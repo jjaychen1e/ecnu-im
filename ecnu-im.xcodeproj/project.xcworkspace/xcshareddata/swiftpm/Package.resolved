@@ -1,0 +1,113 @@
+{
+  "pins" : [
+    {
+      "identity" : "alamofire",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Alamofire/Alamofire.git",
+      "state" : {
+        "revision" : "f82c23a8a7ef8dc1a49a8bfc6a96883e79121864",
+        "version" : "5.5.0"
+      }
+    },
+    {
+      "identity" : "fontawesome.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/thii/FontAwesome.swift",
+      "state" : {
+        "revision" : "07883a32d49dfc7bdedbeea115067b53dfbeeb43",
+        "version" : "1.9.1"
+      }
+    },
+    {
+      "identity" : "kingfisher",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/onevcat/Kingfisher",
+      "state" : {
+        "revision" : "32e4acdf6971f58f5ad552389cf2d7d016334eaf",
+        "version" : "7.2.0"
+      }
+    },
+    {
+      "identity" : "lightbox",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/JJAYCHEN1e/Lightbox",
+      "state" : {
+        "branch" : "master",
+        "revision" : "65c1618b1bfb1f6b822cec75119b108ae60f2d51"
+      }
+    },
+    {
+      "identity" : "regex",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/sharplet/Regex",
+      "state" : {
+        "revision" : "76c2b73d4281d77fc3118391877efd1bf972f515",
+        "version" : "2.1.1"
+      }
+    },
+    {
+      "identity" : "rxswift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ReactiveX/RxSwift",
+      "state" : {
+        "branch" : "main",
+        "revision" : "2d728df855393234f85c15b2201eb9d2efac3018"
+      }
+    },
+    {
+      "identity" : "snapkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SnapKit/SnapKit",
+      "state" : {
+        "revision" : "d458564516e5676af9c70b4f4b2a9178294f1bc6",
+        "version" : "5.0.1"
+      }
+    },
+    {
+      "identity" : "swiftsoup",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/scinfu/SwiftSoup",
+      "state" : {
+        "revision" : "13ba661fd1146967270fca92ce8195b223631436",
+        "version" : "2.3.8"
+      }
+    },
+    {
+      "identity" : "swiftui-introspect",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/siteline/SwiftUI-Introspect",
+      "state" : {
+        "revision" : "f2616860a41f9d9932da412a8978fec79c06fe24",
+        "version" : "0.1.4"
+      }
+    },
+    {
+      "identity" : "swiftui-pull-to-refresh",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/globulus/swiftui-pull-to-refresh",
+      "state" : {
+        "revision" : "5a1e0f8f239381df7e75a63e6d01e42633d0903f",
+        "version" : "1.1.5"
+      }
+    },
+    {
+      "identity" : "swiftyjson",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SwiftyJSON/SwiftyJSON.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "b3dcd7dbd0d488e1a7077cb33b00f2083e382f07"
+      }
+    },
+    {
+      "identity" : "uicolor-hex-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/yeahdongcn/UIColor-Hex-Swift",
+      "state" : {
+        "revision" : "4e0c1bc57c02fcb19c3b34ec5e6188383a95aa94",
+        "version" : "5.1.8"
+      }
+    }
+  ],
+  "version" : 2
+}
