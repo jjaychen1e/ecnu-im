@@ -124,13 +124,22 @@ struct Discussion: Decodable {
     }
 }
 
-extension Discussion: Identifiable, Hashable {
+extension Discussion: Hashable {
     static func == (lhs: Discussion, rhs: Discussion) -> Bool {
-        lhs.id == rhs.id
+        let condition1 = lhs.id == rhs.id
+        let condition2 = lhs.firstPost?.id == rhs.firstPost?.id
+        let condition3 = lhs.lastPost?.id == rhs.lastPost?.id
+        return condition1 && condition2 && condition3
     }
 
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
+        if let lastPostID = lastPost?.id {
+            hasher.combine(lastPostID)
+        }
+        if let firstPostID = firstPost?.id {
+            hasher.combine(firstPostID)
+        }
     }
 }
 

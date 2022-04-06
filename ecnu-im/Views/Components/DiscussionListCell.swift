@@ -55,8 +55,8 @@ struct DiscussionListCell: View {
                 if splitVC.traitCollection.horizontalSizeClass != .compact {
                     if index == 0 {
                         splitVC.setSplitViewRoot(viewController: DiscussionViewController(discussion: discussion, near: 0),
-                                                  column: .secondary,
-                                                  immediatelyShow: true)
+                                                 column: .secondary,
+                                                 immediatelyShow: true)
                     }
                 }
             }
@@ -66,9 +66,11 @@ struct DiscussionListCell: View {
 
 private struct FirstPostCell: View {
     @State private var discussion: Discussion
+    @State private var dateDescription: String
 
     init(discussion: Discussion) {
         self.discussion = discussion
+        dateDescription = discussion.firstPostDateDescription
     }
 
     var body: some View {
@@ -84,7 +86,7 @@ private struct FirstPostCell: View {
                     HStack {
                         Text(discussion.starterName)
                             .font(.system(size: 12, weight: .medium))
-                        Text(discussion.firstPostDateDescription)
+                        Text(dateDescription)
                             .font(.system(size: 10, weight: .light))
                     }
                 }
@@ -112,14 +114,19 @@ private struct FirstPostCell: View {
                 .stroke(Color.primary.opacity(0.2), lineWidth: 1)
                 .padding(8)
         )
+        .onAppear {
+            dateDescription = discussion.firstPostDateDescription
+        }
     }
 }
 
 private struct LastPostCell: View {
     @State private var discussion: Discussion
+    @State private var dateDescription: String
 
     init(discussion: Discussion) {
         self.discussion = discussion
+        dateDescription = discussion.lastPostDateDescription
     }
 
     var body: some View {
@@ -135,7 +142,7 @@ private struct LastPostCell: View {
                         Text(discussion.lastPostedUserName)
                             .font(.system(size: 15, weight: .medium))
                         HStack(spacing: 2) {
-                            Text(discussion.lastPostDateDescription)
+                            Text(dateDescription)
                                 .font(.system(size: 12, weight: .light))
                                 .fixedSize()
                             Spacer()
@@ -153,6 +160,9 @@ private struct LastPostCell: View {
                                                                   imageGridDisplayMode: .narrow))
         }
         .padding(.horizontal, 16)
+        .onAppear {
+            dateDescription = discussion.lastPostDateDescription
+        }
     }
 }
 
