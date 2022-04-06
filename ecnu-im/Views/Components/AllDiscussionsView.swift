@@ -94,7 +94,7 @@ extension AllDiscussionsView {
 
     func loadMore(isRefresh: Bool = false) async {
         isLoading = true
-        if let response = try? await flarumProvider.request(.allDisscussions(pageOffset: pageOffset, pageItemLimit: pageItemLimit)),
+        if let response = try? await flarumProvider.request(.allDiscussions(pageOffset: pageOffset, pageItemLimit: pageItemLimit)),
            let json = try? JSON(data: response.data) {
             var discussionList: [Discussion] = []
 
@@ -147,7 +147,7 @@ extension AllDiscussionsView {
             }
 
             if isRefresh {
-                self.discussionList = []
+                self.discussionList.removeAll()
             }
             self.discussionList.append(contentsOf: discussionList)
             pageOffset += pageItemLimit

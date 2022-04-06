@@ -56,7 +56,7 @@ extension MainSplitViewController {
 
     private func login() {
         Task {
-            if let result = try? await flarumProvider.request(.token(username: "jjaychen", password: "password")),
+            if let result = try? await flarumProvider.request(.token(username: "jjaychen", password: "Chen270499")),
                let token = try? result.map(Token.self) {
                 token.persist()
                 let httpCookie = HTTPCookie(properties: [
