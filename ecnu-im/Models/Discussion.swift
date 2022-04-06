@@ -124,6 +124,16 @@ struct Discussion: Decodable {
     }
 }
 
+extension Discussion: Identifiable, Hashable {
+    static func == (lhs: Discussion, rhs: Discussion) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+}
+
 extension Discussion {
     var starter: User? {
         includedUsers.first { $0.id == relationships?.user }

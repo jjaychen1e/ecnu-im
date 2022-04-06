@@ -60,8 +60,8 @@ struct AllDiscussionsView: View {
                                   .animation(.default, value: state)
                               }) {
             LazyVStack {
-                ForEach(0 ..< discussionList.count, id: \.self) { i in
-                    DiscussionListCell(discussion: discussionList[i], index: i)
+                ForEach(Array(zip(discussionList.indices, discussionList)), id: \.1) { index, discussion in
+                    DiscussionListCell(discussion: discussion, index: index)
                         .overlay(
                             Rectangle()
                                 .foregroundColor(.primary.opacity(0.2))
@@ -69,7 +69,7 @@ struct AllDiscussionsView: View {
                             alignment: .bottom
                         )
                         .onAppear {
-                            checkLoadMore(i)
+                            checkLoadMore(index)
                         }
                 }
             }
