@@ -15,7 +15,7 @@ class AllDiscussionsViewController: UIViewController {
         super.viewDidLoad()
 
         let hostingViewController = UIHostingController(rootView:
-            AllDiscussionsViewWithTokenCheck()
+            AllDiscussionsView()
                 .environment(\.splitVC, splitViewController)
                 .environment(\.nvc, navigationController)
         )

@@ -265,7 +265,7 @@ struct DiscussionView: View {
                 }
             }
         }
-        .background(Asset.defaultThemeBackground2.swiftUIColor)
+        .background(Asset.DefaultTheme.defaultThemeBackground2.swiftUIColor)
         .safeAreaInset(edge: .top, content: {
             DiscussionViewHeader(discussion: discussion)
         })

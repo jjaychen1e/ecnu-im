@@ -9,12 +9,53 @@ import SwiftUI
 import UIKit
 
 class AppGlobalState: ObservableObject {
+    @AppStorage("isLogged") var isLogged = false
+    @AppStorage("account") var account: String = ""
+    @AppStorage("password") var password: String = ""
     @Published var tokenPrepared = false
 
     static let shared = AppGlobalState()
+
+    @discardableResult
+    func login(account: String, password: String) async -> Bool {
+        if let result = try? await flarumProvider.request(.token(username: account, password: password)),
+           let token = try? result.map(Token.self) {
+            let httpCookie = HTTPCookie(properties: [
+                HTTPCookiePropertyKey.domain: "ecnu.im",
+                HTTPCookiePropertyKey.path: "/",
+                HTTPCookiePropertyKey.name: "flarum_remember",
+                HTTPCookiePropertyKey.value: token.token,
+            ])!
+            flarumProvider.session.sessionConfiguration.httpCookieStorage?.setCookie(httpCookie)
+            DispatchQueue.main.async {
+                self.tokenPrepared = true
+            }
+            return true
+        }
+        return false
+    }
+
+    func tryToLoginWithStoredAccount() async {
+        if isLogged {
+            let loginResult = await login(account: account, password: password)
+            if !loginResult {
+                // Maybe password has been modified
+                await MainSplitViewController.rootSplitVC.presentSignView()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    Toast.default(icon: .emoji("🤔"), title: "登录失败", subtitle: "密码可能被修改，请重新登录").show()
+                }
+            }
+        }
+    }
 }
 
 class MainSplitViewController: UIViewController {
+    @AppStorage("isLogged") var isLogged = false
+    @AppStorage("account") var account: String = ""
+    @AppStorage("password") var password: String = ""
+
+    static var rootSplitVC: UISplitViewController!
+
     private var mainSplitViewController: UISplitViewController!
     private lazy var primaryViewController: UINavigationController = {
         let nvc = UINavigationController()
@@ -45,29 +86,15 @@ class MainSplitViewController: UIViewController {
         mainSplitViewController.setSplitViewRoot(viewController: secondaryNavigationViewController, column: .secondary)
         mainSplitViewController.preferredDisplayMode = .twoDisplaceSecondary
         mainSplitViewController.show(.primary)
+        Self.rootSplitVC = mainSplitViewController
     }
 }
 
 extension MainSplitViewController {
     func initializeApp() {
-        login()
         fetchTags()
-    }
-
-    private func login() {
         Task {
-            if let result = try? await flarumProvider.request(.token(username: "jjaychen", password: "password")),
-               let token = try? result.map(Token.self) {
-                token.persist()
-                let httpCookie = HTTPCookie(properties: [
-                    HTTPCookiePropertyKey.domain: "ecnu.im",
-                    HTTPCookiePropertyKey.path: "/",
-                    HTTPCookiePropertyKey.name: "flarum_remember",
-                    HTTPCookiePropertyKey.value: token.token,
-                ])!
-                flarumProvider.session.sessionConfiguration.httpCookieStorage?.setCookie(httpCookie)
-            }
-            AppGlobalState.shared.tokenPrepared = true
+            await AppGlobalState.shared.tryToLoginWithStoredAccount()
         }
     }
 
