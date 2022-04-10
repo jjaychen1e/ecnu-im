@@ -12,37 +12,17 @@ class DiscussionViewController: UIViewController {
     private var discussion: Discussion
     private var near: Int
 
+    private weak var navigationBarTimer: Timer!
+
     init(discussion: Discussion, near: Int) {
         self.discussion = discussion
         self.near = near
         super.init(nibName: nil, bundle: nil)
-        navigationController?.isNavigationBarHidden = true
-    }
-
-    override func viewWillAppear(_: Bool) {
-        super.viewWillAppear(true)
-        navigationController?.isNavigationBarHidden = true
-    }
-
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        navigationController?.isNavigationBarHidden = true
-    }
-
-    override func viewWillDisappear(_: Bool) {
-        super.viewWillDisappear(true)
-//        navigationController?.isNavigationBarHidden = false
-//        navigationController?.setNavigationBarHidden(false, animated: false)
-    }
-
-    override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-//        navigationController?.isNavigationBarHidden = false
-//        navigationController?.setNavigationBarHidden(false, animated: false)
     }
 
     deinit {
         navigationController?.setNavigationBarHidden(false, animated: false)
+        navigationBarTimer.invalidate()
     }
 
     @available(*, unavailable)
@@ -58,12 +38,11 @@ class DiscussionViewController: UIViewController {
                 .environment(\.nvc, navigationController)
         )
         addSubViewController(discussionViewHostingController, addConstrains: true)
-        navigationController?.isNavigationBarHidden = true
-        // When embedded in UISplitViewController, this may fail...
-        DispatchQueue.main.asyncAfter(deadline: .now()) {
-            self.navigationController?.isNavigationBarHidden = true
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+
+        // UISplitView will show UINavigationBar in many cases. It will be displayed
+        // even we hide it in `viewDidLoad`. And when present another VC, it will be
+        // displayed, too.
+        navigationBarTimer = Timer.scheduledTimer(withTimeInterval: 0.01, repeats: true) { _ in
             self.navigationController?.isNavigationBarHidden = true
         }
     }
