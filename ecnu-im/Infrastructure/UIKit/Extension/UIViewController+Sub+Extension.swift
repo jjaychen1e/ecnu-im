@@ -6,12 +6,11 @@
 //
 
 import Foundation
-import UIKit
 import SnapKit
+import UIKit
 
 extension UIViewController {
-    func addSubViewController(_ viewController: UIViewController, addConstrains: Bool = false) {
-        view.addSubview(viewController.view)
+    private func _convenientlyAddChildViewController(_ viewController: UIViewController, addConstrains: Bool = false) {
         viewController.willMove(toParent: self)
         addChild(viewController)
         viewController.didMove(toParent: self)
@@ -20,5 +19,22 @@ extension UIViewController {
                 make.edges.equalToSuperview()
             }
         }
+    }
+
+    func addChildViewController(_ viewController: UIViewController, addConstrains: Bool = false) {
+        view.addSubview(viewController.view)
+        _convenientlyAddChildViewController(viewController, addConstrains: addConstrains)
+    }
+
+    func insertChildViewController(_ viewController: UIViewController, at index: Int, addConstrains: Bool = false) {
+        view.insertSubview(viewController.view, at: index)
+        _convenientlyAddChildViewController(viewController, addConstrains: addConstrains)
+    }
+
+    func safelyRemoveFromParent() {
+        willMove(toParent: nil)
+        view.removeFromSuperview()
+        removeFromParent()
+        didMove(toParent: nil)
     }
 }

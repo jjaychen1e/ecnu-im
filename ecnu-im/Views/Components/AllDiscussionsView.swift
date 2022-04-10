@@ -122,7 +122,10 @@ extension AllDiscussionsView {
 
         if let response = try? await flarumProvider.request(.allDiscussions(pageOffset: pageOffset, pageItemLimit: pageItemLimit)),
            let json = try? JSON(data: response.data) {
-            guard !Task.isCancelled else { return }
+            guard !Task.isCancelled else {
+                print("cancelled")
+                return
+            }
             var discussionList: [Discussion] = []
 
             let includedData = DataParser.parseIncludedData(json: json["included"])

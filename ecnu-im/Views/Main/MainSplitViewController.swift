@@ -72,12 +72,7 @@ class MainSplitViewController: UIViewController {
     static var rootSplitVC: UISplitViewController!
 
     private var mainSplitViewController: UISplitViewController!
-    private lazy var primaryViewController: UINavigationController = {
-        let nvc = UINavigationController()
-        return nvc
-    }()
-
-    private lazy var supplementaryNavigationViewController: UINavigationController = {
+    private lazy var primaryNavigationViewController: UINavigationController = {
         let nvc = UINavigationController()
         return nvc
     }()
@@ -88,16 +83,19 @@ class MainSplitViewController: UIViewController {
     }()
 
     private lazy var sidebarViewController = SidebarViewController()
+    private lazy var primaryViewController = TabController()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         initializeApp()
 
-        mainSplitViewController = UISplitViewController(style: .tripleColumn)
-        addSubViewController(mainSplitViewController, addConstrains: true)
+        mainSplitViewController = UISplitViewController(style: .doubleColumn)
+        addChildViewController(mainSplitViewController, addConstrains: true)
+        mainSplitViewController.setSplitViewRoot(viewController: primaryNavigationViewController, column: .primary)
+//        mainSplitViewController.setSplitViewRoot(viewController: sidebarViewController, column: .primary)
         mainSplitViewController.setSplitViewRoot(viewController: primaryViewController, column: .primary)
-        mainSplitViewController.setSplitViewRoot(viewController: sidebarViewController, column: .primary)
-        mainSplitViewController.setSplitViewRoot(viewController: supplementaryNavigationViewController, column: .supplementary)
+        mainSplitViewController.maximumPrimaryColumnWidth = 420
+        mainSplitViewController.preferredPrimaryColumnWidthFraction = 0.5
         mainSplitViewController.setSplitViewRoot(viewController: secondaryNavigationViewController, column: .secondary)
         mainSplitViewController.preferredDisplayMode = .twoDisplaceSecondary
         mainSplitViewController.show(.primary)

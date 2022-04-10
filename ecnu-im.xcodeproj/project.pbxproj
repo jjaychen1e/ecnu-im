@@ -33,6 +33,8 @@
 		631BB0422805E5D1007D4138 /* Themes in Resources */ = {isa = PBXBuildFile; fileRef = 631BB0412805E5D1007D4138 /* Themes */; };
 		63272FD327F5B7FE00D106CF /* Lightbox in Frameworks */ = {isa = PBXBuildFile; productRef = 63272FD227F5B7FE00D106CF /* Lightbox */; };
 		63272FD527F5D14800D106CF /* DiscussionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63272FD427F5D14800D106CF /* DiscussionView.swift */; };
+		633E3EFE28129CEB00D6931A /* TabBarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633E3EFD28129CEB00D6931A /* TabBarViewController.swift */; };
+		633E3F0028129DBC00D6931A /* TabBarContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633E3EFF28129DBC00D6931A /* TabBarContentView.swift */; };
 		6349B18827EEA99D0002E89A /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 6349B18727EEA99D0002E89A /* Alamofire */; };
 		6349B18B27EEAA180002E89A /* TargetType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6349B18A27EEAA180002E89A /* TargetType.swift */; };
 		6349B18D27EEAB250002E89A /* RequestTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6349B18C27EEAB250002E89A /* RequestTask.swift */; };
@@ -80,6 +82,9 @@
 		63706E1727F6BC9C00BE3A48 /* NavigationViwe+BackGesture+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63706E1627F6BC9C00BE3A48 /* NavigationViwe+BackGesture+Extension.swift */; };
 		6372548F2805B9F300147D62 /* EditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6372548E2805B9F300147D62 /* EditorView.swift */; };
 		638F90912802B4BB002308E0 /* AllDiscussionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 638F90902802B4BB002308E0 /* AllDiscussionsView.swift */; };
+		6391FCD02811B2C8006E086D /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6391FCCF2811B2C8006E086D /* HomeView.swift */; };
+		6391FCD32811BAD3006E086D /* HomeViewControllerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6391FCD22811BAD3006E086D /* HomeViewControllerViewController.swift */; };
+		6391FCD52811BB69006E086D /* NoNavigationBarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6391FCD42811BB69006E086D /* NoNavigationBarViewController.swift */; };
 		63B74092280277A900376B94 /* SignModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B7408F280277A900376B94 /* SignModalView.swift */; };
 		63B74093280277A900376B94 /* SignUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B74090280277A900376B94 /* SignUpView.swift */; };
 		63B74094280277A900376B94 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B74091280277A900376B94 /* SignInView.swift */; };
@@ -103,6 +108,7 @@
 		63E8BF0127F9767C0021E4C2 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 63E8BF0027F9767C0021E4C2 /* SnapKit */; };
 		63E8BF0327F9769A0021E4C2 /* SidebarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63E8BF0227F9769A0021E4C2 /* SidebarViewController.swift */; };
 		63E8BF0627F98ADC0021E4C2 /* MainSplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63E8BF0527F98ADC0021E4C2 /* MainSplitViewController.swift */; };
+		63E971FE28118AD0003974B6 /* TabController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63E971FD28118AD0003974B6 /* TabController.swift */; };
 		63EB854B27F2E8A00064F5A8 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 63EB854A27F2E8A00064F5A8 /* Kingfisher */; };
 		63EB854E27F2EC1D0064F5A8 /* AvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63EB854D27F2EC1D0064F5A8 /* AvatarView.swift */; };
 		63EB855727F300080064F5A8 /* SwiftUIPullToRefresh in Frameworks */ = {isa = PBXBuildFile; productRef = 63EB855627F300080064F5A8 /* SwiftUIPullToRefresh */; };
@@ -147,6 +153,8 @@
 		631BB0332805E4FD007D4138 /* Theme.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		631BB0412805E5D1007D4138 /* Themes */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Themes; sourceTree = "<group>"; };
 		63272FD427F5D14800D106CF /* DiscussionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscussionView.swift; sourceTree = "<group>"; };
+		633E3EFD28129CEB00D6931A /* TabBarViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarViewController.swift; sourceTree = "<group>"; };
+		633E3EFF28129DBC00D6931A /* TabBarContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarContentView.swift; sourceTree = "<group>"; };
 		6349B18A27EEAA180002E89A /* TargetType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TargetType.swift; sourceTree = "<group>"; };
 		6349B18C27EEAB250002E89A /* RequestTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestTask.swift; sourceTree = "<group>"; };
 		6349B19027EEABD20002E89A /* APIProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIProvider.swift; sourceTree = "<group>"; };
@@ -188,6 +196,9 @@
 		63706E1627F6BC9C00BE3A48 /* NavigationViwe+BackGesture+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NavigationViwe+BackGesture+Extension.swift"; sourceTree = "<group>"; };
 		6372548E2805B9F300147D62 /* EditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorView.swift; sourceTree = "<group>"; };
 		638F90902802B4BB002308E0 /* AllDiscussionsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AllDiscussionsView.swift; sourceTree = "<group>"; };
+		6391FCCF2811B2C8006E086D /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		6391FCD22811BAD3006E086D /* HomeViewControllerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewControllerViewController.swift; sourceTree = "<group>"; };
+		6391FCD42811BB69006E086D /* NoNavigationBarViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoNavigationBarViewController.swift; sourceTree = "<group>"; };
 		63B7408F280277A900376B94 /* SignModalView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignModalView.swift; sourceTree = "<group>"; };
 		63B74090280277A900376B94 /* SignUpView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignUpView.swift; sourceTree = "<group>"; };
 		63B74091280277A900376B94 /* SignInView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
@@ -210,6 +221,7 @@
 		63E8BEFC27F968940021E4C2 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		63E8BF0227F9769A0021E4C2 /* SidebarViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarViewController.swift; sourceTree = "<group>"; };
 		63E8BF0527F98ADC0021E4C2 /* MainSplitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainSplitViewController.swift; sourceTree = "<group>"; };
+		63E971FD28118AD0003974B6 /* TabController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabController.swift; sourceTree = "<group>"; };
 		63EB854D27F2EC1D0064F5A8 /* AvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarView.swift; sourceTree = "<group>"; };
 		8B7643C14C1ECACCA7A6233B /* Pods-ecnu-im.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ecnu-im.debug.xcconfig"; path = "Target Support Files/Pods-ecnu-im/Pods-ecnu-im.debug.xcconfig"; sourceTree = "<group>"; };
 		C360C9BBEFC24D910424BE89 /* Pods-ecnu-im.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ecnu-im.release.xcconfig"; path = "Target Support Files/Pods-ecnu-im/Pods-ecnu-im.release.xcconfig"; sourceTree = "<group>"; };
@@ -322,6 +334,7 @@
 				63B7409A2802784B00376B94 /* Modifiers */,
 				634C470127F9C17900FC591D /* Components */,
 				63E8BF0427F98AAF0021E4C2 /* Main */,
+				6391FCD42811BB69006E086D /* NoNavigationBarViewController.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -396,6 +409,7 @@
 		634C470127F9C17900FC591D /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				63E971FA281185D1003974B6 /* TabBar */,
 				6366738F2807308000A732A3 /* Editor */,
 				63B74097280277E700376B94 /* Buttons */,
 				63B7408E2802778600376B94 /* Sign in & Sign out */,
@@ -585,6 +599,15 @@
 			path = "Data Parser";
 			sourceTree = "<group>";
 		};
+		6391FCD12811BAC2006E086D /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				6391FCCF2811B2C8006E086D /* HomeView.swift */,
+				6391FCD22811BAD3006E086D /* HomeViewControllerViewController.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
 		63B7408E2802778600376B94 /* Sign in & Sign out */ = {
 			isa = PBXGroup;
 			children = (
@@ -690,13 +713,24 @@
 		63E8BF0427F98AAF0021E4C2 /* Main */ = {
 			isa = PBXGroup;
 			children = (
+				6391FCD12811BAC2006E086D /* Home */,
 				63E8BF0227F9769A0021E4C2 /* SidebarViewController.swift */,
 				63E8BF0527F98ADC0021E4C2 /* MainSplitViewController.swift */,
 				634C470227F9C18E00FC591D /* AllDiscussionsViewController.swift */,
 				634C470A27FABC3A00FC591D /* DiscussionViewController.swift */,
 				6372548E2805B9F300147D62 /* EditorView.swift */,
+				63E971FD28118AD0003974B6 /* TabController.swift */,
 			);
 			path = Main;
+			sourceTree = "<group>";
+		};
+		63E971FA281185D1003974B6 /* TabBar */ = {
+			isa = PBXGroup;
+			children = (
+				633E3EFD28129CEB00D6931A /* TabBarViewController.swift */,
+				633E3EFF28129DBC00D6931A /* TabBarContentView.swift */,
+			);
+			path = TabBar;
 			sourceTree = "<group>";
 		};
 		63EB854C27F2EC100064F5A8 /* DefaultAvatar */ = {
@@ -955,6 +989,7 @@
 				631BB0392805E4FD007D4138 /* SwiftDownEditor.swift in Sources */,
 				635FF1C92803028D00C7CDBF /* Toast.swift in Sources */,
 				63B740A32802793100376B94 /* CustomFieldModifier.swift in Sources */,
+				6391FCD02811B2C8006E086D /* HomeView.swift in Sources */,
 				63E8BF0327F9769A0021E4C2 /* SidebarViewController.swift in Sources */,
 				631BB03F2805E4FD007D4138 /* Theme.swift in Sources */,
 				63B74096280277CA00376B94 /* SignViewModel.swift in Sources */,
@@ -964,7 +999,9 @@
 				63EB854E27F2EC1D0064F5A8 /* AvatarView.swift in Sources */,
 				6349B18B27EEAA180002E89A /* TargetType.swift in Sources */,
 				63706E1327F5F08800BE3A48 /* PostAuthorAvatarView.swift in Sources */,
+				6391FCD52811BB69006E086D /* NoNavigationBarViewController.swift in Sources */,
 				63E8BEFE27F968940021E4C2 /* AppDelegate.swift in Sources */,
+				633E3EFE28129CEB00D6931A /* TabBarViewController.swift in Sources */,
 				63E8BF0627F98ADC0021E4C2 /* MainSplitViewController.swift in Sources */,
 				6318B66A27EF755A00108D49 /* DiscussionListCell.swift in Sources */,
 				63150ABB27F0340B00D83D9D /* LinkPreviewView.swift in Sources */,
@@ -977,6 +1014,7 @@
 				635B2A6227EEE79200FF6109 /* FlarumAPI.swift in Sources */,
 				63B7409C2802786700376B94 /* OutlineModifier.swift in Sources */,
 				63DA4FC927F5754300F4FA6E /* ImageBrowser.swift in Sources */,
+				63E971FE28118AD0003974B6 /* TabController.swift in Sources */,
 				63B740A12802791700376B94 /* AngularButton.swift in Sources */,
 				63E8BEFD27F968940021E4C2 /* SceneDelegate.swift in Sources */,
 				63CBEA4C27EF0EC2002026E2 /* FlowNav.swift in Sources */,
@@ -1006,6 +1044,7 @@
 				634C470927F9E76C00FC591D /* UISplitViewController+Helper+Extension.swift in Sources */,
 				635B2A5D27EEBB5700FF6109 /* AnyEncodable.swift in Sources */,
 				6316117627EF4333002CD6C4 /* User.swift in Sources */,
+				6391FCD32811BAD3006E086D /* HomeViewControllerViewController.swift in Sources */,
 				635B2A5727EEB3CA00FF6109 /* Endpoint.swift in Sources */,
 				636BE18627F84D5C00283943 /* Introspect+UISplitViewController+Extension.swift in Sources */,
 				63B74099280277FC00376B94 /* CloseButton.swift in Sources */,
@@ -1013,6 +1052,7 @@
 				631BB0342805E4FD007D4138 /* Storage.swift in Sources */,
 				6372548F2805B9F300147D62 /* EditorView.swift in Sources */,
 				635FF09627F092B300A0D239 /* GeometryReader+Execute+Extension.swift in Sources */,
+				633E3F0028129DBC00D6931A /* TabBarContentView.swift in Sources */,
 				6318B68827F0113300108D49 /* Date+Description+Extension.swift in Sources */,
 				6316117827EF4692002CD6C4 /* Post.swift in Sources */,
 				63B74092280277A900376B94 /* SignModalView.swift in Sources */,

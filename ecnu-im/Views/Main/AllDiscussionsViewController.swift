@@ -12,17 +12,19 @@ import UIKit
 
 class AllDiscussionsViewController: UIViewController {
     private var hostingViewController: Any!
+    var splitVC: UISplitViewController?
+    var nvc: UINavigationController?
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         let hostingViewController = UIHostingController(rootView:
             AllDiscussionsView()
-                .environment(\.splitVC, splitViewController)
-                .environment(\.nvc, navigationController)
+                .environment(\.splitVC, splitViewController ?? splitVC)
+                .environment(\.nvc, navigationController ?? nvc)
         )
         self.hostingViewController = hostingViewController
-        addSubViewController(hostingViewController, addConstrains: true)
+        addChildViewController(hostingViewController, addConstrains: true)
         title = "最新回复"
         let scrollEdgeAppearance = UINavigationBarAppearance()
         navigationItem.scrollEdgeAppearance = scrollEdgeAppearance

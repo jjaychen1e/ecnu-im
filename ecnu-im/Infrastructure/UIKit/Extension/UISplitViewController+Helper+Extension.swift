@@ -160,7 +160,7 @@ extension UISplitViewController {
                     }
                     horizontalSizeClassObservations!.append(.init(enter: enterCompactAction, exit: exitCompactAction))
                 } else if column == .primary {
-                    viewController.navigationItem.prependLeftBarButtonItems(.primaryToggleSidebarBarButtonItem(splitViewController: self))
+//                    viewController.navigationItem.prependLeftBarButtonItems(.primaryToggleSidebarBarButtonItem(splitViewController: self))
                 } else if column == .secondary {
 //                    let appearance = UINavigationBarAppearance()
 //                    appearance.shadowColor = nil

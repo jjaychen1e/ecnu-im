@@ -8,21 +8,14 @@
 import SwiftUI
 import UIKit
 
-class DiscussionViewController: UIViewController {
+class DiscussionViewController: NoNavigationBarViewController {
     private var discussion: Discussion
     private var near: Int
-
-    private weak var navigationBarTimer: Timer?
 
     init(discussion: Discussion, near: Int) {
         self.discussion = discussion
         self.near = near
         super.init(nibName: nil, bundle: nil)
-    }
-
-    deinit {
-        navigationController?.setNavigationBarHidden(false, animated: false)
-        navigationBarTimer?.invalidate()
     }
 
     @available(*, unavailable)
@@ -37,12 +30,6 @@ class DiscussionViewController: UIViewController {
                 .environment(\.splitVC, splitViewController)
                 .environment(\.nvc, navigationController)
         )
-        addSubViewController(discussionViewHostingController, addConstrains: true)
-
-        // UISplitViewController will show UINavigationBar in many cases. It will be displayed
-        // even we hide it in `viewDidLoad`. And when present another VC, it will be displayed, too.
-        navigationBarTimer = Timer.scheduledTimer(withTimeInterval: 0.01, repeats: true) { _ in
-            self.navigationController?.isNavigationBarHidden = true
-        }
+        addChildViewController(discussionViewHostingController, addConstrains: true)
     }
 }
