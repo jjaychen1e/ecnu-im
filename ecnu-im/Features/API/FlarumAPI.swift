@@ -37,8 +37,8 @@ enum Flarum {
     case token(username: String, password: String)
     case allTags
     case allDiscussions(includes: Set<DiscussionIncludeOption> = DiscussionIncludeOption.homeDiscussionIncludeOptionSet,
-                         pageOffset: Int = 0,
-                         pageItemLimit: Int = 20)
+                        pageOffset: Int = 0,
+                        pageItemLimit: Int = 20)
     case posts(discussionID: Int, offset: Int, limit: Int)
 }
 
@@ -99,7 +99,7 @@ extension Flarum: TargetType {
             return .requestParameters(parameters: [
                 "filter[discussion]": discussionID,
                 "page[offset]": max(0, offset),
-                "page[limit]": limit
+                "page[limit]": limit,
             ], encoding: URLEncoding.default)
         }
     }
