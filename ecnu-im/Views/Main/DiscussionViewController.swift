@@ -39,9 +39,8 @@ class DiscussionViewController: UIViewController {
         )
         addSubViewController(discussionViewHostingController, addConstrains: true)
 
-        // UISplitView will show UINavigationBar in many cases. It will be displayed
-        // even we hide it in `viewDidLoad`. And when present another VC, it will be
-        // displayed, too.
+        // UISplitViewController will show UINavigationBar in many cases. It will be displayed
+        // even we hide it in `viewDidLoad`. And when present another VC, it will be displayed, too.
         navigationBarTimer = Timer.scheduledTimer(withTimeInterval: 0.01, repeats: true) { _ in
             self.navigationController?.isNavigationBarHidden = true
         }
