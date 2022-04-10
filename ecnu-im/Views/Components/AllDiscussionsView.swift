@@ -9,20 +9,6 @@ import SwiftUI
 import SwiftUIPullToRefresh
 import SwiftyJSON
 
-struct AllDiscussionsViewWithTokenCheck: View {
-    @ObservedObject var appGlobalState = AppGlobalState.shared
-
-    var body: some View {
-        if appGlobalState.tokenPrepared {
-            AllDiscussionsView()
-        } else {
-            ThemeManager.shared.theme.backgroundColor1
-                .overlay(Text("Loading..."))
-                .edgesIgnoringSafeArea(.all)
-        }
-    }
-}
-
 struct AllDiscussionsViewNavigationHeader: View {
     var body: some View {
         VStack(spacing: 0) {
@@ -46,11 +32,11 @@ struct AllDiscussionsView: View {
     @State private var discussionList: [Discussion] = []
     @State private var pageOffset = 0
     @State private var isLoading = false
+    @State private var isLogged = false
 
     var body: some View {
         RefreshableScrollView(loadingViewBackgroundColor: ThemeManager.shared.theme.backgroundColor1,
                               action: {
-                                  pageOffset = 0
                                   await loadMore(isRefresh: true)
                               }, progress: { state in
                                   RefreshActivityIndicator(isAnimating: state == .loading) {
@@ -60,17 +46,31 @@ struct AllDiscussionsView: View {
                                   .animation(.default, value: state)
                               }) {
             LazyVStack {
-                ForEach(Array(zip(discussionList.indices, discussionList)), id: \.1) { index, discussion in
-                    DiscussionListCell(discussion: discussion, index: index)
-                        .overlay(
-                            Rectangle()
-                                .foregroundColor(.primary.opacity(0.2))
-                                .frame(height: 0.5),
-                            alignment: .bottom
-                        )
-                        .onAppear {
-                            checkLoadMore(index)
-                        }
+                if discussionList.count > 0 {
+                    ForEach(Array(zip(discussionList.indices, discussionList)), id: \.1) { index, discussion in
+                        DiscussionListCell(discussion: discussion, index: index)
+                            .padding(.bottom, 2)
+                            .overlay(
+                                Rectangle()
+                                    .foregroundColor(.primary.opacity(0.2))
+                                    .frame(height: 0.5),
+                                alignment: .bottom
+                            )
+                            .onAppear {
+                                checkLoadMore(index)
+                            }
+                    }
+                } else {
+                    ForEach(0 ..< 10) { _ in
+                        DiscussionListCellPlaceholder()
+                            .padding(.bottom, 2)
+                            .overlay(
+                                Rectangle()
+                                    .foregroundColor(.primary.opacity(0.2))
+                                    .frame(height: 0.5),
+                                alignment: .bottom
+                            )
+                    }
                 }
             }
         }
@@ -80,6 +80,16 @@ struct AllDiscussionsView: View {
                 await loadMore()
             }
         }
+        .onReceive(AppGlobalState.shared.$tokenPrepared, perform: { output in
+            if !isLogged {
+                if output {
+                    isLogged = true
+                    Task {
+                        await loadMore(isRefresh: true)
+                    }
+                }
+            }
+        })
     }
 }
 
@@ -94,6 +104,14 @@ extension AllDiscussionsView {
 
     func loadMore(isRefresh: Bool = false) async {
         isLoading = true
+        if isRefresh {
+            pageOffset = 0
+        }
+
+        if isRefresh {
+            discussionList.removeAll()
+        }
+
         if let response = try? await flarumProvider.request(.allDiscussions(pageOffset: pageOffset, pageItemLimit: pageItemLimit)),
            let json = try? JSON(data: response.data) {
             var discussionList: [Discussion] = []
@@ -144,10 +162,6 @@ extension AllDiscussionsView {
                         discussionList.append(discussion)
                     }
                 }
-            }
-
-            if isRefresh {
-                self.discussionList.removeAll()
             }
             self.discussionList.append(contentsOf: discussionList)
             pageOffset += pageItemLimit

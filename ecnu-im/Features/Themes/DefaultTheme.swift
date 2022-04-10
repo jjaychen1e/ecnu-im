@@ -10,11 +10,11 @@ import SwiftUI
 
 final class DefaultTheme: Theme {
     var textColor: Color = Asset.dynamicWhite.swiftUIColor
-    var backgroundColor1: Color = Asset.defaultThemeBackground1.swiftUIColor
-    var backgroundColor2: Color = Asset.defaultThemeBackground2.swiftUIColor
-    var cardColor: Color = Asset.defaultThemeCardColor.swiftUIColor
-    var mentionColor: Color = Asset.defaultThemeMentionColor.swiftUIColor
-    var linkTextColor: Color = Asset.defaultThemeLinkColor.swiftUIColor
-    var primaryText: Color = Asset.defaultThemePrimaryText.swiftUIColor
-    var secondaryText: Color = Asset.defaultThemeSecondaryText.swiftUIColor
+    var backgroundColor1: Color = Asset.DefaultTheme.defaultThemeBackground1.swiftUIColor
+    var backgroundColor2: Color = Asset.DefaultTheme.defaultThemeBackground2.swiftUIColor
+    var cardColor: Color = Asset.DefaultTheme.defaultThemeCardColor.swiftUIColor
+    var mentionColor: Color = Asset.DefaultTheme.defaultThemeMentionColor.swiftUIColor
+    var linkTextColor: Color = Asset.DefaultTheme.defaultThemeLinkColor.swiftUIColor
+    var primaryText: Color = Asset.DefaultTheme.defaultThemePrimaryText.swiftUIColor
+    var secondaryText: Color = Asset.DefaultTheme.defaultThemeSecondaryText.swiftUIColor
 }

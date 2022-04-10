@@ -11,6 +11,35 @@ import SwiftSoup
 import SwiftUI
 import UIColorHexSwift
 
+struct DiscussionListCellPlaceholder: View {
+    var body: some View {
+        VStack(alignment: .leading) {
+            HStack(alignment: .top) {
+                Circle()
+                    .fill(Color(rgba: "#D6D6D6"))
+                    .frame(width: 40, height: 40)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("那只敏捷的棕毛狐狸跳过那只懒狗，消失得无影无踪。")
+                        .font(.system(size: 17, weight: .bold))
+                    HStack(alignment: .center, spacing: 2) {
+                        Text("jjaychen")
+                            .font(.system(size: 15, weight: .medium))
+                        Text("1 分钟前")
+                            .font(.system(size: 12, weight: .light))
+                            .frame(alignment: .leading)
+                    }
+                }
+                Spacer()
+            }
+            Text(String(repeating: " ", count: Int.random(in: 40 ..< 80)))
+            Text(String(repeating: " ", count: Int.random(in: 40 ..< 80)))
+            Text(String(repeating: " ", count: Int.random(in: 40 ..< 80)))
+        }
+        .padding(.horizontal, 16)
+        .redacted(reason: .placeholder)
+    }
+}
+
 struct DiscussionListCell: View {
     @Environment(\.splitVC) var splitVC
     @State var discussion: Discussion
@@ -20,10 +49,14 @@ struct DiscussionListCell: View {
         VStack(spacing: 0) {
             ZStack {
                 Button {
-                    let near = (discussion.attributes?.commentCount ?? 1) - 1
-                    splitVC?.setSplitViewRoot(viewController: DiscussionViewController(discussion: discussion, near: near),
-                                              column: .secondary,
-                                              immediatelyShow: true)
+                    if AppGlobalState.shared.tokenPrepared {
+                        let near = (discussion.attributes?.commentCount ?? 1) - 1
+                        splitVC?.setSplitViewRoot(viewController: DiscussionViewController(discussion: discussion, near: near),
+                                                  column: .secondary,
+                                                  immediatelyShow: true)
+                    } else {
+                        splitVC?.presentSignView()
+                    }
                 } label: {
                     LastPostCell(discussion: discussion)
                         .background(Color.white.opacity(0.001))
@@ -35,9 +68,13 @@ struct DiscussionListCell: View {
                 && discussion.lastPost != nil
                 && discussion.firstPost != discussion.lastPost {
                 Button {
-                    splitVC?.setSplitViewRoot(viewController: DiscussionViewController(discussion: discussion, near: 0),
-                                              column: .secondary,
-                                              immediatelyShow: true)
+                    if AppGlobalState.shared.tokenPrepared {
+                        splitVC?.setSplitViewRoot(viewController: DiscussionViewController(discussion: discussion, near: 0),
+                                                  column: .secondary,
+                                                  immediatelyShow: true)
+                    } else {
+                        splitVC?.presentSignView()
+                    }
                 } label: {
                     FirstPostCell(discussion: discussion)
                         .background(Color.white.opacity(0.001))
