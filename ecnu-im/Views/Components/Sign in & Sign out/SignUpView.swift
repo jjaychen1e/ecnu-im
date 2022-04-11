@@ -1,4 +1,25 @@
+import ReCaptcha
+import Regex
+import RxSwift
 import SwiftUI
+
+private struct RegisterErrorDetail: Decodable {
+    let status: String
+    let code: String
+    let detail: String
+}
+
+private struct RegisterErrorModel: Decodable {
+    let errors: [RegisterErrorDetail]
+}
+
+private struct RegisterSuccessData: Decodable {
+    let id: String
+}
+
+private struct RegisterSuccessModel: Decodable {
+    let data: RegisterSuccessData
+}
 
 class SignUpViewModel: ObservableObject {
     @Published var email = ""
@@ -17,10 +38,14 @@ struct SignUpView: View {
     @FocusState var isPasswordFocused: Bool
     @FocusState var isConfirmedPasswordFocused: Bool
     @State var appear = [false, false, false]
+    @State private var registering = false
     var dismissModal: () -> Void
     @AppStorage("isLogged") var isLogged = false
     @AppStorage("account") var account: String = ""
     @AppStorage("password") var password: String = ""
+
+    @State private var disposeBag = DisposeBag()
+    @State private var recaptcha: ReCaptcha!
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -66,7 +91,7 @@ struct SignUpView: View {
                 .keyboardType(.emailAddress)
                 .autocapitalization(.none)
                 .disableAutocorrection(true)
-                .placeholder(when: signUpViewModel.email.isEmpty) {
+                .placeholder(when: signUpViewModel.account.isEmpty) {
                     Text("账号")
                         .foregroundColor(.primary)
                         .blendMode(.overlay)
@@ -98,11 +123,19 @@ struct SignUpView: View {
                 .focused($isPasswordFocused)
 
             Button {
-//                dismissModal()
-//                isLogged = true
+                register()
             } label: {
                 AngularButton(title: "注册")
             }
+            .disabled(registering)
+            .overlay(
+                Group {
+                    if registering {
+                        ProgressView()
+                    }
+                },
+                alignment: .center
+            )
 
             (Text("注册即代表同意我们的") + Text("**[论坛守则](https://ecnu.im/d/287)**") + Text("及") + Text("**[隐私协议](https://ecnu.im/p/4-privacy)**。"))
                 .font(.footnote)
@@ -133,6 +166,112 @@ struct SignUpView: View {
         withAnimation(.timingCurve(0.2, 0.8, 0.2, 1, duration: 0.8).delay(0.6)) {
             appear[2] = true
         }
+    }
+
+    func checkRegisterInfo() -> Bool {
+        if signUpViewModel.email == "" {
+            Toast.default(
+                icon: .emoji("‼️"),
+                title: "邮箱为空"
+            ).show()
+            return false
+        }
+        let regex = Regex("^(.+\\@\\w+\\.ecnu\\.edu\\.cn)$")
+        if !regex.matches(signUpViewModel.email) {
+            Toast.default(
+                icon: .emoji("‼️"),
+                title: "邮箱有误",
+                subtitle: "请使用校内邮箱注册"
+            ).show()
+            return false
+        }
+        if signUpViewModel.account.count < 3 {
+            Toast.default(
+                icon: .emoji("‼️"),
+                title: "帐户长度至少为3个字符"
+            ).show()
+            return false
+        }
+        if signUpViewModel.password.count < 8 {
+            Toast.default(
+                icon: .emoji("‼️"),
+                title: "密码长度至少为8个字符"
+            ).show()
+            return false
+        }
+
+        return true
+    }
+
+    func register() {
+        guard checkRegisterInfo() else { return }
+        registering = true
+
+        let nickname = signUpViewModel.nickname != "" ? signUpViewModel.nickname : signUpViewModel.account
+
+        recaptcha = try! ReCaptcha(endpoint: .default, locale: .current)
+        disposeBag = DisposeBag()
+        let topView = UIApplication.shared.topController()!.view!
+        let webViewTag = 123
+        recaptcha.configureWebView { webView in
+            webView.frame = topView.bounds
+            webView.tag = webViewTag
+        }
+        recaptcha.rx.didFinishLoading
+            .debug("did finish loading")
+            .subscribe()
+            .disposed(by: disposeBag)
+
+        _ = recaptcha.rx.validate(on: topView, resetOnError: false)
+            .subscribe(onNext: { next in
+                print(next)
+                topView.viewWithTag(webViewTag)?.removeFromSuperview()
+                Task {
+                    if let result = try? await flarumProvider.request(.register(email: signUpViewModel.email,
+                                                                                username: signUpViewModel.account,
+                                                                                nickname: nickname,
+                                                                                password: signUpViewModel.password,
+                                                                                recaptcha: next)) {
+                        if let error = try? result.map(RegisterErrorModel.self) {
+                            let errorDetail = error.errors.map { $0.detail }.joined(separator: "")
+                                .replacingOccurrences(of: "username ", with: "帐号")
+                                .replacingOccurrences(of: "email ", with: "邮箱")
+                                .replacingOccurrences(of: "nickname ", with: "昵称")
+                                .replacingOccurrences(of: "password ", with: "密码")
+                            let toast = Toast.default(
+                                icon: .emoji("‼️"),
+                                title: "注册失败",
+                                subtitle: errorDetail
+                            )
+                            toast.show()
+                            registering = false
+                        } else if let _ = try? result.map(RegisterSuccessModel.self) {
+                            Task {
+                                await AppGlobalState.shared.login(account: signUpViewModel.account, password: signUpViewModel.password)
+                                DispatchQueue.main.async {
+                                    AppGlobalState.shared.isLogged = true
+                                    AppGlobalState.shared.account = signUpViewModel.account
+                                    AppGlobalState.shared.password = signUpViewModel.password
+                                }
+                            }
+                            registering = false
+                            model.dismissModal.toggle()
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                                let toast = Toast.default(
+                                    icon: .emoji("🎉"),
+                                    title: "注册成功"
+                                )
+                                toast.show()
+                            }
+                        } else {
+                            registering = false
+                        }
+                    }
+                }
+            }, onError: { error in
+                print(error)
+                registering = false
+            })
     }
 }
 

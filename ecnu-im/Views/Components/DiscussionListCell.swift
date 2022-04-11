@@ -248,7 +248,7 @@ struct ParsedGridImageView: View {
             .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
             .aspectRatio(1, contentMode: .fill)
             .clipped()
-            .contentShape(Rectangle()) // Cliped cause tappable area overflow
+            .contentShape(Rectangle()) // Clipped cause tappable area overflow
             .onTapGesture {
                 onTapAction(index, urls)
             }

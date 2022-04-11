@@ -31,12 +31,13 @@ struct ToastPopover: View {
                     Text(subtitle)
                         .font(.system(size: 12, weight: .bold))
                         .foregroundColor(.init(uiColor: .systemGray))
+                        .lineLimit(10)
                 }
             }
         }
         .padding(.horizontal, 25)
         .padding(.vertical, 10)
-        .frame(minWidth: 150, minHeight: 58)
+        .frame(minWidth: 150, maxWidth: 300, minHeight: 58)
         .background(
             RoundedRectangle(cornerRadius: 100)
                 .stroke(.gray.opacity(0.1))
@@ -45,7 +46,7 @@ struct ToastPopover: View {
                         .fill(colorScheme == .light ? Color(red: 0.99, green: 0.99, blue: 0.99) : Color(red: 0.13, green: 0.13, blue: 0.13))
                 )
         )
-        .shadow(color: Color("Shadow").opacity(0.3), radius: 20, x: 0, y: 10)
+        .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 8)
     }
 }
 

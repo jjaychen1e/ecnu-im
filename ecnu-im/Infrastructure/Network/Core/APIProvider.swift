@@ -16,12 +16,11 @@ class APIProvider<Target: TargetType> {
     let session: Session
 
     init() {
-        self.session = Self.defaultAlamofireSession()
+        session = Self.defaultAlamofireSession()
     }
 
     func request(_ target: Target,
-                 completion: @escaping Completion)
-    {
+                 completion: @escaping Completion) {
         return requestInternal(target, completion: completion)
     }
 
@@ -32,18 +31,20 @@ class APIProvider<Target: TargetType> {
 
 extension APIProvider {
     private func requestInternal(_ target: Target, completion: @escaping Completion) {
-        let endpoint = Self.defaultEndpointMapping(for: target)
-        do {
-            let request = try endpoint.urlRequest()
-            session.request(request).response { response in
-                let result = convertResponseToResult(response.response, request: request, data: response.data, error: response.error)
-                completion(result)
-            }.resume()
-        } catch _ {}
+        Task {
+            let endpoint = await Self.defaultEndpointMapping(for: target)
+            do {
+                let request = try endpoint.urlRequest()
+                session.request(request).response { response in
+                    let result = convertResponseToResult(response.response, request: request, data: response.data, error: response.error)
+                    completion(result)
+                }.resume()
+            } catch _ {}
+        }
     }
 
     private func requestInternal(_ target: Target) async throws -> Response {
-        let endpoint = Self.defaultEndpointMapping(for: target)
+        let endpoint = await Self.defaultEndpointMapping(for: target)
         let request = try endpoint.urlRequest()
 
         let dataTask = session.request(request).serializingData()
@@ -56,12 +57,12 @@ extension APIProvider {
 }
 
 extension APIProvider {
-    class func defaultEndpointMapping(for target: Target) -> Endpoint {
+    class func defaultEndpointMapping(for target: Target) async -> Endpoint {
         Endpoint(
             url: URL(target: target).absoluteString,
             method: target.method,
             task: target.task,
-            httpHeaderFields: target.headers
+            httpHeaderFields: await target.headers
         )
     }
 
@@ -75,8 +76,7 @@ extension APIProvider {
 
 /// A public function responsible for converting the result of a `URLRequest` to a Result<Response, NetworkError>.
 public func convertResponseToResult(_ response: HTTPURLResponse?, request: URLRequest?, data: Data?, error: Swift.Error?) ->
-    Result<Response, NetworkError>
-{
+    Result<Response, NetworkError> {
     switch (response, data, error) {
     case let (.some(response), data, .none):
         let response = Response(statusCode: response.statusCode, data: data ?? Data(), request: request, response: response)
