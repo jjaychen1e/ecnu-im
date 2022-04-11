@@ -22,7 +22,7 @@ private struct HeaderItem: Hashable {
 
 private enum RowType {
     case navigation(action: () -> Void)
-    case action(textColor: UIColor? = nil, action: () -> Void)
+    case action(textColor: UIColor? = nil, action: (_ sender: UIView) -> Void)
     case toggle(action: (Bool) -> Void)
     case segmentedControl(actions: [UIAction])
 }
@@ -80,8 +80,8 @@ class SidebarViewController: UIViewController {
     private var collectionView: UICollectionView!
     private lazy var dataSource = makeDataSource()
     private lazy var allDiscussionViewController = AllDiscussionsViewController()
-    
-    static private let iconImageSize: CGFloat = 24.0
+
+    private static let iconImageSize: CGFloat = 24.0
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -273,9 +273,18 @@ class SidebarViewController: UIViewController {
                 icon: .system(name: "person.crop.circle"),
                 label: "个人资料"),
                 RowItem(type: .action(textColor: .systemRed,
-                                      action: {
-                                          print("Clicked 4")
-
+                                      action: { sender in
+                                          let alertController = UIAlertController(title: "你确定要退出登录吗", message: nil, preferredStyle: .actionSheet)
+                                          alertController.addAction(.init(title: "退出登录", style: .destructive, handler: { _ in
+                                              AppGlobalState.shared.logout()
+                                          }))
+                                          alertController.addAction(.init(title: "取消", style: .cancel, handler: { _ in
+                                              alertController.dismiss(animated: true)
+                                          }))
+                                          if let popoverController = alertController.popoverPresentationController {
+                                              popoverController.sourceView = sender // to set the source of your alert
+                                          }
+                                          self.present(alertController, animated: true)
                                       }),
                         label: "退出登录"),
             ]),
@@ -287,7 +296,20 @@ class SidebarViewController: UIViewController {
                 label: "开关例子"),
                 RowItem(type: .segmentedControl(actions: ThemeOption.allCases.map { option in
                     UIAction(title: option.rawValue) { _ in
-                        print(option)
+                        switch option {
+                        case .auto:
+                            UIApplication.shared.sceneWindows.forEach { window in
+                                window.overrideUserInterfaceStyle = .unspecified
+                            }
+                        case .light:
+                            UIApplication.shared.sceneWindows.forEach { window in
+                                window.overrideUserInterfaceStyle = .light
+                            }
+                        case .dark:
+                            UIApplication.shared.sceneWindows.forEach { window in
+                                window.overrideUserInterfaceStyle = .dark
+                            }
+                        }
                     }
                 }),
                 icon: .uiImage(uiImage: Asset.Icons.darkTheme.image),
@@ -335,7 +357,9 @@ extension SidebarViewController: UICollectionViewDelegate {
                 case let .navigation(action):
                     action()
                 case let .action(_, action):
-                    action()
+                    if let cell = collectionView.cellForItem(at: indexPath) {
+                        action(cell)
+                    }
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
                         collectionView.deselectItem(at: indexPath, animated: true)
                     }

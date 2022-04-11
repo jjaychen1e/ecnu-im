@@ -81,13 +81,8 @@ struct AllDiscussionsView: View {
             }
         }
         .onReceive(AppGlobalState.shared.$tokenPrepared, perform: { output in
-            if !isLogged {
-                if output {
-                    isLogged = true
-                    Task {
-                        await loadMore(isRefresh: true)
-                    }
-                }
+            Task {
+                await loadMore(isRefresh: true)
             }
         })
     }

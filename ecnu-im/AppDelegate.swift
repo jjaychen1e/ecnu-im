@@ -31,8 +31,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
     }
-    
-    func applicationWillEnterForeground(_ application: UIApplication) {
+
+    func applicationWillEnterForeground(_: UIApplication) {
         Task {
             await AppGlobalState.shared.tryToLoginWithStoredAccount()
         }
@@ -41,7 +41,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 extension UIApplication {
     func topController() -> UIViewController? {
-        let keyWindow = windows.filter { $0.isKeyWindow }.first
+        let keyWindow = sceneWindows.filter { $0.isKeyWindow }.first
 
         if var topController = keyWindow?.rootViewController {
             while let presentedViewController = topController.presentedViewController {
@@ -50,5 +50,11 @@ extension UIApplication {
             return topController
         }
         return nil
+    }
+
+    var sceneWindows: [UIWindow] {
+        UIApplication.shared.connectedScenes
+            .first(where: { $0 is UIWindowScene })
+            .flatMap { $0 as? UIWindowScene }?.windows ?? []
     }
 }

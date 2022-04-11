@@ -72,7 +72,7 @@ struct SignUpView: View {
     }
 
     var form: some View {
-        Group {
+        VStack(alignment: .leading, spacing: 10) {
             TextField("", text: $signUpViewModel.email)
                 .textContentType(.emailAddress)
                 .keyboardType(.emailAddress)
