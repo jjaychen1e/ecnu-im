@@ -13,20 +13,34 @@ class AppGlobalState: ObservableObject {
     @AppStorage("account") var account: String = ""
     @AppStorage("password") var password: String = ""
     @Published var tokenPrepared = false
+    private var flarumTokenCookie: HTTPCookie?
 
     static let shared = AppGlobalState()
+
+    func logout() {
+        if let cookieStorage = flarumProvider.session.sessionConfiguration.httpCookieStorage,
+           let cookies = cookieStorage.cookies(for: URL(string: "https://ecnu.im")!) {
+            for cookie: HTTPCookie in cookies {
+                cookieStorage.deleteCookie(cookie)
+            }
+        }
+        AppGlobalState.shared.tokenPrepared = false
+        AppGlobalState.shared.isLogged = false
+        AppGlobalState.shared.account = ""
+        AppGlobalState.shared.password = ""
+    }
 
     @discardableResult
     func login(account: String, password: String) async -> Bool {
         if let result = try? await flarumProvider.request(.token(username: account, password: password)),
            let token = try? result.map(Token.self) {
-            let httpCookie = HTTPCookie(properties: [
+            let flarumTokenCookie = HTTPCookie(properties: [
                 HTTPCookiePropertyKey.domain: "ecnu.im",
                 HTTPCookiePropertyKey.path: "/",
                 HTTPCookiePropertyKey.name: "flarum_remember",
                 HTTPCookiePropertyKey.value: token.token,
             ])!
-            flarumProvider.session.sessionConfiguration.httpCookieStorage?.setCookie(httpCookie)
+            flarumProvider.session.sessionConfiguration.httpCookieStorage?.setCookie(flarumTokenCookie)
             DispatchQueue.main.async {
                 self.tokenPrepared = true
             }
