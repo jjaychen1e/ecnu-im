@@ -96,13 +96,13 @@ private struct DiscussionHeaderTagView: View {
             }
             .padding(.vertical, 2)
             .padding(.horizontal, 6)
-            .background(Asset.dynamicWhite.swiftUIColor)
+            .background(Asset.DynamicColors.dynamicWhite.swiftUIColor)
             .cornerRadius(4)
 
             if let childTag = tag.child {
                 Text(childTag.name)
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(Asset.dynamicWhite.swiftUIColor)
+                    .foregroundColor(Asset.DynamicColors.dynamicWhite.swiftUIColor)
             }
         }
         .foregroundColor(tag.backgroundColor)
@@ -135,7 +135,7 @@ private struct DiscussionViewHeader: View {
         .padding(.bottom)
         .padding(.top, 8)
         .frame(maxWidth: .infinity)
-        .foregroundColor(Asset.dynamicWhite.swiftUIColor)
+        .foregroundColor(Asset.DynamicColors.dynamicWhite.swiftUIColor)
         .background(discussion.synthesisedTag?.backgroundColor ?? .gray)
         .overlay(
             Group {
@@ -152,7 +152,7 @@ private struct DiscussionViewHeader: View {
                         }, label: {
                             Image(systemName: "arrow.backward.circle.fill")
                                 .font(.system(size: 30, weight: .medium))
-                                .foregroundColor(Asset.dynamicWhite.swiftUIColor)
+                                .foregroundColor(Asset.DynamicColors.dynamicWhite.swiftUIColor)
                         })
                         .offset(x: 8, y: 0)
                     }

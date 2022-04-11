@@ -22,11 +22,13 @@ internal typealias AssetImageTypeAlias = ImageAsset.Image
 // swiftlint:disable identifier_name line_length nesting type_body_length type_name
 internal enum Asset {
   internal static let accentColor = ColorAsset(name: "AccentColor")
-  internal static let background = ColorAsset(name: "Background")
+  internal static let shadow = ColorAsset(name: "Shadow")
+  internal enum Backgrounds {
+    internal static let background = ColorAsset(name: "Background")
+  }
   internal enum Blobs {
     internal static let blob1 = ImageAsset(name: "Blob 1")
   }
-  internal static let shadow = ColorAsset(name: "Shadow")
   internal enum DefaultTheme {
     internal static let defaultThemeBackground1 = ColorAsset(name: "defaultThemeBackground1")
     internal static let defaultThemeBackground2 = ColorAsset(name: "defaultThemeBackground2")
@@ -36,8 +38,13 @@ internal enum Asset {
     internal static let defaultThemePrimaryText = ColorAsset(name: "defaultThemePrimaryText")
     internal static let defaultThemeSecondaryText = ColorAsset(name: "defaultThemeSecondaryText")
   }
-  internal static let dynamicBlack = ColorAsset(name: "dynamicBlack")
-  internal static let dynamicWhite = ColorAsset(name: "dynamicWhite")
+  internal enum DynamicColors {
+    internal static let dynamicBlack = ColorAsset(name: "dynamicBlack")
+    internal static let dynamicWhite = ColorAsset(name: "dynamicWhite")
+  }
+  internal enum Icons {
+    internal static let darkTheme = ImageAsset(name: "darkTheme")
+  }
 }
 // swiftlint:enable identifier_name line_length nesting type_body_length type_name
 
