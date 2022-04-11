@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Regex
 
 let flarumProvider = APIProvider<Flarum>()
 let flarumBaseURL = "https://ecnu.im"
@@ -40,6 +41,7 @@ enum Flarum {
                         pageOffset: Int = 0,
                         pageItemLimit: Int = 20)
     case posts(discussionID: Int, offset: Int, limit: Int)
+    case register(email: String, username: String, nickname: String, password: String, recaptcha: String)
 }
 
 extension Flarum: TargetType {
@@ -59,6 +61,8 @@ extension Flarum: TargetType {
             return "/api/discussions"
         case .posts:
             return "/api/posts"
+        case .register:
+            return "/register"
         }
     }
 
@@ -74,6 +78,8 @@ extension Flarum: TargetType {
             return .get
         case .posts:
             return .get
+        case .register:
+            return .post
         }
     }
 
@@ -101,10 +107,35 @@ extension Flarum: TargetType {
                 "page[offset]": max(0, offset),
                 "page[limit]": limit,
             ], encoding: URLEncoding.default)
+        case let .register(email, username, nickname, password, recaptcha):
+            return .requestParameters(parameters: [
+                "username": username,
+                "email": email,
+                "password": password,
+                "fof_terms_policy_1": true,
+                "g-recaptcha-response": recaptcha,
+                "nickname": nickname,
+            ], encoding: JSONEncoding.default)
         }
     }
 
     var headers: [String: String]? {
-        nil
+        get async {
+            let basicHeader = [
+                "Accept-Language": "zh-CN,zh;",
+            ]
+            switch self {
+            case .register:
+                let regex = Regex("\"csrfToken\":\"(.*?)\"")
+                if let homeResult = try? await flarumProvider.request(.home),
+                   let homeContentStr = try? homeResult.mapString(),
+                   let csrfToken = regex.firstMatch(in: homeContentStr)?.captures[0] {
+                    return basicHeader.merging(["X-CSRF-Token": csrfToken]) { _, new in new }
+                }
+                fallthrough
+            default:
+                return basicHeader
+            }
+        }
     }
 }

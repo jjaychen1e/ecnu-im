@@ -5,6 +5,8 @@
 //  Created by 陈俊杰 on 2022/4/3.
 //
 
+import ReCaptcha
+import RxSwift
 import SwiftUI
 import UIKit
 

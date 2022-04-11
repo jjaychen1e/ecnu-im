@@ -43,5 +43,5 @@ protocol TargetType {
     var task: RequestTask { get }
 
     /// The headers to be used in the request.
-    var headers: [String: String]? { get }
+    var headers: [String: String]? { get async }
 }
