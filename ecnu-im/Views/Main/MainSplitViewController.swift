@@ -55,6 +55,7 @@ class AppGlobalState: ObservableObject {
             if !loginResult {
                 // Maybe password has been modified
                 await MainSplitViewController.rootSplitVC.presentSignView()
+                isLogged = false
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     Toast.default(icon: .emoji("🤔"), title: "登录失败", subtitle: "密码可能被修改，请重新登录").show()
                 }

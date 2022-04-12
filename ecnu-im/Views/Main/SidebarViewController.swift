@@ -25,14 +25,14 @@ private enum RowType {
     case action(textColor: UIColor? = nil, action: (_ sender: UIView) -> Void)
     case toggle(action: (Bool) -> Void)
     case segmentedControl(actions: [UIAction])
+
+    // TODO: drop down
 }
 
 private enum RowIcon {
     case system(name: String)
     case uiImage(uiImage: UIImage)
     case image(name: String)
-
-    // TODO: drop down, segmented control
 
     func toUIImage() -> UIImage? {
         switch self {

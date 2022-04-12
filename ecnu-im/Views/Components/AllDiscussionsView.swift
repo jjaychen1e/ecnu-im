@@ -5,6 +5,7 @@
 //  Created by 陈俊杰 on 2022/3/25.
 //
 
+import RxSwift
 import SwiftUI
 import SwiftUIPullToRefresh
 import SwiftyJSON
@@ -33,6 +34,8 @@ struct AllDiscussionsView: View {
     @State private var pageOffset = 0
     @State private var isLoading = false
     @State private var isLogged = false
+
+    @State private var initialLoadMoreTask: Task<Void, Never>?
 
     var body: some View {
         RefreshableScrollView(loadingViewBackgroundColor: ThemeManager.shared.theme.backgroundColor1,
@@ -76,11 +79,19 @@ struct AllDiscussionsView: View {
         }
         .background(ThemeManager.shared.theme.backgroundColor1)
         .onLoad {
-            Task {
+            // We cannot just use isLogged, because user may change password
+            initialLoadMoreTask = Task {
                 await loadMore()
+                initialLoadMoreTask = nil
             }
         }
-        .onReceive(AppGlobalState.shared.$tokenPrepared, perform: { output in
+        .onReceive(AppGlobalState.shared.$tokenPrepared, perform: { _ in
+            if let initialLoadMoreTask = initialLoadMoreTask {
+                initialLoadMoreTask.cancel()
+                self.initialLoadMoreTask = nil
+                self.isLoading = false
+            }
+
             Task {
                 await loadMore(isRefresh: true)
             }
@@ -90,7 +101,7 @@ struct AllDiscussionsView: View {
 
 extension AllDiscussionsView {
     func checkLoadMore(_ i: Int) {
-        if !isLoading && (i == discussionList.count - 10 || i == discussionList.count - 1) {
+        if i == discussionList.count - 10 || i == discussionList.count - 1 {
             Task {
                 await loadMore()
             }
@@ -98,6 +109,8 @@ extension AllDiscussionsView {
     }
 
     func loadMore(isRefresh: Bool = false) async {
+        guard !isLoading else { return }
+
         isLoading = true
         if isRefresh {
             pageOffset = 0
@@ -109,6 +122,7 @@ extension AllDiscussionsView {
 
         if let response = try? await flarumProvider.request(.allDiscussions(pageOffset: pageOffset, pageItemLimit: pageItemLimit)),
            let json = try? JSON(data: response.data) {
+            guard !Task.isCancelled else { return }
             var discussionList: [Discussion] = []
 
             let includedData = DataParser.parseIncludedData(json: json["included"])

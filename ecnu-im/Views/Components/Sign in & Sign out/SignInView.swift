@@ -12,6 +12,7 @@ struct SignInView: View {
     @FocusState var isEmailFocused: Bool
     @FocusState var isPasswordFocused: Bool
     @State var appear = [false, false, false]
+    @State private var logging = false
     var dismissModal: () -> Void
 
     var body: some View {
@@ -55,6 +56,7 @@ struct SignInView: View {
 
             Button {
                 Task {
+                    logging = true
                     if await AppGlobalState.shared.login(account: signInViewModel.account, password: signInViewModel.password) {
                         DispatchQueue.main.async {
                             AppGlobalState.shared.isLogged = true
@@ -77,10 +79,12 @@ struct SignInView: View {
                         )
                         toast.show()
                     }
+                    logging = false
                 }
             } label: {
                 AngularButton(title: "登录")
             }
+            .disabled(logging)
 
             Divider()
 
