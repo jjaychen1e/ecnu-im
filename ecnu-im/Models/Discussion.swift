@@ -129,7 +129,9 @@ extension Discussion: Hashable {
         let condition1 = lhs.id == rhs.id
         let condition2 = lhs.firstPost?.id == rhs.firstPost?.id
         let condition3 = lhs.lastPost?.id == rhs.lastPost?.id
-        return condition1 && condition2 && condition3
+        let condition4 = lhs.firstPost?.attributes?.contentHtml == rhs.firstPost?.attributes?.contentHtml
+        let condition5 = lhs.lastPost?.attributes?.contentHtml == rhs.lastPost?.attributes?.contentHtml
+        return condition1 && condition2 && condition3 && condition4 && condition5
     }
 
     func hash(into hasher: inout Hasher) {
@@ -139,6 +141,12 @@ extension Discussion: Hashable {
         }
         if let firstPostID = firstPost?.id {
             hasher.combine(firstPostID)
+        }
+        if let firstPostContentHtml = firstPost?.attributes?.contentHtml {
+            hasher.combine(firstPostContentHtml)
+        }
+        if let lastPostContentHtml = lastPost?.attributes?.contentHtml {
+            hasher.combine(lastPostContentHtml)
         }
     }
 }
