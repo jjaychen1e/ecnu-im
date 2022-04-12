@@ -177,8 +177,7 @@ struct DiscussionView: View {
     @State private var scrollTarget: ScrollTarget?
     @State private var discussion: Discussion
     @State private var near: Int
-    @StateObject private var dumbPublisher = DumbPublisher()
-    @State private var loader: DiscussionPostsLoader
+    @ObservedObject private var loader: DiscussionPostsLoader
 
     private let limit = 30
 
@@ -189,7 +188,7 @@ struct DiscussionView: View {
     init(discussion: Discussion, near: Int) {
         _discussion = State(initialValue: discussion)
         _near = State(initialValue: near)
-        _loader = State(initialValue: DiscussionPostsLoader(discussionID: Int(discussion.id)!, limit: limit))
+        loader = DiscussionPostsLoader(discussionID: Int(discussion.id)!, limit: limit)
         _posts = State(initialValue: Array(repeating: nil, count: discussion.attributes?.commentCount ?? 0))
     }
 
@@ -272,11 +271,6 @@ struct DiscussionView: View {
         .onLoad {
             Task {
                 await loadData(near: near)
-            }
-        }
-        .onReceive(dumbPublisher.$publishedValue) { output in
-            if output == 0 {
-                loader = .init(discussionID: discussionID, limit: limit)
             }
         }
     }
@@ -372,7 +366,7 @@ actor DiscussionPostsLoaderInfo {
     private var isOffsetLoading: Set<Int> = []
     private var isPaused = false
     private var loadedOffset: Set<Int> = []
-
+    
     func setPaused(_ paused: Bool) {
         isPaused = paused
     }
@@ -391,9 +385,10 @@ actor DiscussionPostsLoaderInfo {
     }
 }
 
-private class DiscussionPostsLoader {
-    var discussionID: Int
-    private var limit: Int
+@MainActor
+private class DiscussionPostsLoader: ObservableObject {
+    @Published private var discussionID: Int
+    @Published private var limit: Int
     private var info = DiscussionPostsLoaderInfo()
 
     internal init(discussionID: Int, limit: Int) {
