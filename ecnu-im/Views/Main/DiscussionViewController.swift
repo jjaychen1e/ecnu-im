@@ -12,7 +12,7 @@ class DiscussionViewController: UIViewController {
     private var discussion: Discussion
     private var near: Int
 
-    private weak var navigationBarTimer: Timer!
+    private weak var navigationBarTimer: Timer?
 
     init(discussion: Discussion, near: Int) {
         self.discussion = discussion
@@ -22,7 +22,7 @@ class DiscussionViewController: UIViewController {
 
     deinit {
         navigationController?.setNavigationBarHidden(false, animated: false)
-        navigationBarTimer.invalidate()
+        navigationBarTimer?.invalidate()
     }
 
     @available(*, unavailable)
