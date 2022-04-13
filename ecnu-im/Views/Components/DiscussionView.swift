@@ -173,6 +173,9 @@ class DumbPublisher: ObservableObject {
 }
 
 struct DiscussionView: View {
+    @State private var miniMiniEditorDisplayed = false
+    @FocusState private var miniMiniEditorFocused: Bool
+
     @State private var posts: [Post?] = []
     @State private var scrollTarget: ScrollTarget?
     @State private var discussion: Discussion
@@ -214,6 +217,16 @@ struct DiscussionView: View {
         rightBound -= 1
 
         return index - leftBound + 1 <= 8
+    }
+
+    func turnOnMiniEditor() {
+        miniMiniEditorDisplayed = true
+        miniMiniEditorFocused = true
+    }
+
+    func turnOffMiniEditor() {
+        miniMiniEditorFocused = false
+        miniMiniEditorDisplayed = false
     }
 
     var body: some View {
@@ -272,6 +285,30 @@ struct DiscussionView: View {
             Task {
                 await loadData(near: near)
             }
+        }
+        .overlay(alignment: .bottomTrailing) {
+            Button {
+                turnOnMiniEditor()
+            } label: {
+                Circle()
+                    .frame(width: 60, height: 60)
+                    .overlay(
+                        Image(systemName: "plus")
+                            .font(.system(size: 30, weight: .medium, design: .rounded))
+                            .foregroundColor(.white)
+                    )
+                    .opacity(miniMiniEditorDisplayed ? 0 : 1)
+            }
+            .offset(x: -16, y: -16)
+            .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
+        }
+        .overlay(alignment: .bottom) {
+            VStack {
+                Color.white.opacity(0.001).offset(x: 50, y: 0)
+                    .simultaneousGesture(DragGesture().onChanged { _ in turnOffMiniEditor() })
+                MiniEditor(discussion: discussion, focused: _miniMiniEditorFocused, hide: turnOffMiniEditor)
+            }
+            .opacity(miniMiniEditorDisplayed ? 1 : 0)
         }
     }
 }

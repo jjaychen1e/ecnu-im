@@ -42,6 +42,7 @@ enum Flarum {
                         pageItemLimit: Int = 20)
     case posts(discussionID: Int, offset: Int, limit: Int)
     case register(email: String, username: String, nickname: String, password: String, recaptcha: String)
+    case newPost(discussionID: String, content: String)
 }
 
 extension Flarum: TargetType {
@@ -63,6 +64,8 @@ extension Flarum: TargetType {
             return "/api/posts"
         case .register:
             return "/register"
+        case .newPost:
+            return "api/posts"
         }
     }
 
@@ -79,6 +82,8 @@ extension Flarum: TargetType {
         case .posts:
             return .get
         case .register:
+            return .post
+        case .newPost:
             return .post
         }
     }
@@ -116,6 +121,23 @@ extension Flarum: TargetType {
                 "g-recaptcha-response": recaptcha,
                 "nickname": nickname,
             ], encoding: JSONEncoding.default)
+        case let .newPost(discussionID, content):
+            return .requestParameters(parameters: [
+                "data": [
+                    "type": "posts",
+                    "attributes": [
+                        "content": content,
+                    ],
+                    "relationships": [
+                        "discussion": [
+                            "data": [
+                                "type": "discussions",
+                                "id": discussionID,
+                            ],
+                        ],
+                    ],
+                ],
+            ], encoding: JSONEncoding.default)
         }
     }
 
@@ -125,7 +147,7 @@ extension Flarum: TargetType {
                 "Accept-Language": "zh-CN,zh;",
             ]
             switch self {
-            case .register:
+            case .register, .newPost:
                 let regex = Regex("\"csrfToken\":\"(.*?)\"")
                 if let homeResult = try? await flarumProvider.request(.home),
                    let homeContentStr = try? homeResult.mapString(),
