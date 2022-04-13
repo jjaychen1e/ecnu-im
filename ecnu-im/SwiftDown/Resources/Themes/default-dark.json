@@ -1,0 +1,67 @@
+{
+    "name": "Default Dark",
+    "author": {
+        "name": "Quentin Eude",
+        "email": "quentineude@gmail.com"
+    },
+    "version": "1.0",
+    "editor": {
+        "backgroundColor": "#1D1F21",
+        "tintColor": "#A1A8B5",
+        "cursorColor": "#A1A8B5"
+    },
+    "styles": {
+        "h1": {
+            "color": "#D36770",
+            "size": 23
+        },
+        "h2": {
+            "color": "#D36770",
+            "size": 20
+        },
+        "h3": {
+            "color": "#D36770",
+            "size": 18
+        },
+        "h4": {
+            "color": "#D36770"
+        },
+        "h5": {
+            "color": "#D36770"
+        },
+        "h6": {
+            "color": "#D36770"
+        },
+        "body": {
+            "font": "Menlo-Regular",
+            "size": 15,
+            "color": "#A1A8B5"
+        },
+        "bold": {
+            "font": "Menlo-Bold",
+            "color": "#D19A66"
+        },
+        "italic": {
+            "font": "Menlo-Italic",
+            "color": "#C678DD"
+        },
+        "link": {
+            "color": "#A66BFF"
+        },
+        "image": {
+            "color": "#A66BFF"
+        },
+        "inlineCode": {
+            "color": "#A7E3A6"
+        },
+        "codeBlock": {
+            "color": "#A7E3A6"
+        },
+        "blockQuote": {
+            "color": "#1CBD47"
+        },
+        "list": {
+            "color": "#A7E3A6"
+        }
+    }
+}
