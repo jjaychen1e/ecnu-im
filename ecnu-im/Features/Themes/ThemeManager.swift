@@ -9,9 +9,9 @@ import Foundation
 
 class ThemeManager: ObservableObject {
     static let shared = ThemeManager()
-    @Published private(set) var theme: Theme = DefaultTheme()
+    @Published private(set) var theme: IMTheme = DefaultTheme()
 
-    public func applyTheme(theme: Theme) {
+    public func applyTheme(theme: IMTheme) {
         self.theme = theme
     }
 }

@@ -1,5 +1,5 @@
 //
-//  Theme.swift
+//  IMTheme.swift
 //  ecnu-im
 //
 //  Created by 陈俊杰 on 2022/4/2.
@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-protocol Theme {
+protocol IMTheme {
     var textColor: Color { get set }
     var backgroundColor1: Color { get set }
     var backgroundColor2: Color { get set }

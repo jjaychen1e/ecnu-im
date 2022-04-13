@@ -10,6 +10,15 @@
       }
     },
     {
+      "identity" : "down",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/johnxnguyen/Down",
+      "state" : {
+        "branch" : "master",
+        "revision" : "e754ab1c80920dd51a8e08290c912ac1c2ac8b58"
+      }
+    },
+    {
       "identity" : "fontawesome.swift",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/thii/FontAwesome.swift",
@@ -52,6 +61,15 @@
       "state" : {
         "revision" : "d458564516e5676af9c70b4f4b2a9178294f1bc6",
         "version" : "5.0.1"
+      }
+    },
+    {
+      "identity" : "swift-markdownkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/objecthub/swift-markdownkit",
+      "state" : {
+        "revision" : "c6c009353863779ee5855b1cf58ced6a3b851f3e",
+        "version" : "1.1.5"
       }
     },
     {

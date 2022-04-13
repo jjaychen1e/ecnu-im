@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-final class DefaultTheme: Theme {
+final class DefaultTheme: IMTheme {
     var textColor: Color = Asset.DynamicColors.dynamicWhite.swiftUIColor
     var backgroundColor1: Color = Asset.DefaultTheme.defaultThemeBackground1.swiftUIColor
     var backgroundColor2: Color = Asset.DefaultTheme.defaultThemeBackground2.swiftUIColor
