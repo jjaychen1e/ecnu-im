@@ -7,6 +7,7 @@
 
 import Down
 import Foundation
+import MarkdownKit
 
 public class MarkdownEngine {
     var text = ""

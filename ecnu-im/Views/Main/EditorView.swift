@@ -6,13 +6,13 @@
 //
 
 import SwiftUI
-//import Markdown
+// import Markdown
 
 struct EditorView: View {
-    @State private var text: String = "# 你好"
+    @ObservedObject var model: EditorContentModel
 
     var body: some View {
-        SwiftDownEditor(text: $text)
+        SwiftDownEditor(text: $model.text)
             .insetsSize(40)
             .theme(Theme.BuiltIn.defaultDark.theme())
             .edgesIgnoringSafeArea(.all)
@@ -21,6 +21,6 @@ struct EditorView: View {
 
 struct EditorView_Previews: PreviewProvider {
     static var previews: some View {
-        EditorView()
+        EditorView(model: .init())
     }
 }

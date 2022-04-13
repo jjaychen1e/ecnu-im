@@ -62,6 +62,7 @@
 		6365777E27F19A2F008AD10E /* Font Awesome 5 Free-Solid-900.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6365777927F19A2A008AD10E /* Font Awesome 5 Free-Solid-900.otf */; };
 		6365778227F19C52008AD10E /* FontAwesome+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6365778127F19C52008AD10E /* FontAwesome+Extension.swift */; };
 		6365778627F1D897008AD10E /* UserDefaluts+JSON+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6365778527F1D897008AD10E /* UserDefaluts+JSON+Extension.swift */; };
+		636673912807308A00A732A3 /* MiniEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 636673902807308A00A732A3 /* MiniEditor.swift */; };
 		636BE16B27F7231900283943 /* Regex in Frameworks */ = {isa = PBXBuildFile; productRef = 636BE16A27F7231900283943 /* Regex */; };
 		636BE16E27F7440B00283943 /* Introspect in Frameworks */ = {isa = PBXBuildFile; productRef = 636BE16D27F7440B00283943 /* Introspect */; };
 		636BE17127F7FD6600283943 /* IMTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 636BE17027F7FD6600283943 /* IMTheme.swift */; };
@@ -171,6 +172,7 @@
 		6365777B27F19A2A008AD10E /* Font Awesome 5 Free-Regular-400.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Font Awesome 5 Free-Regular-400.otf"; sourceTree = "<group>"; };
 		6365778127F19C52008AD10E /* FontAwesome+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FontAwesome+Extension.swift"; sourceTree = "<group>"; };
 		6365778527F1D897008AD10E /* UserDefaluts+JSON+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaluts+JSON+Extension.swift"; sourceTree = "<group>"; };
+		636673902807308A00A732A3 /* MiniEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniEditor.swift; sourceTree = "<group>"; };
 		636BE17027F7FD6600283943 /* IMTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IMTheme.swift; sourceTree = "<group>"; };
 		636BE17227F7FDB800283943 /* DefaultTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultTheme.swift; sourceTree = "<group>"; };
 		636BE17427F7FE0C00283943 /* ThemeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeManager.swift; sourceTree = "<group>"; };
@@ -394,6 +396,7 @@
 		634C470127F9C17900FC591D /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				6366738F2807308000A732A3 /* Editor */,
 				63B74097280277E700376B94 /* Buttons */,
 				63B7408E2802778600376B94 /* Sign in & Sign out */,
 				6318B66927EF755A00108D49 /* DiscussionListCell.swift */,
@@ -538,6 +541,14 @@
 				6365778527F1D897008AD10E /* UserDefaluts+JSON+Extension.swift */,
 			);
 			path = Extension;
+			sourceTree = "<group>";
+		};
+		6366738F2807308000A732A3 /* Editor */ = {
+			isa = PBXGroup;
+			children = (
+				636673902807308A00A732A3 /* MiniEditor.swift */,
+			);
+			path = Editor;
 			sourceTree = "<group>";
 		};
 		636BE16F27F7FD3C00283943 /* Themes */ = {
@@ -962,6 +973,7 @@
 				635B2A5927EEB74000FF6109 /* URL+Network+Extension.swift in Sources */,
 				635B2A6427EEF0A700FF6109 /* Token.swift in Sources */,
 				636BE17127F7FD6600283943 /* IMTheme.swift in Sources */,
+				636673912807308A00A732A3 /* MiniEditor.swift in Sources */,
 				635B2A6227EEE79200FF6109 /* FlarumAPI.swift in Sources */,
 				63B7409C2802786700376B94 /* OutlineModifier.swift in Sources */,
 				63DA4FC927F5754300F4FA6E /* ImageBrowser.swift in Sources */,
