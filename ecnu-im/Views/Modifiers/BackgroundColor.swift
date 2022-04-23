@@ -14,7 +14,7 @@ struct BackgroundColor: ViewModifier {
     func body(content: Content) -> some View {
         content
             .overlay(
-                Color("Background")
+                Asset.SpecialColors.background.swiftUIColor
                     .opacity(colorScheme == .dark ? opacity : 0)
                     .blendMode(.overlay)
                     .allowsHitTesting(false)

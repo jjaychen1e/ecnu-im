@@ -274,7 +274,7 @@ struct HomePostCardView: View {
             .padding(.bottom, 6)
             .frame(width: 276, height: 165)
             .background(.ultraThinMaterial)
-            .backgroundStyle(cornerRadius: 30)
+            .backgroundStyle(cornerRadius: 30, opacity: 0.3)
         }
     }
 }
@@ -343,7 +343,7 @@ struct HomePostCardViewLarge: View {
             .padding(.top, 12)
             .padding(.bottom, 6)
             .background(.ultraThinMaterial)
-            .backgroundStyle(cornerRadius: 15)
+            .backgroundStyle(cornerRadius: 15, opacity: 0.3)
         }
     }
 }
