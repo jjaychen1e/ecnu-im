@@ -32,6 +32,7 @@ struct HomeView: View {
             Image("Background")
                 .ignoresSafeArea()
         )
+        .background(Asset.SpecialColors.background.swiftUIColor)
         .safeAreaInset(edge: .top) {
             header
         }
@@ -86,6 +87,7 @@ struct HomeView: View {
                 Text("我敢打包票，这里很多人根本没有经历过真正的大学生活。我时不时会回忆起遥远的过往：没有口罩，没有健康打卡，没有门禁……就像核战后老人在火炉边给孩子们将着还有电力，网络时候的日子那样，我们这些老人娓娓道来……")
                     .font(.system(size: 12, weight: .regular, design: .rounded))
                     .lineLimit(3)
+                    .foregroundColor(.black)
             }
             Image(systemName: "xmark")
                 .font(.system(size: 15, weight: .medium, design: .rounded))
@@ -134,7 +136,7 @@ struct HomeView: View {
         VStack(alignment: .leading, spacing: 4) {
             Text("置顶")
                 .font(.system(.largeTitle, design: .rounded).bold())
-                .foregroundColor(Color(rgba: "#2A5896"))
+                .foregroundColor(Asset.SpecialColors.sectionColor.swiftUIColor)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.leading)
 
@@ -144,8 +146,9 @@ struct HomeView: View {
                         HomePostCardView()
                             .overlay(alignment: .topTrailing) {
                                 Image(systemName: "pin.circle.fill")
+                                    .symbolRenderingMode(.palette)
+                                    .foregroundStyle(.white, Color(rgba: "#2864B4"))
                                     .font(.system(size: 30, weight: .regular, design: .rounded))
-                                    .foregroundColor(Color(rgba: "#2864B4"))
                                     .rotationEffect(.degrees(45))
                                     .frame(width: 30, height: 30)
                                     .offset(x: 5, y: -5)
@@ -177,7 +180,7 @@ struct HomeView: View {
                         .padding(.trailing)
                 }
             }
-            .foregroundColor(Color(rgba: "#2A5896"))
+            .foregroundColor(Asset.SpecialColors.sectionColor.swiftUIColor)
 
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: 16) {
@@ -201,6 +204,7 @@ struct HomeView: View {
 struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
         HomeView()
+            .preferredColorScheme(.dark)
     }
 }
 
@@ -218,7 +222,7 @@ struct HomePostCardView: View {
                         Text("论坛「排版简易指南」")
                             .lineLimit(1)
                             .font(.system(size: 14, weight: .semibold, design: .rounded))
-                            .foregroundColor(Color(rgba: "#3939A4"))
+                            .foregroundColor(Asset.SpecialColors.cardTitleColor.swiftUIColor)
                         HStack(spacing: 2) {
                             Text("@jjaychen")
                                 .font(.system(size: 12, weight: .semibold, design: .rounded))
@@ -234,7 +238,7 @@ struct HomePostCardView: View {
                     .truncationMode(.tail)
                     .font(.system(size: 12, weight: .regular, design: .rounded))
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                
+
                 HStack(spacing: 4) {
                     Spacer()
                     HStack(spacing: -3) {
@@ -269,10 +273,8 @@ struct HomePostCardView: View {
             .padding(.top, 12)
             .padding(.bottom, 6)
             .frame(width: 276, height: 165)
-            .background(Color.white.opacity(0.4).blur(radius: 5))
-            .mask(RoundedRectangle(cornerRadius: 15, style: .continuous))
-            .backgroundStyle(cornerRadius: 15, opacity: 0.6)
-            .shadow(color: Color.black.opacity(0.15), radius: 10, x: 0, y: 5)
+            .background(.ultraThinMaterial)
+            .backgroundStyle(cornerRadius: 30)
         }
     }
 }
@@ -291,7 +293,7 @@ struct HomePostCardViewLarge: View {
                         Text("2018 年来华师大的老人回忆上个纪元的生活")
                             .lineLimit(1)
                             .font(.system(size: 14, weight: .semibold, design: .rounded))
-                            .foregroundColor(Color(rgba: "#3939A4"))
+                            .foregroundColor(Asset.SpecialColors.cardTitleColor.swiftUIColor)
                         HStack(spacing: 2) {
                             Text("@bNeutrasterL")
                                 .font(.system(size: 12, weight: .semibold, design: .rounded))
@@ -340,10 +342,8 @@ struct HomePostCardViewLarge: View {
             .padding(.horizontal, 12)
             .padding(.top, 12)
             .padding(.bottom, 6)
-            .background(Color.white.opacity(0.4).blur(radius: 5))
-            .mask(RoundedRectangle(cornerRadius: 15, style: .continuous))
-            .backgroundStyle(cornerRadius: 15, opacity: 0.6)
-            .shadow(color: Color.black.opacity(0.15), radius: 10, x: 0, y: 5)
+            .background(.ultraThinMaterial)
+            .backgroundStyle(cornerRadius: 15)
         }
     }
 }
