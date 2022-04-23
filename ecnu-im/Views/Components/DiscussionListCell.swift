@@ -42,7 +42,7 @@ struct DiscussionListCellPlaceholder: View {
 
 struct DiscussionListCell: View {
     @Environment(\.splitVC) var splitVC
-    @State var discussion: Discussion
+    @State var discussion: FlarumDiscussion
     @State var index: Int
 
     var body: some View {
@@ -102,10 +102,10 @@ struct DiscussionListCell: View {
 }
 
 private struct FirstPostCell: View {
-    @State private var discussion: Discussion
+    @State private var discussion: FlarumDiscussion
     @State private var dateDescription: String
 
-    init(discussion: Discussion) {
+    init(discussion: FlarumDiscussion) {
         self.discussion = discussion
         dateDescription = discussion.firstPostDateDescription
     }
@@ -158,10 +158,10 @@ private struct FirstPostCell: View {
 }
 
 private struct LastPostCell: View {
-    @State private var discussion: Discussion
+    @State private var discussion: FlarumDiscussion
     @State private var dateDescription: String
 
-    init(discussion: Discussion) {
+    init(discussion: FlarumDiscussion) {
         self.discussion = discussion
         dateDescription = discussion.lastPostDateDescription
     }
@@ -183,7 +183,7 @@ private struct LastPostCell: View {
                                 .font(.system(size: 12, weight: .light))
                                 .fixedSize()
                             Spacer()
-                            if let tag = discussion.synthesisedTag {
+                            if let tag = discussion.synthesizedTag {
                                 DiscussionCellTagView(tag: tag)
                                     .fixedSize()
                             }

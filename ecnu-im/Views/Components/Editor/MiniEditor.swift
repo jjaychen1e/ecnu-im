@@ -12,7 +12,7 @@ class EditorContentModel: ObservableObject {
 }
 
 struct MiniEditor: View {
-    @State var discussion: Discussion
+    @State var discussion: FlarumDiscussion
     @ObservedObject private var model = EditorContentModel()
     @FocusState var focused: Bool
 

@@ -30,7 +30,7 @@ struct AllDiscussionsViewNavigationHeader: View {
 
 struct AllDiscussionsView: View {
     private let pageItemLimit = 20
-    @State private var discussionList: [Discussion] = []
+    @State private var discussionList: [FlarumDiscussion] = []
     @State private var pageOffset = 0
     @State private var isLoading = false
     @State private var isLogged = false
@@ -126,56 +126,8 @@ extension AllDiscussionsView {
                 print("cancelled")
                 return
             }
-            var discussionList: [Discussion] = []
-
-            let includedData = DataParser.parseIncludedData(json: json["included"])
-            let includedUsers = includedData.includedUsers
-            let includedPosts = includedData.includedPosts
-            let includedTags = includedData.includedTags
-
-            if let discussionListJSON = json["data"].array {
-                for discussionJSON in discussionListJSON {
-                    let relationshipsJSON = discussionJSON["relationships"]
-                    let discussionJSONWithoutRelationships = discussionJSON.removing(key: "relationships")
-                    if let discussionData = try? discussionJSONWithoutRelationships.rawData(),
-                       var discussion = try? JSONDecoder().decode(Discussion.self, from: discussionData) {
-                        var relationships = DiscussionRelationship()
-                        relationships.user = relationshipsJSON["user"]["data"]["id"].string
-                        relationships.lastPostedUser = relationshipsJSON["lastPostedUser"]["data"]["id"].string
-                        relationships.firstPost = relationshipsJSON["firstPost"]["data"]["id"].string
-                        relationships.lastPost = relationshipsJSON["lastPost"]["data"]["id"].string
-                        if let tagsJSON = relationshipsJSON["tags"]["data"].array {
-                            relationships.tags = tagsJSON.compactMap { $0["id"].string }
-                        }
-                        if let recipientUsersJSON = relationshipsJSON["recipientUsers"]["data"].array {
-                            relationships.recipientUsers = recipientUsersJSON.compactMap { $0["id"].string }
-                        }
-                        if let recipientGroups = relationshipsJSON["recipientGroups"]["data"].array {
-                            relationships.recipientGroups = recipientGroups.compactMap { $0["id"].string }
-                        }
-
-                        var userIds = [
-                            relationships.user,
-                            relationships.lastPostedUser,
-                        ].compactMap { $0 }
-                        userIds.append(contentsOf: relationships.recipientUsers ?? [])
-
-                        let postIds = [
-                            relationships.firstPost,
-                            relationships.lastPost,
-                        ].compactMap { $0 }
-
-                        let tagIds = (relationships.tags ?? []).compactMap { $0 }
-
-                        discussion.includedUsers.append(contentsOf: includedUsers.filter { userIds.contains($0.id) })
-                        discussion.includedPosts.append(contentsOf: includedPosts.filter { postIds.contains($0.id) })
-                        discussion.includedTags.append(contentsOf: includedTags.filter { tagIds.contains($0.id) })
-                        discussion.relationships = relationships
-                        discussionList.append(discussion)
-                    }
-                }
-            }
-            self.discussionList.append(contentsOf: discussionList)
+            let newDiscussions = FlarumResponse(json: json).data.discussions
+            discussionList.append(contentsOf: newDiscussions)
             pageOffset += pageItemLimit
         }
         isLoading = false

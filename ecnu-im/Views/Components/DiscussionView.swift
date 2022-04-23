@@ -112,17 +112,17 @@ private struct DiscussionHeaderTagView: View {
 private struct DiscussionViewHeader: View {
     @Environment(\.splitVC) var splitVC
     @Environment(\.nvc) var nvc
-    @State private var discussion: Discussion
+    @State private var discussion: FlarumDiscussion
 
-    init(discussion: Discussion) {
+    init(discussion: FlarumDiscussion) {
         _discussion = State(initialValue: discussion)
     }
 
     var body: some View {
         VStack {
             Group {
-                if discussion.synthesisedTag != nil {
-                    DiscussionHeaderTagView(tag: discussion.synthesisedTag!)
+                if discussion.synthesizedTag != nil {
+                    DiscussionHeaderTagView(tag: discussion.synthesizedTag!)
                 } else {
                     Color.clear
                         .frame(height: 30)
@@ -136,7 +136,7 @@ private struct DiscussionViewHeader: View {
         .padding(.top, 8)
         .frame(maxWidth: .infinity)
         .foregroundColor(Asset.DynamicColors.dynamicWhite.swiftUIColor)
-        .background(discussion.synthesisedTag?.backgroundColor ?? .gray)
+        .background(discussion.synthesizedTag?.backgroundColor ?? .gray)
         .overlay(
             Group {
                 if let splitVC = splitVC {
@@ -178,7 +178,7 @@ struct DiscussionView: View {
 
     @State private var posts: [Post?] = []
     @State private var scrollTarget: ScrollTarget?
-    @State private var discussion: Discussion
+    @State private var discussion: FlarumDiscussion
     @State private var near: Int
     @ObservedObject private var loader: DiscussionPostsLoader
 
@@ -188,7 +188,7 @@ struct DiscussionView: View {
         Int(discussion.id)!
     }
 
-    init(discussion: Discussion, near: Int) {
+    init(discussion: FlarumDiscussion, near: Int) {
         _discussion = State(initialValue: discussion)
         _near = State(initialValue: near)
         loader = DiscussionPostsLoader(discussionID: Int(discussion.id)!, limit: limit)

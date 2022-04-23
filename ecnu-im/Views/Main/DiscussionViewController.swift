@@ -9,10 +9,10 @@ import SwiftUI
 import UIKit
 
 class DiscussionViewController: NoNavigationBarViewController {
-    private var discussion: Discussion
+    private var discussion: FlarumDiscussion
     private var near: Int
 
-    init(discussion: Discussion, near: Int) {
+    init(discussion: FlarumDiscussion, near: Int) {
         self.discussion = discussion
         self.near = near
         super.init(nibName: nil, bundle: nil)
