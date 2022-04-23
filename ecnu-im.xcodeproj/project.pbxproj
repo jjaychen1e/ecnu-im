@@ -321,13 +321,6 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
-		63272FD627F5D17800D106CF /* ViewModels */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = ViewModels;
-			sourceTree = "<group>";
-		};
 		6345D1B527EF4C72000AB92C /* Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -644,7 +637,6 @@
 		63CBEA4527EF0B69002026E2 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				63272FD627F5D17800D106CF /* ViewModels */,
 				63CBEA4627EF0B71002026E2 /* Discussion.swift */,
 				63CBEA4B27EF0EC2002026E2 /* FlowNav.swift */,
 				6316117527EF4333002CD6C4 /* User.swift */,
