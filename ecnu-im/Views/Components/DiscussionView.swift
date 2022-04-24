@@ -29,7 +29,7 @@ private struct DiscussionViewPostCell: View {
                             .font(.system(size: 12, weight: .medium))
                         Text(post.createdDateDescription)
                             .font(.system(size: 10, weight: .light))
-                        Text("#\(post.attributes!.number)")
+                        Text("#\(post.attributes?.number ?? -1)")
                     }
                 }
                 Spacer()
@@ -350,11 +350,11 @@ extension DiscussionView {
                     if posts[offset + index] == nil {
                         let threshold = 10
                         if index < threshold {
-                            var _post = post
+                            let _post = post
                             _post.loadMoreState = .init(prevOffset: loadMoreState.prevOffset, nextOffset: nil)
                             posts[offset + index] = _post
                         } else if index >= loadedData.count - threshold {
-                            var _post = post
+                            let _post = post
                             _post.loadMoreState = .init(prevOffset: nil, nextOffset: loadMoreState.nextOffset)
                             posts[offset + index] = _post
                         } else {

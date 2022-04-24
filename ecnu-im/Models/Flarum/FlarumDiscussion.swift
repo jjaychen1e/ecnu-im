@@ -202,6 +202,14 @@ extension FlarumDiscussion {
             return "Unknown"
         }
     }
+    
+    var commentCount: Int {
+        attributes?.commentCount ?? 0
+    }
+    
+    var viewCount: Int {
+        attributes?.viewCount ?? 0
+    }
 }
 
 extension FlarumDiscussion: Hashable {

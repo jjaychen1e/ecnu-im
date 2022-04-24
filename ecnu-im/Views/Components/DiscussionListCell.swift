@@ -117,7 +117,7 @@ private struct FirstPostCell: View {
                                      url: discussion.starterAvatarURL,
                                      size: 30)
 
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: 0) {
                     Text(discussion.discussionTitle)
                         .font(.system(size: 15, weight: .bold))
                     HStack {
@@ -172,7 +172,7 @@ private struct LastPostCell: View {
                 PostAuthorAvatarView(name: discussion.lastPostedUserName,
                                      url: discussion.lastPostedUserAvatarURL,
                                      size: 40)
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 0) {
                     Text(discussion.discussionTitle)
                         .font(.system(size: 17, weight: .bold))
                     HStack(alignment: .top, spacing: 2) {
@@ -183,10 +183,8 @@ private struct LastPostCell: View {
                                 .font(.system(size: 12, weight: .light))
                                 .fixedSize()
                             Spacer()
-                            if let tags = discussion.synthesizedTags {
-                                DiscussionTagsView(tags: tags)
-                                    .fixedSize()
-                            }
+                            DiscussionTagsView(tags: discussion.synthesizedTags)
+                                .fixedSize()
                         }
                     }
                 }

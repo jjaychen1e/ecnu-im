@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftyJSON
 
 struct ScrollPreferenceKey: PreferenceKey {
     static var defaultValue: CGFloat = 0
@@ -15,15 +16,39 @@ struct ScrollPreferenceKey: PreferenceKey {
 }
 
 struct HomeView: View {
+    @Environment(\.splitVC) var splitVC
+
     @State var hasScrolled = false
+
+    @State var stickyDiscussions: [FlarumDiscussion] = []
+    @State var newestDiscussions: [FlarumDiscussion] = []
+
+    private func processDiscussions(discussions: [FlarumDiscussion]) {
+        stickyDiscussions = discussions.filter {
+            if let attributes = $0.attributes {
+                return (attributes.lastReadPostNumber ?? 0 < attributes.lastPostNumber ?? 0) && (attributes.isSticky ?? false || attributes.isStickiest ?? false)
+            } else {
+                return false
+            }
+        }
+        newestDiscussions = discussions.filter { !stickyDiscussions.contains($0) }
+    }
+
+    func load() async {
+        if let response = try? await flarumProvider.request(.allDiscussions(pageOffset: 0, pageItemLimit: 20)),
+           let json = try? JSON(data: response.data) {
+            let newDiscussions = FlarumResponse(json: json).data.discussions
+            processDiscussions(discussions: newDiscussions)
+        }
+    }
 
     var body: some View {
         ScrollView {
             Group {
                 scrollDetector
                 notification
-                stickySection
-                latestSection
+                stickySection()
+                latestSection()
             }
             .padding(.bottom)
         }
@@ -35,6 +60,11 @@ struct HomeView: View {
         .background(Asset.SpecialColors.background.swiftUIColor)
         .safeAreaInset(edge: .top) {
             header
+        }
+        .onLoad {
+            Task {
+                await load()
+            }
         }
     }
 
@@ -132,103 +162,132 @@ struct HomeView: View {
         .frame(alignment: .top)
     }
 
-    var stickySection: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("置顶")
-                .font(.system(.largeTitle, design: .rounded).bold())
-                .foregroundColor(Asset.SpecialColors.sectionColor.swiftUIColor)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.leading)
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 16) {
-                    ForEach(0 ..< 5) { _ in
-                        HomePostCardView()
-                            .overlay(alignment: .topTrailing) {
-                                Image(systemName: "pin.circle.fill")
-                                    .symbolRenderingMode(.palette)
-                                    .foregroundStyle(.white, Color(rgba: "#2864B4"))
-                                    .font(.system(size: 30, weight: .regular, design: .rounded))
-                                    .rotationEffect(.degrees(45))
-                                    .frame(width: 30, height: 30)
-                                    .offset(x: 5, y: -5)
-                            }
-                    }
-                }
-                .padding(.all, 24)
-            }
-            .padding(.all, -24)
-            .safeAreaInset(edge: .leading) {
-                Color.clear.frame(width: 8, height: 0)
-            }
-            .safeAreaInset(edge: .trailing) {
-                Color.clear.frame(width: 8, height: 0)
-            }
-        }
-    }
-
-    var latestSection: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                Text("最新动态")
+    @ViewBuilder
+    func stickySection() -> some View {
+        if stickyDiscussions.count > 0 {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("置顶")
                     .font(.system(.largeTitle, design: .rounded).bold())
+                    .foregroundColor(Asset.SpecialColors.sectionColor.swiftUIColor)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.leading)
-                Spacer()
-                Button {} label: {
-                    Text("查看全部")
-                        .font(.system(size: 14, weight: .semibold, design: .rounded).bold())
-                        .padding(.trailing)
-                }
-            }
-            .foregroundColor(Asset.SpecialColors.sectionColor.swiftUIColor)
 
-            ScrollView(.vertical, showsIndicators: false) {
-                VStack(spacing: 16) {
-                    ForEach(0 ..< 5) { _ in
-                        HomePostCardViewLarge()
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 16) {
+                        ForEach(Array(zip(stickyDiscussions.indices, stickyDiscussions)), id: \.1.id) { index, discussion in
+                            Button {
+                                if AppGlobalState.shared.tokenPrepared {
+                                    let near = (discussion.attributes?.lastReadPostNumber ?? 1) - 1
+                                    splitVC?.setSplitViewRoot(viewController: DiscussionViewController(discussion: discussion, near: near),
+                                                              column: .secondary,
+                                                              immediatelyShow: true)
+                                } else {
+                                    splitVC?.presentSignView()
+                                }
+                            } label: {
+                                HomePostCardView(discussion: discussion)
+                                    .overlay(alignment: .topTrailing) {
+                                        Image(systemName: "pin.circle.fill")
+                                            .symbolRenderingMode(.palette)
+                                            .foregroundStyle(.white, Color(rgba: "#2864B4"))
+                                            .font(.system(size: 30, weight: .regular, design: .rounded))
+                                            .rotationEffect(.degrees(45))
+                                            .frame(width: 30, height: 30)
+                                            .offset(x: 5, y: -5)
+                                    }
+                            }
+                            .buttonStyle(.plain)
+                        }
                     }
+                    .padding(.all, 24)
                 }
-                .padding(.all, 24)
-            }
-            .padding(.all, -24)
-            .safeAreaInset(edge: .leading) {
-                Color.clear.frame(width: 8, height: 0)
-            }
-            .safeAreaInset(edge: .trailing) {
-                Color.clear.frame(width: 8, height: 0)
+                .padding(.all, -24)
+                .safeAreaInset(edge: .leading) {
+                    Color.clear.frame(width: 8, height: 0)
+                }
+                .safeAreaInset(edge: .trailing) {
+                    Color.clear.frame(width: 8, height: 0)
+                }
             }
         }
     }
-}
 
-struct HomeView_Previews: PreviewProvider {
-    static var previews: some View {
-        HomeView()
-            .preferredColorScheme(.dark)
+    @ViewBuilder
+    func latestSection() -> some View {
+        if newestDiscussions.count > 0 {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text("最新动态")
+                        .font(.system(.largeTitle, design: .rounded).bold())
+                        .padding(.leading)
+                    Spacer()
+                    Button {} label: {
+                        Text("查看全部")
+                            .font(.system(size: 14, weight: .semibold, design: .rounded).bold())
+                            .padding(.trailing)
+                    }
+                }
+                .foregroundColor(Asset.SpecialColors.sectionColor.swiftUIColor)
+
+                ScrollView(.vertical, showsIndicators: false) {
+                    VStack(spacing: 16) {
+                        ForEach(Array(zip(newestDiscussions.indices, newestDiscussions)), id: \.1.id) { index, discussion in
+                            Button {
+                                if AppGlobalState.shared.tokenPrepared {
+                                    let near = (discussion.attributes?.lastReadPostNumber ?? 1) - 1
+                                    splitVC?.setSplitViewRoot(viewController: DiscussionViewController(discussion: discussion, near: near),
+                                                              column: .secondary,
+                                                              immediatelyShow: true)
+                                } else {
+                                    splitVC?.presentSignView()
+                                }
+                            } label: {
+                                HomePostCardViewLarge(discussion: discussion)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.all, 24)
+                }
+                .padding(.all, -24)
+                .safeAreaInset(edge: .leading) {
+                    Color.clear.frame(width: 8, height: 0)
+                }
+                .safeAreaInset(edge: .trailing) {
+                    Color.clear.frame(width: 8, height: 0)
+                }
+            }
+        } else {
+            // TODO: Placeholder
+        }
     }
 }
 
 struct HomePostCardView: View {
+    @State var discussion: FlarumDiscussion
+
     var body: some View {
         Group {
-            VStack {
+            VStack(spacing: 4) {
                 HStack(alignment: .top) {
-                    Image("avatar")
-                        .resizable()
-                        .frame(width: 40, height: 40)
+                    PostAuthorAvatarView(name: discussion.starterName, url: discussion.starterAvatarURL, size: 40)
                         .mask(Circle())
                         .overlay(Circle().stroke(Color.white, lineWidth: 1))
-                    VStack(alignment: .leading) {
-                        Text("论坛「排版简易指南」")
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(discussion.discussionTitle)
                             .lineLimit(1)
                             .font(.system(size: 14, weight: .semibold, design: .rounded))
                             .foregroundColor(Asset.SpecialColors.cardTitleColor.swiftUIColor)
-                        HStack(spacing: 2) {
-                            Text("@jjaychen")
-                                .font(.system(size: 12, weight: .semibold, design: .rounded))
-                            Text("2周前")
-                                .font(.system(size: 10, weight: .regular, design: .rounded))
-                            Spacer()
+                        HStack(alignment: .top, spacing: 2) {
+                            HStack(alignment: .center, spacing: 2) {
+                                Text(discussion.lastPostedUserName)
+                                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                Text(discussion.lastPostDateDescription)
+                                    .font(.system(size: 10, weight: .regular, design: .rounded))
+                            }
+                            DiscussionTagsView(tags: discussion.synthesizedTags)
+                                .fixedSize()
+                                .frame(maxWidth: .infinity, alignment: .trailing)
                         }
                     }
                 }
@@ -255,14 +314,14 @@ struct HomePostCardView: View {
                             Image(systemName: "eye")
                                 .font(.system(size: 10))
                                 .frame(width: 16, height: 16)
-                            Text("140")
+                            Text("\(discussion.viewCount)")
                                 .font(.system(size: 10, weight: .semibold, design: .rounded))
                         }
                         HStack(spacing: 1) {
                             Image(systemName: "message")
                                 .font(.system(size: 10))
                                 .frame(width: 16, height: 16)
-                            Text("26")
+                            Text("\(discussion.commentCount)")
                                 .font(.system(size: 10, weight: .semibold, design: .rounded))
                         }
                     }
@@ -280,26 +339,30 @@ struct HomePostCardView: View {
 }
 
 struct HomePostCardViewLarge: View {
+    @State var discussion: FlarumDiscussion
+
     var body: some View {
         Group {
             VStack(spacing: 4) {
                 HStack(alignment: .top) {
-                    Image("avatar")
-                        .resizable()
-                        .frame(width: 30, height: 30)
+                    PostAuthorAvatarView(name: discussion.starterName, url: discussion.starterAvatarURL, size: 40)
                         .mask(Circle())
                         .overlay(Circle().stroke(Color.white, lineWidth: 1))
-                    VStack(alignment: .leading) {
-                        Text("2018 年来华师大的老人回忆上个纪元的生活")
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(discussion.discussionTitle)
                             .lineLimit(1)
                             .font(.system(size: 14, weight: .semibold, design: .rounded))
                             .foregroundColor(Asset.SpecialColors.cardTitleColor.swiftUIColor)
-                        HStack(spacing: 2) {
-                            Text("@bNeutrasterL")
-                                .font(.system(size: 12, weight: .semibold, design: .rounded))
-                            Text("2周前")
-                                .font(.system(size: 10, weight: .regular, design: .rounded))
-                            Spacer()
+                        HStack(alignment: .top, spacing: 2) {
+                            HStack(alignment: .center, spacing: 2) {
+                                Text(discussion.lastPostedUserName)
+                                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                Text(discussion.lastPostDateDescription)
+                                    .font(.system(size: 10, weight: .regular, design: .rounded))
+                            }
+                            DiscussionTagsView(tags: discussion.synthesizedTags)
+                                .fixedSize()
+                                .frame(maxWidth: .infinity, alignment: .trailing)
                         }
                     }
                 }

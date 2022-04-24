@@ -37,7 +37,7 @@ struct FlarumPostAttributes: Decodable {
         case canReact
     }
 
-    var number: Int
+    var number: Int? // Possible nil
     var createdAt: String
     var contentType: FlarumPostContentType
     var contentHtml: String?

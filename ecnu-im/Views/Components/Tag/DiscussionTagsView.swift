@@ -26,7 +26,7 @@ struct DiscussionTagsView: View {
                     }
                 }
             }
-            .cornerRadius(6)
+            .mask(RoundedRectangle(cornerRadius: 5, style: .continuous))
         } else {
             EmptyView()
         }
@@ -35,13 +35,13 @@ struct DiscussionTagsView: View {
     func singleTagView(tag: TagViewModel) -> some View {
         HStack(spacing: 2) {
             if let iconInfo = tag.iconInfo {
-                Text(fa: iconInfo.icon, faStyle: iconInfo.style, size: 14)
+                Text(fa: iconInfo.icon, faStyle: iconInfo.style, size: 12)
             }
             Text(tag.name)
-                .font(.system(size: 14))
+                .font(.system(size: 12))
         }
         .foregroundColor(tag.fontColor ?? .primary)
-        .padding(.horizontal, 6)
+        .padding(.horizontal, 5)
         .padding(.vertical, 4)
         .background(tag.backgroundColor)
     }

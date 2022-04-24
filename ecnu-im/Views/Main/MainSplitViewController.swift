@@ -17,13 +17,17 @@ class AppGlobalState: ObservableObject {
 
     static let shared = AppGlobalState()
 
-    func logout() {
+    func clearCookieStorage() {
         if let cookieStorage = flarumProvider.session.sessionConfiguration.httpCookieStorage,
            let cookies = cookieStorage.cookies(for: URL(string: "https://ecnu.im")!) {
             for cookie: HTTPCookie in cookies {
                 cookieStorage.deleteCookie(cookie)
             }
         }
+    }
+
+    func logout() {
+        clearCookieStorage()
         AppGlobalState.shared.tokenPrepared = false
         AppGlobalState.shared.isLogged = false
         AppGlobalState.shared.account = ""
