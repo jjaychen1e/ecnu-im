@@ -5,6 +5,7 @@
 //  Created by 陈俊杰 on 2022/3/25.
 //
 
+import Combine
 import RxSwift
 import SwiftUI
 import SwiftUIPullToRefresh
@@ -36,6 +37,7 @@ struct AllDiscussionsView: View {
     @State private var isLogged = false
 
     @State private var initialLoadMoreTask: Task<Void, Never>?
+    @State private var subscriptions: Set<AnyCancellable> = []
 
     var body: some View {
         RefreshableScrollView(loadingViewBackgroundColor: ThemeManager.shared.theme.backgroundColor1,
@@ -84,18 +86,20 @@ struct AllDiscussionsView: View {
                 await loadMore()
                 initialLoadMoreTask = nil
             }
-        }
-        .onReceive(AppGlobalState.shared.$tokenPrepared, perform: { _ in
-            if let initialLoadMoreTask = initialLoadMoreTask {
-                initialLoadMoreTask.cancel()
-                self.initialLoadMoreTask = nil
-                self.isLoading = false
-            }
 
-            Task {
-                await loadMore(isRefresh: true)
-            }
-        })
+            AppGlobalState.shared.$tokenPrepared.sink { change in
+                print(change)
+                if let initialLoadMoreTask = initialLoadMoreTask, !initialLoadMoreTask.isCancelled {
+                    initialLoadMoreTask.cancel()
+                    self.initialLoadMoreTask = nil
+                    self.isLoading = false
+                }
+
+                Task {
+                    await loadMore(isRefresh: true)
+                }
+            }.store(in: &subscriptions)
+        }
     }
 }
 
