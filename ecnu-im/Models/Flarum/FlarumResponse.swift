@@ -26,7 +26,14 @@ struct FlarumResponse {
         links = json["links"].decode(FlarumLinks.self)
         data = .init()
 
-        let included = parseData(json: json["included"])
+        let includedFirst = parseData(json: json["included"])
+        // Not all relationships are included in data section!
+        // For example, when you request for discussions list, in the data section,
+        //  a discussion only has relationship info between itself and tags, but no
+        //  relationship info between tags. That means in the data section, it only
+        //  contains first level relationships.
+        // We can easily tackle this problem with one more time traverse.
+        let included = parseData(json: json["included"], withRelationship: true, includedData: includedFirst)
         data = parseData(json: json["data"], withRelationship: true, includedData: included)
     }
 

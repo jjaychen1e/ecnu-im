@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftSoup
 
 struct FlarumPostAttributes: Decodable {
     enum FlarumPostContent {
@@ -38,7 +39,7 @@ struct FlarumPostAttributes: Decodable {
 
     var number: Int
     var createdAt: String
-    var contentType: PostContentType
+    var contentType: FlarumPostContentType
     var contentHtml: String?
     var content: FlarumPostContent? // Only available when login, and should be decoded manually.
     var canEdit: Bool?
@@ -84,6 +85,66 @@ class FlarumPost {
     var id: String
     var attributes: FlarumPostAttributes?
     var relationships: FlarumPostRelationships?
+
+    // MARK: Loading Logic
+
+    struct FlarumPostLoadMoreState {
+        var prevOffset: Int?
+        var nextOffset: Int?
+    }
+
+    var loadMoreState: FlarumPostLoadMoreState?
+    var isDeleted: Bool?
+
+    static var deletedPost: FlarumPost {
+        let post = FlarumPost(id: UUID().uuidString)
+        post.isDeleted = true
+        return post
+    }
+
+    // Rendering
+    var contentHtmlElements: Elements? {
+        if let html = attributes?.contentHtml {
+            let parser = ContentHtmlParser()
+            return parser.parse(html)
+        }
+        return nil
+    }
+
+    // Extension can not have stored property
+    var postContentViews: [Any] {
+        if let elements = contentHtmlElements {
+            let converter = ContentHtmlViewConverter()
+            return converter.convert(elements)
+        }
+
+        return []
+    }
+}
+
+extension FlarumPost {
+    var author: FlarumUser? {
+        relationships?.user
+    }
+
+    var authorName: String {
+        author?.attributes.displayName ?? "Unkown"
+    }
+
+    var authorAvatarURL: URL? {
+        if let urlStr = author?.attributes.avatarUrl {
+            return URL(string: urlStr)
+        }
+        return nil
+    }
+
+    var createdDateDescription: String {
+        if let date = attributes?.createdDate {
+            return date.localeDescription
+        } else {
+            return "Unknown"
+        }
+    }
 }
 
 extension FlarumPost: Equatable {

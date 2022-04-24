@@ -113,7 +113,7 @@ extension MainSplitViewController {
 
     private func fetchTags() {
         Task {
-            Tag.initTagInfo(viewModel: TagsViewModel.shared)
+            FlarumTag.initTagInfo(viewModel: TagsViewModel.shared)
         }
     }
 }

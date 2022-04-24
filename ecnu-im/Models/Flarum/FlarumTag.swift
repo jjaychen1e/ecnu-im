@@ -6,8 +6,9 @@
 //
 
 import Foundation
+import SwiftyJSON
 
-struct FlarumTagAttributes: Decodable {
+struct FlarumTagAttributes: Codable {
     var name: String
     var description: String
     var slug: String
@@ -22,11 +23,11 @@ struct FlarumTagAttributes: Decodable {
     var canAddToDiscussion: Bool
 }
 
-struct FlarumTagRelationships {
+struct FlarumTagRelationships: Codable {
     var parent: FlarumTag?
 }
 
-class FlarumTag {
+class FlarumTag: Codable {
     init(id: String, attributes: FlarumTagAttributes, relationships: FlarumTagRelationships? = nil) {
         self.id = id
         self.attributes = attributes
@@ -36,4 +37,39 @@ class FlarumTag {
     var id: String
     var attributes: FlarumTagAttributes
     var relationships: FlarumTagRelationships?
+}
+
+extension FlarumTag {
+    static let UserDefaultsKeyAllTags = "AllTags"
+
+    static func initTagInfo(viewModel: TagsViewModel) {
+        Task {
+            let tags = await fetchTagsInfo()
+            let tagsViewModel: [TagViewModel] = tags.map { tag in
+                TagViewModel(tag: tag)
+            }
+            DispatchQueue.main.async {
+                viewModel.tags = tagsViewModel
+            }
+            UserDefaults.standard.setEncodable(tags, forKey: FlarumTag.UserDefaultsKeyAllTags)
+        }
+
+        if let allTags = UserDefaults.standard.object(forKey: FlarumTag.UserDefaultsKeyAllTags, type: [FlarumTag].self) {
+            let tagsViewModel: [TagViewModel] = allTags.map { tag in
+                TagViewModel(tag: tag)
+            }
+            DispatchQueue.main.async {
+                viewModel.tags = tagsViewModel
+            }
+        }
+    }
+
+    private static func fetchTagsInfo() async -> [FlarumTag] {
+        if let response = try? await flarumProvider.request(.allTags) {
+            let data = response.data
+            let json = JSON(data)
+            return FlarumResponse(json: json).data.tags
+        }
+        return []
+    }
 }

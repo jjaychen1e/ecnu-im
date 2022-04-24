@@ -183,8 +183,8 @@ private struct LastPostCell: View {
                                 .font(.system(size: 12, weight: .light))
                                 .fixedSize()
                             Spacer()
-                            if let tag = discussion.synthesizedTag {
-                                DiscussionCellTagView(tag: tag)
+                            if let tags = discussion.synthesizedTags {
+                                DiscussionTagsView(tags: tags)
                                     .fixedSize()
                             }
                         }

@@ -11,10 +11,10 @@ import SwiftyJSON
 
 private struct DiscussionViewPostCell: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
-    @State private var post: Post
+    @State private var post: FlarumPost
     @State private var index: Int
 
-    init(post: Post, index: Int) {
+    init(post: FlarumPost, index: Int) {
         _post = State(wrappedValue: post)
         _index = State(wrappedValue: index)
     }
@@ -76,39 +76,6 @@ private struct DiscussionViewPostCellPlaceholder: View {
     }
 }
 
-private struct DiscussionHeaderTagView: View {
-    @EnvironmentObject var tagsViewModel: TagsViewModel
-
-    private let tag: TagViewModel
-
-    init(tag: TagViewModel) {
-        self.tag = tag
-    }
-
-    var body: some View {
-        HStack(spacing: 2) {
-            HStack(spacing: 2) {
-                if let iconInfo = tag.iconInfo {
-                    Text(fa: iconInfo.icon, faStyle: iconInfo.style, size: 14)
-                }
-                Text(tag.name)
-                    .font(.system(size: 14, weight: .medium))
-            }
-            .padding(.vertical, 2)
-            .padding(.horizontal, 6)
-            .background(Asset.DynamicColors.dynamicWhite.swiftUIColor)
-            .cornerRadius(4)
-
-            if let childTag = tag.child {
-                Text(childTag.name)
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(Asset.DynamicColors.dynamicWhite.swiftUIColor)
-            }
-        }
-        .foregroundColor(tag.backgroundColor)
-    }
-}
-
 private struct DiscussionViewHeader: View {
     @Environment(\.splitVC) var splitVC
     @Environment(\.nvc) var nvc
@@ -121,8 +88,8 @@ private struct DiscussionViewHeader: View {
     var body: some View {
         VStack {
             Group {
-                if discussion.synthesizedTag != nil {
-                    DiscussionHeaderTagView(tag: discussion.synthesizedTag!)
+                if discussion.synthesizedTags.count > 0 {
+                    DiscussionHeaderTagsView(tags: discussion.synthesizedTags)
                 } else {
                     Color.clear
                         .frame(height: 30)
@@ -136,7 +103,7 @@ private struct DiscussionViewHeader: View {
         .padding(.top, 8)
         .frame(maxWidth: .infinity)
         .foregroundColor(Asset.DynamicColors.dynamicWhite.swiftUIColor)
-        .background(discussion.synthesizedTag?.backgroundColor ?? .gray)
+        .background(discussion.synthesizedTags.first?.backgroundColor ?? .gray)
         .overlay(
             Group {
                 if let splitVC = splitVC {
@@ -144,7 +111,7 @@ private struct DiscussionViewHeader: View {
                         Button(action: {
                             if let nvc = nvc {
                                 if nvc.viewControllers.count == 1 {
-                                    splitVC.show(.supplementary)
+                                    splitVC.show(.primary)
                                 } else {
                                     nvc.popViewController(animated: true)
                                 }
@@ -176,7 +143,7 @@ struct DiscussionView: View {
     @State private var miniMiniEditorDisplayed = false
     @FocusState private var miniMiniEditorFocused: Bool
 
-    @State private var posts: [Post?] = []
+    @State private var posts: [FlarumPost?] = []
     @State private var scrollTarget: ScrollTarget?
     @State private var discussion: FlarumDiscussion
     @State private var near: Int
@@ -361,7 +328,7 @@ extension DiscussionView {
         }
     }
 
-    private func process(offset: Int, loadedData: [Post], loadMoreState: LoadMoreState) {
+    private func process(offset: Int, loadedData: [FlarumPost], loadMoreState: FlarumPost.FlarumPostLoadMoreState) {
         guard loadedData.count > 0 else { return }
         // [offset, offset + loadedData.count - 1]
         if posts.count < offset + loadedData.count {
@@ -371,7 +338,7 @@ extension DiscussionView {
         if loadedData.count < limit {
             for i in (offset + loadedData.count) ..< (offset + limit) {
                 if i < posts.count, posts[i] == nil {
-                    posts[i] = .init(id: "0", isDeleted: true)
+                    posts[i] = FlarumPost.deletedPost
                 }
             }
         }
@@ -403,7 +370,7 @@ actor DiscussionPostsLoaderInfo {
     private var isOffsetLoading: Set<Int> = []
     private var isPaused = false
     private var loadedOffset: Set<Int> = []
-    
+
     func setPaused(_ paused: Bool) {
         isPaused = paused
     }
@@ -441,10 +408,10 @@ private class DiscussionPostsLoader: ObservableObject {
         await info.setPaused(false)
     }
 
-    func loadData(offset: Int) async -> (posts: [Post], loadMoreState: LoadMoreState)? {
+    func loadData(offset: Int) async -> (posts: [FlarumPost], loadMoreState: FlarumPost.FlarumPostLoadMoreState)? {
         guard await info.shouldLoad(offset: offset) else { return nil }
-        var postLists: [Post] = []
-        var loadMoreState = LoadMoreState()
+        var postLists: [FlarumPost] = []
+        var loadMoreState = FlarumPost.FlarumPostLoadMoreState()
         if let response = try? await flarumProvider.request(.posts(discussionID: discussionID,
                                                                    offset: offset,
                                                                    limit: limit)),
@@ -462,38 +429,9 @@ private class DiscussionPostsLoader: ObservableObject {
                 loadMoreState.nextOffset = Int(offset) ?? 0
             }
 
-            let includedData = DataParser.parseIncludedData(json: json["included"])
-            let includedUsers = includedData.includedUsers
-            let includedPosts = includedData.includedPosts
-
-            if let postListJSON = json["data"].array {
-                if postListJSON.count == 0 {
-                    // Maybe.. prev
-//                    return await loadData()
-                }
-                for postJSON in postListJSON {
-                    let relationshipsJSON = postJSON["relationships"]
-                    let postJSONWithoutRelationships = postJSON.removing(key: "relationships")
-                    if let postData = try? postJSONWithoutRelationships.rawData(),
-                       var post = try? JSONDecoder().decode(Post.self, from: postData) {
-                        if let user = relationshipsJSON["user"]["data"]["id"].string,
-                           let discussion = relationshipsJSON["discussion"]["data"]["id"].string {
-                            let likes = relationshipsJSON["likes"]["data"].arrayValue.map { $0["id"].string }.compactMap { $0 }
-                            let mentionedBy = relationshipsJSON["mentionedBy"]["data"].arrayValue.map { $0["id"].string }.compactMap { $0 }
-                            let reactions = relationshipsJSON["reactions"]["data"].arrayValue.map { $0["id"].string }.compactMap { $0 }
-                            let postRelationship = PostRelationship(user: user,
-                                                                    discussion: discussion,
-                                                                    likes: likes,
-                                                                    reactions: reactions,
-                                                                    mentionedBy: mentionedBy)
-                            post.includedUsers.append(contentsOf: includedUsers.filter { $0.id == user })
-                            post.includedPosts.append(contentsOf: includedPosts.filter { mentionedBy.contains($0.id) })
-                            post.relationships = postRelationship
-                            postLists.append(post)
-                        }
-                    }
-                }
-            }
+//             If empty, maybe we should fetch `prev`
+            let posts = FlarumResponse(json: json).data.posts
+            postLists.append(contentsOf: posts)
         }
         await info.finishLoad(offset: offset)
         return (posts: postLists, loadMoreState: loadMoreState)

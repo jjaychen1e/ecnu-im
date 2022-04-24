@@ -9,7 +9,7 @@ import Foundation
 
 struct FlarumDiscussionAttributes: Decodable {
     var title: String
-    var commentCount: Int
+    var commentCount: Int?
     var participantCount: Int?
     var createdAt: String?
     var lastPostedAt: String?
@@ -146,21 +146,19 @@ extension FlarumDiscussion {
         relationships?.tags ?? []
     }
 
-    var synthesizedTag: TagViewModel? {
-        if tags.count == 1 {
-            return TagsViewModel.shared.allTags.first { $0.id == tags.first!.id }
-        } else {
-            // Parent-Child, or 精品
-            // We should change the logic.. theses codes are shit.
-            for possibleParentTag in tags {
-                if TagsViewModel.shared.allParentTags.contains(where: { $0.id == possibleParentTag.id }) {
-                    return TagsViewModel.shared.allTags.first { parent in
-                        possibleParentTag.id == parent.id && parent.child != nil && tags.contains(where: { t in t.id == parent.child!.id })
-                    }
-                }
+    var synthesizedTags: [TagViewModel] {
+        var tagViewModels: [TagViewModel] = []
+        let subTags = tags.filter { $0.attributes.isChild }
+        let firstLevelTags = tags.filter { !$0.attributes.isChild }
+        for tag in firstLevelTags {
+            let tagViewModel = TagViewModel(tag: tag)
+            if let childTag = subTags.first(where: { $0.relationships?.parent?.id == tag.id }) {
+                tagViewModel.child = TagViewModel(tag: childTag)
             }
+            tagViewModels.append(tagViewModel)
         }
-        return nil
+
+        return tagViewModels
     }
 
     var discussionTitle: String {
