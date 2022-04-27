@@ -18,12 +18,12 @@ extension Image {
 extension Text {
     init(fa: FontAwesome, faStyle: FontAwesomeStyle, size: CGFloat = 17) {
         self = Text(String.fontAwesomeIcon(name: fa))
-            .font(Font(uiFont: UIFont.fontAwesome(ofSize: size, style: faStyle)))
+            .font(.init(uiFont: UIFont.fontAwesome(ofSize: size, style: faStyle)))
     }
 }
 
-extension Font {
+extension SwiftUI.Font {
     init(uiFont: UIFont) {
-        self = Font(uiFont as CTFont)
+        self = SwiftUI.Font(uiFont as CTFont)
     }
 }
