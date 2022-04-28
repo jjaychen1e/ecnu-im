@@ -9,7 +9,7 @@ import LinkPresentation
 import SwiftUI
 import UIKit
 
-struct LinkPrewviewView: View {
+struct LinkPreviewView: View {
     @State var link: String
     @State private var metadata: LPLinkMetadata?
 

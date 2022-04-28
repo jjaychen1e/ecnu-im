@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		63031E242813A5030046F222 /* FlarumResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63031E232813A5030046F222 /* FlarumResponse.swift */; };
+		63127828281A4D710090BAE3 /* DynamicHeightTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63127827281A4D710090BAE3 /* DynamicHeightTextView.swift */; };
+		6312782A281A4E5B0090BAE3 /* ContentItemsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63127829281A4E5B0090BAE3 /* ContentItemsView.swift */; };
 		63150ABB27F0340B00D83D9D /* LinkPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63150ABA27F0340B00D83D9D /* LinkPreviewView.swift */; };
 		6316117A27EF480F002CD6C4 /* Tag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6316117927EF480F002CD6C4 /* Tag.swift */; };
 		6318B66627EF707400108D49 /* String+Excerpt+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6318B66527EF707400108D49 /* String+Excerpt+Extension.swift */; };
@@ -35,6 +37,13 @@
 		631E59E52813FB15009A1A94 /* FlarumLinks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631E59E42813FB15009A1A94 /* FlarumLinks.swift */; };
 		63272FD327F5B7FE00D106CF /* Lightbox in Frameworks */ = {isa = PBXBuildFile; productRef = 63272FD227F5B7FE00D106CF /* Lightbox */; };
 		63272FD527F5D14800D106CF /* DiscussionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63272FD427F5D14800D106CF /* DiscussionView.swift */; };
+		6329EE6B281A9C78001BE8DD /* ContentItemDivider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6329EE6A281A9C78001BE8DD /* ContentItemDivider.swift */; };
+		6329EE6E281AAD5F001BE8DD /* SwiftLinkPreview in Frameworks */ = {isa = PBXBuildFile; productRef = 6329EE6D281AAD5F001BE8DD /* SwiftLinkPreview */; };
+		6329EE70281AAEFC001BE8DD /* ContentItemSingleImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6329EE6F281AAEFC001BE8DD /* ContentItemSingleImage.swift */; };
+		6329EE72281AB031001BE8DD /* ContentItemImagesGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6329EE71281AB031001BE8DD /* ContentItemImagesGrid.swift */; };
+		6329EE74281AB1C7001BE8DD /* ParseConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6329EE73281AB1C7001BE8DD /* ParseConfiguration.swift */; };
+		632B6247281A2E480064380C /* ContentItemBlockquote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632B6246281A2E480064380C /* ContentItemBlockquote.swift */; };
+		632B6249281A32FE0064380C /* ContentItemParagraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632B6248281A32FE0064380C /* ContentItemParagraph.swift */; };
 		633BC2E62813D98E00BC0930 /* FlarumDiscussion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633BC2E52813D98E00BC0930 /* FlarumDiscussion.swift */; };
 		633BC2E82813D9F900BC0930 /* FlarumPost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633BC2E72813D9F900BC0930 /* FlarumPost.swift */; };
 		633BC2EA2813DA4400BC0930 /* FlarumReaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633BC2E92813DA4400BC0930 /* FlarumReaction.swift */; };
@@ -90,6 +99,7 @@
 		63706E1527F6BA9700BE3A48 /* View+ViewDidLoad+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63706E1427F6BA9700BE3A48 /* View+ViewDidLoad+Extension.swift */; };
 		63706E1727F6BC9C00BE3A48 /* NavigationViwe+BackGesture+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63706E1627F6BC9C00BE3A48 /* NavigationViwe+BackGesture+Extension.swift */; };
 		6372548F2805B9F300147D62 /* EditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6372548E2805B9F300147D62 /* EditorView.swift */; };
+		63770F3E281AD9EA0071461A /* ContentItemCodeBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63770F3D281AD9EA0071461A /* ContentItemCodeBlock.swift */; };
 		638F90912802B4BB002308E0 /* AllDiscussionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 638F90902802B4BB002308E0 /* AllDiscussionsView.swift */; };
 		6391FCD02811B2C8006E086D /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6391FCCF2811B2C8006E086D /* HomeView.swift */; };
 		6391FCD32811BAD3006E086D /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6391FCD22811BAD3006E086D /* HomeViewController.swift */; };
@@ -138,6 +148,8 @@
 
 /* Begin PBXFileReference section */
 		63031E232813A5030046F222 /* FlarumResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlarumResponse.swift; sourceTree = "<group>"; };
+		63127827281A4D710090BAE3 /* DynamicHeightTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicHeightTextView.swift; sourceTree = "<group>"; };
+		63127829281A4E5B0090BAE3 /* ContentItemsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentItemsView.swift; sourceTree = "<group>"; };
 		63150ABA27F0340B00D83D9D /* LinkPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkPreviewView.swift; sourceTree = "<group>"; };
 		63150ABC27F0356E00D83D9D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		6316117927EF480F002CD6C4 /* Tag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tag.swift; sourceTree = "<group>"; };
@@ -164,6 +176,12 @@
 		631E59E22813FA79009A1A94 /* FlarumUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlarumUser.swift; sourceTree = "<group>"; };
 		631E59E42813FB15009A1A94 /* FlarumLinks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlarumLinks.swift; sourceTree = "<group>"; };
 		63272FD427F5D14800D106CF /* DiscussionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscussionView.swift; sourceTree = "<group>"; };
+		6329EE6A281A9C78001BE8DD /* ContentItemDivider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentItemDivider.swift; sourceTree = "<group>"; };
+		6329EE6F281AAEFC001BE8DD /* ContentItemSingleImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentItemSingleImage.swift; sourceTree = "<group>"; };
+		6329EE71281AB031001BE8DD /* ContentItemImagesGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentItemImagesGrid.swift; sourceTree = "<group>"; };
+		6329EE73281AB1C7001BE8DD /* ParseConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParseConfiguration.swift; sourceTree = "<group>"; };
+		632B6246281A2E480064380C /* ContentItemBlockquote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentItemBlockquote.swift; sourceTree = "<group>"; };
+		632B6248281A32FE0064380C /* ContentItemParagraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentItemParagraph.swift; sourceTree = "<group>"; };
 		633BC2E52813D98E00BC0930 /* FlarumDiscussion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlarumDiscussion.swift; sourceTree = "<group>"; };
 		633BC2E72813D9F900BC0930 /* FlarumPost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlarumPost.swift; sourceTree = "<group>"; };
 		633BC2E92813DA4400BC0930 /* FlarumReaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlarumReaction.swift; sourceTree = "<group>"; };
@@ -213,6 +231,7 @@
 		63706E1427F6BA9700BE3A48 /* View+ViewDidLoad+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+ViewDidLoad+Extension.swift"; sourceTree = "<group>"; };
 		63706E1627F6BC9C00BE3A48 /* NavigationViwe+BackGesture+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NavigationViwe+BackGesture+Extension.swift"; sourceTree = "<group>"; };
 		6372548E2805B9F300147D62 /* EditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorView.swift; sourceTree = "<group>"; };
+		63770F3D281AD9EA0071461A /* ContentItemCodeBlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentItemCodeBlock.swift; sourceTree = "<group>"; };
 		638F90902802B4BB002308E0 /* AllDiscussionsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AllDiscussionsView.swift; sourceTree = "<group>"; };
 		6391FCCF2811B2C8006E086D /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		6391FCD22811BAD3006E086D /* HomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewController.swift; sourceTree = "<group>"; };
@@ -271,6 +290,7 @@
 				6349B18827EEA99D0002E89A /* Alamofire in Frameworks */,
 				63E8BF0127F9767C0021E4C2 /* SnapKit in Frameworks */,
 				6365777727F197B5008AD10E /* tools in Frameworks */,
+				6329EE6E281AAD5F001BE8DD /* SwiftLinkPreview in Frameworks */,
 				6365777527F197B5008AD10E /* FontAwesome in Frameworks */,
 				6AFAE93FCA5ED3B4EA84F433 /* Pods_ecnu_im.framework in Frameworks */,
 			);
@@ -286,6 +306,14 @@
 				C360C9BBEFC24D910424BE89 /* Pods-ecnu-im.release.xcconfig */,
 			);
 			path = Pods;
+			sourceTree = "<group>";
+		};
+		63127826281A4D670090BAE3 /* Component */ = {
+			isa = PBXGroup;
+			children = (
+				63127827281A4D710090BAE3 /* DynamicHeightTextView.swift */,
+			);
+			path = Component;
 			sourceTree = "<group>";
 		};
 		6318B67727F0030800108D49 /* ecnu-imTests */ = {
@@ -337,6 +365,30 @@
 				631BB0412805E5D1007D4138 /* Themes */,
 			);
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		632B6243281A2E030064380C /* Content Item */ = {
+			isa = PBXGroup;
+			children = (
+				63127826281A4D670090BAE3 /* Component */,
+				634A57562816EB6E0022B27E /* ContentTextStyleStack.swift */,
+				632B6246281A2E480064380C /* ContentItemBlockquote.swift */,
+				632B6248281A32FE0064380C /* ContentItemParagraph.swift */,
+				63127829281A4E5B0090BAE3 /* ContentItemsView.swift */,
+				6329EE6A281A9C78001BE8DD /* ContentItemDivider.swift */,
+				6329EE6F281AAEFC001BE8DD /* ContentItemSingleImage.swift */,
+				6329EE71281AB031001BE8DD /* ContentItemImagesGrid.swift */,
+				63770F3D281AD9EA0071461A /* ContentItemCodeBlock.swift */,
+			);
+			path = "Content Item";
+			sourceTree = "<group>";
+		};
+		632B6244281A2E0E0064380C /* Content Block */ = {
+			isa = PBXGroup;
+			children = (
+				634A575C2816F0090022B27E /* ContentBlock.swift */,
+			);
+			path = "Content Block";
 			sourceTree = "<group>";
 		};
 		633BC2E42813D98200BC0930 /* Flarum */ = {
@@ -434,11 +486,12 @@
 		634A57552816D65E0022B27E /* Content Parser */ = {
 			isa = PBXGroup;
 			children = (
+				632B6244281A2E0E0064380C /* Content Block */,
+				632B6243281A2E030064380C /* Content Item */,
 				634A57532816A77B0022B27E /* ContentParser.swift */,
-				634A57562816EB6E0022B27E /* ContentTextStyleStack.swift */,
 				634A57582816EBC20022B27E /* Font.swift */,
 				634A575A2816EC0E0022B27E /* RichText.swift */,
-				634A575C2816F0090022B27E /* ContentBlock.swift */,
+				6329EE73281AB1C7001BE8DD /* ParseConfiguration.swift */,
 			);
 			path = "Content Parser";
 			sourceTree = "<group>";
@@ -837,6 +890,7 @@
 				63E8BF0027F9767C0021E4C2 /* SnapKit */,
 				63F584502806C4620053DB3A /* MarkdownKit */,
 				63F584532806C5E90053DB3A /* Down */,
+				6329EE6D281AAD5F001BE8DD /* SwiftLinkPreview */,
 			);
 			productName = "ecnu-im";
 			productReference = 63D2ACF227ECCDC400517A2E /* ecnu.im.app */;
@@ -885,6 +939,7 @@
 				63E8BEFF27F9767C0021E4C2 /* XCRemoteSwiftPackageReference "SnapKit" */,
 				63F5844F2806C4620053DB3A /* XCRemoteSwiftPackageReference "swift-markdownkit" */,
 				63F584522806C5E90053DB3A /* XCRemoteSwiftPackageReference "Down" */,
+				6329EE6C281AAD5F001BE8DD /* XCRemoteSwiftPackageReference "SwiftLinkPreview" */,
 			);
 			productRefGroup = 63D2ACF327ECCDC400517A2E /* Products */;
 			projectDirPath = "";
@@ -1016,6 +1071,7 @@
 				631BB0352805E4FD007D4138 /* UniversalTypes.swift in Sources */,
 				6365778627F1D897008AD10E /* UserDefaluts+JSON+Extension.swift in Sources */,
 				634A575D2816F0090022B27E /* ContentBlock.swift in Sources */,
+				6329EE70281AAEFC001BE8DD /* ContentItemSingleImage.swift in Sources */,
 				63B740A72802795900376B94 /* SlideFadeIn.swift in Sources */,
 				631BB03E2805E4FD007D4138 /* Style.swift in Sources */,
 				63B74094280277A900376B94 /* SignInView.swift in Sources */,
@@ -1035,6 +1091,7 @@
 				63706E1527F6BA9700BE3A48 /* View+ViewDidLoad+Extension.swift in Sources */,
 				63EB854E27F2EC1D0064F5A8 /* AvatarView.swift in Sources */,
 				6349B18B27EEAA180002E89A /* TargetType.swift in Sources */,
+				6329EE74281AB1C7001BE8DD /* ParseConfiguration.swift in Sources */,
 				63706E1327F5F08800BE3A48 /* PostAuthorAvatarView.swift in Sources */,
 				6391FCD52811BB69006E086D /* NoNavigationBarViewController.swift in Sources */,
 				63E8BEFE27F968940021E4C2 /* AppDelegate.swift in Sources */,
@@ -1042,12 +1099,15 @@
 				63E8BF0627F98ADC0021E4C2 /* MainSplitViewController.swift in Sources */,
 				6318B66A27EF755A00108D49 /* DiscussionListCell.swift in Sources */,
 				63150ABB27F0340B00D83D9D /* LinkPreviewView.swift in Sources */,
+				6329EE72281AB031001BE8DD /* ContentItemImagesGrid.swift in Sources */,
 				6318B66F27F001AF00108D49 /* ContentHtmlParser.swift in Sources */,
 				633BC2E62813D98E00BC0930 /* FlarumDiscussion.swift in Sources */,
 				631BB03A2805E4FD007D4138 /* MarkdownEngine.swift in Sources */,
 				634A57592816EBC20022B27E /* Font.swift in Sources */,
 				635B2A5927EEB74000FF6109 /* URL+Network+Extension.swift in Sources */,
+				6312782A281A4E5B0090BAE3 /* ContentItemsView.swift in Sources */,
 				633BC2EA2813DA4400BC0930 /* FlarumReaction.swift in Sources */,
+				6329EE6B281A9C78001BE8DD /* ContentItemDivider.swift in Sources */,
 				635B2A6427EEF0A700FF6109 /* Token.swift in Sources */,
 				636BE17127F7FD6600283943 /* IMTheme.swift in Sources */,
 				636673912807308A00A732A3 /* MiniEditor.swift in Sources */,
@@ -1067,6 +1127,7 @@
 				635FF1C42803028D00C7CDBF /* ToastConfiguration.swift in Sources */,
 				6365778227F19C52008AD10E /* FontAwesome+Extension.swift in Sources */,
 				63706E1727F6BC9C00BE3A48 /* NavigationViwe+BackGesture+Extension.swift in Sources */,
+				63127828281A4D710090BAE3 /* DynamicHeightTextView.swift in Sources */,
 				635B2A5327EEB0DD00FF6109 /* NetworkError.swift in Sources */,
 				63A6CCD128157FE0000075F7 /* DiscussionHeaderTagsView.swift in Sources */,
 				63272FD527F5D14800D106CF /* DiscussionView.swift in Sources */,
@@ -1082,6 +1143,7 @@
 				6318B66627EF707400108D49 /* String+Excerpt+Extension.swift in Sources */,
 				63A6CCCF28156A51000075F7 /* DiscussionTagsView.swift in Sources */,
 				635B2A5B27EEBB3500FF6109 /* URLRequest+Network+Extension.swift in Sources */,
+				632B6247281A2E480064380C /* ContentItemBlockquote.swift in Sources */,
 				63B740A92802799300376B94 /* BackgroundColor.swift in Sources */,
 				6365777227F19638008AD10E /* DiscussionCellTagView.swift in Sources */,
 				634C470727F9C21F00FC591D /* UIViewController+Sub+Extension.swift in Sources */,
@@ -1089,12 +1151,14 @@
 				635B2A5D27EEBB5700FF6109 /* AnyEncodable.swift in Sources */,
 				6391FCD32811BAD3006E086D /* HomeViewController.swift in Sources */,
 				635B2A5727EEB3CA00FF6109 /* Endpoint.swift in Sources */,
+				63770F3E281AD9EA0071461A /* ContentItemCodeBlock.swift in Sources */,
 				636BE18627F84D5C00283943 /* Introspect+UISplitViewController+Extension.swift in Sources */,
 				63B74099280277FC00376B94 /* CloseButton.swift in Sources */,
 				631BB03C2805E4FD007D4138 /* MarkdownNode.swift in Sources */,
 				631BB0342805E4FD007D4138 /* Storage.swift in Sources */,
 				6372548F2805B9F300147D62 /* EditorView.swift in Sources */,
 				635FF09627F092B300A0D239 /* GeometryReader+Execute+Extension.swift in Sources */,
+				632B6249281A32FE0064380C /* ContentItemParagraph.swift in Sources */,
 				633E3F0028129DBC00D6931A /* TabBarContentView.swift in Sources */,
 				63031E242813A5030046F222 /* FlarumResponse.swift in Sources */,
 				631E59E52813FB15009A1A94 /* FlarumLinks.swift in Sources */,
@@ -1402,6 +1466,14 @@
 				kind = branch;
 			};
 		};
+		6329EE6C281AAD5F001BE8DD /* XCRemoteSwiftPackageReference "SwiftLinkPreview" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/LeonardoCardoso/SwiftLinkPreview";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.0;
+			};
+		};
 		6349B18627EEA99D0002E89A /* XCRemoteSwiftPackageReference "Alamofire" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
@@ -1502,6 +1574,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 63272FD127F5B7FE00D106CF /* XCRemoteSwiftPackageReference "Lightbox" */;
 			productName = Lightbox;
+		};
+		6329EE6D281AAD5F001BE8DD /* SwiftLinkPreview */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6329EE6C281AAD5F001BE8DD /* XCRemoteSwiftPackageReference "SwiftLinkPreview" */;
+			productName = SwiftLinkPreview;
 		};
 		6349B18727EEA99D0002E89A /* Alamofire */ = {
 			isa = XCSwiftPackageProductDependency;

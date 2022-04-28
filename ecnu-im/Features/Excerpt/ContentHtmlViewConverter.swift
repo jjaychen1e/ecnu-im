@@ -330,7 +330,7 @@ extension ContentHtmlViewConverter {
                     continue
                 }
                 linkPreviewCount += 1
-                views.append(AnyView(LinkPrewviewView(link: link).frame(maxWidth: 400)))
+                views.append(AnyView(LinkPreviewView(link: link).frame(maxWidth: 400)))
             } else if case let SpecialContentType.image(src) = component {
                 var images = [URL(string: src)]
                 index += 1

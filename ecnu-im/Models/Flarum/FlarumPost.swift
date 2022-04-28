@@ -9,10 +9,10 @@ import Foundation
 import SwiftSoup
 
 struct FlarumPostAttributes: Decodable {
-    enum FlarumPostContent {
+    enum FlarumPostContent: Decodable {
         case comment(String)
-        case discussionRenamed([[Int]])
-        case discussionTagged([String])
+        case discussionRenamed([String])
+        case discussionTagged([[Int]])
         case discussionLocked(Bool)
     }
 
@@ -28,6 +28,7 @@ struct FlarumPostAttributes: Decodable {
         case createdAt
         case contentType
         case contentHtml
+        case content
         case canEdit
         case canDelete
         case canHide

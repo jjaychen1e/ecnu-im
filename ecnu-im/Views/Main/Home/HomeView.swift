@@ -42,6 +42,8 @@ struct HomeView: View {
         }
     }
 
+    @State var contentItems: [Any] = []
+
     var body: some View {
         ScrollView {
             Group {
@@ -174,7 +176,7 @@ struct HomeView: View {
 
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 16) {
-                        ForEach(Array(zip(stickyDiscussions.indices, stickyDiscussions)), id: \.1.id) { index, discussion in
+                        ForEach(Array(zip(stickyDiscussions.indices, stickyDiscussions)), id: \.1.id) { _, discussion in
                             Button {
                                 if AppGlobalState.shared.tokenPrepared {
                                     let near = (discussion.attributes?.lastReadPostNumber ?? 1) - 1
@@ -231,7 +233,7 @@ struct HomeView: View {
 
                 ScrollView(.vertical, showsIndicators: false) {
                     VStack(spacing: 16) {
-                        ForEach(Array(zip(newestDiscussions.indices, newestDiscussions)), id: \.1.id) { index, discussion in
+                        ForEach(Array(zip(newestDiscussions.indices, newestDiscussions)), id: \.1.id) { _, discussion in
                             Button {
                                 if AppGlobalState.shared.tokenPrepared {
                                     let near = (discussion.attributes?.lastReadPostNumber ?? 1) - 1
@@ -265,6 +267,7 @@ struct HomeView: View {
 
 struct HomePostCardView: View {
     @State var discussion: FlarumDiscussion
+    @State var postExcerptText: String = ""
 
     var body: some View {
         Group {
@@ -284,14 +287,16 @@ struct HomePostCardView: View {
                                     .font(.system(size: 12, weight: .semibold, design: .rounded))
                                 Text(discussion.lastPostDateDescription)
                                     .font(.system(size: 10, weight: .regular, design: .rounded))
+                                    .fixedSize()
                             }
+                            Spacer(minLength: 0)
                             DiscussionTagsView(tags: discussion.synthesizedTags)
                                 .fixedSize()
-                                .frame(maxWidth: .infinity, alignment: .trailing)
+//                                .frame(maxWidth: .infinity, alignment: .trailing)
                         }
                     }
                 }
-                Text("目前帖子内支持的格式有 Markdown 和 BBCode（未来可能会有 HTML 嵌入或 MathJax 数学公式）。另外还会有一些自定义的逻辑，例如图片缩略图和链接预览功能。\n不同专业背景的同学对 Markdown 格式的了解程度不一，又存在一些特殊的排版逻辑...")
+                Text(postExcerptText)
                     .multilineTextAlignment(.leading)
                     .lineLimit(Int.max)
                     .truncationMode(.tail)
@@ -335,11 +340,27 @@ struct HomePostCardView: View {
             .background(.ultraThinMaterial)
             .backgroundStyle(cornerRadius: 30, opacity: 0.3)
         }
+        .onLoad {
+            if let post = discussion.lastPost, let id = Int(post.id) {
+                Task {
+                    let result = try await flarumProvider.request(.postsById(id: id))
+                    if let json = try? JSON(data: result.data),
+                       let post = FlarumResponse(json: json).data.posts.first,
+                       let content = post.attributes?.content,
+                       case let .comment(comment) = content {
+                        let parser = ContentParser(content: comment, configuration: .init(imageOnTapAction: { _, _ in },
+                                                                                          imageGridDisplayMode: .narrow))
+                        postExcerptText = parser.getExcerptContent(configuration: .init(textLengthMax: 100, textLineMax: 4, imageCountMax: 0)).text
+                    }
+                }
+            }
+        }
     }
 }
 
 struct HomePostCardViewLarge: View {
     @State var discussion: FlarumDiscussion
+    @State var postExcerptText: String = ""
 
     var body: some View {
         Group {
@@ -366,7 +387,7 @@ struct HomePostCardViewLarge: View {
                         }
                     }
                 }
-                Text("我敢打包票，这里很多人根本没有经历过真正的大学生活。我时不时会回忆起遥远的过往：没有口罩，没有健康打卡，没有门禁……\n就像核战后老人在火炉边给孩子们将着还有电力，网络时候的日子那样，我们这些老人娓娓道来……")
+                Text(postExcerptText)
                     .multilineTextAlignment(.leading)
                     .lineLimit(Int.max)
                     .truncationMode(.tail)
@@ -407,6 +428,21 @@ struct HomePostCardViewLarge: View {
             .padding(.bottom, 6)
             .background(.ultraThinMaterial)
             .backgroundStyle(cornerRadius: 15, opacity: 0.3)
+        }
+        .onLoad {
+            if let post = discussion.lastPost, let id = Int(post.id) {
+                Task {
+                    let result = try await flarumProvider.request(.postsById(id: id))
+                    if let json = try? JSON(data: result.data),
+                       let post = FlarumResponse(json: json).data.posts.first,
+                       let content = post.attributes?.content,
+                       case let .comment(comment) = content {
+                        let parser = ContentParser(content: comment, configuration: .init(imageOnTapAction: { _, _ in },
+                                                                                          imageGridDisplayMode: .narrow))
+                        postExcerptText = parser.getExcerptContent(configuration: .init(textLengthMax: 100, textLineMax: 4, imageCountMax: 0)).text
+                    }
+                }
+            }
         }
     }
 }

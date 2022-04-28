@@ -41,6 +41,7 @@ enum Flarum {
                         pageOffset: Int = 0,
                         pageItemLimit: Int = 20)
     case posts(discussionID: Int, offset: Int, limit: Int)
+    case postsById(id: Int)
     case register(email: String, username: String, nickname: String, password: String, recaptcha: String)
     case newPost(discussionID: String, content: String)
 }
@@ -62,6 +63,8 @@ extension Flarum: TargetType {
             return "/api/discussions"
         case .posts:
             return "/api/posts"
+        case .postsById:
+            return "/api/posts"
         case .register:
             return "/register"
         case .newPost:
@@ -80,6 +83,8 @@ extension Flarum: TargetType {
         case .allDiscussions:
             return .get
         case .posts:
+            return .get
+        case .postsById:
             return .get
         case .register:
             return .post
@@ -111,6 +116,10 @@ extension Flarum: TargetType {
                 "filter[discussion]": discussionID,
                 "page[offset]": max(0, offset),
                 "page[limit]": limit,
+            ], encoding: URLEncoding.default)
+        case let .postsById(id: id):
+            return .requestParameters(parameters: [
+                "filter[id]": "\(id)"
             ], encoding: URLEncoding.default)
         case let .register(email, username, nickname, password, recaptcha):
             return .requestParameters(parameters: [

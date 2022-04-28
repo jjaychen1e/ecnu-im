@@ -27,8 +27,8 @@ struct ContentBlockList: Equatable {
         case text(RichText)
         case list(ContentBlockList)
     }
-    
-    enum ContentListType:Equatable {
+
+    enum ContentListType: Equatable {
         case bullet
         case ordered(Int)
     }
@@ -37,7 +37,7 @@ struct ContentBlockList: Equatable {
     var listType: ContentListType
 }
 
-indirect enum ContentBlock: Equatable {
+enum ContentBlock {
     case paragraph(RichText)
     case header(RichText, Int)
     case blockQuote([ContentBlock])
@@ -49,6 +49,33 @@ indirect enum ContentBlock: Equatable {
     case images(urls: [String])
     case table(rows: [ContentTableItem])
 
+    var excerptText: String {
+        switch self {
+        case let .paragraph(richText):
+            return richText.plainText
+        case let .header(richText, _):
+            return richText.plainText + " "
+        case let .blockQuote(array):
+            return array.map { $0.excerptText }.joined()
+        case let .list(contentBlockList):
+            return ""
+        case .divider:
+            return ""
+        case let .codeBlock(optional, content):
+            return content
+        case .linkPreview:
+            return " [链接预览] "
+        case .image:
+            return ""
+        case .images:
+            return ""
+        case let .table(rows):
+            return ""
+        }
+    }
+}
+
+extension ContentBlock: Equatable {
     public static func == (lhs: ContentBlock, rhs: ContentBlock) -> Bool {
         switch lhs {
         case let .paragraph(text):

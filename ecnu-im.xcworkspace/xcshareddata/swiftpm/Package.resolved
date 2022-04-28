@@ -73,6 +73,15 @@
       }
     },
     {
+      "identity" : "swiftlinkpreview",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/LeonardoCardoso/SwiftLinkPreview",
+      "state" : {
+        "revision" : "3eb30b1832a9cf0eaeec3e2cf6cfc0ed18ef763f",
+        "version" : "3.4.0"
+      }
+    },
+    {
       "identity" : "swiftsoup",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/scinfu/SwiftSoup",

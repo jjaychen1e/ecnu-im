@@ -9,14 +9,17 @@ import Foundation
 import UIKit
 
 enum ContentTextStyle {
+    case fontSize(CGFloat)
+    case textColor(UIColor)
     case bold
+    case mono
     case italic
     case underline
     case strikethrough
     case `subscript`
     case superscript
     case markerColor(UIColor)
-    case linkColor(UIColor)
+    case link(String)
 }
 
 let ContentMarkerColorAttribute = "MarkerColorAttribute"
@@ -35,19 +38,34 @@ final class ContentTextStyleStack {
     }
 
     func textAttributes() -> [NSAttributedString.Key: Any] {
+        var fontSize: CGFloat?
+        var textColor: UIColor?
         var bold: Bool?
+        var mono: Bool?
         var italic: Bool?
         var strikethrough: Bool?
         var underline: Bool?
         var baselineOffset: CGFloat?
         var markerColor: UIColor?
-        var linkColor: UIColor?
+        var link: String?
 
         for item in items.reversed() {
             switch item {
+            case let .fontSize(value):
+                if fontSize == nil {
+                    fontSize = value
+                }
+            case let .textColor(value):
+                if textColor == nil {
+                    textColor = value
+                }
             case .bold:
                 if bold == nil {
                     bold = true
+                }
+            case .mono:
+                if mono == nil {
+                    mono = true
                 }
             case .italic:
                 if italic == nil {
@@ -74,28 +92,52 @@ final class ContentTextStyleStack {
                 if markerColor == nil {
                     markerColor = color
                 }
-            case let .linkColor(color):
-                if linkColor == nil {
-                    linkColor = color
+            case let .link(url):
+                if link == nil {
+                    link = url
                 }
             }
         }
 
         var attributes: [NSAttributedString.Key: Any] = [:]
 
-        var parsedFontSize = 16.0
+        var parsedFontSize: CGFloat
+        if let fontSize = fontSize {
+            parsedFontSize = fontSize
+        } else {
+            parsedFontSize = 16.0
+        }
 
         if let baselineOffset = baselineOffset {
             attributes[NSAttributedString.Key.baselineOffset] = round(parsedFontSize * baselineOffset)
             parsedFontSize = round(parsedFontSize * 0.85)
         }
 
-        if bold != nil, bold!, italic != nil, italic! {
+//        if bold != nil, bold!, italic != nil, italic! {
+//            attributes[NSAttributedString.Key.font] = Font.semiboldItalic(parsedFontSize)
+//        } else if bold != nil, bold! {
+//            attributes[NSAttributedString.Key.font] = Font.bold(parsedFontSize)
+//        } else if italic != nil, italic! {
+//            attributes[NSAttributedString.Key.font] = Font.italic(parsedFontSize)
+//        } else {
+//            attributes[NSAttributedString.Key.font] = Font.regular(parsedFontSize)
+//        }
+        // mono, bold, italic
+
+        if mono != nil, mono!, bold != nil, bold!, italic != nil, italic! {
+            attributes[NSAttributedString.Key.font] = Font.semiboldItalicMonospace(parsedFontSize)
+        } else if mono != nil, mono!, italic != nil, italic! {
+            attributes[NSAttributedString.Key.font] = Font.italicMonospace(parsedFontSize)
+        } else if mono != nil, mono!, bold != nil, bold! {
+            attributes[NSAttributedString.Key.font] = Font.semiboldMonospace(parsedFontSize)
+        } else if bold != nil, bold!, italic != nil, italic! {
             attributes[NSAttributedString.Key.font] = Font.semiboldItalic(parsedFontSize)
         } else if bold != nil, bold! {
             attributes[NSAttributedString.Key.font] = Font.bold(parsedFontSize)
         } else if italic != nil, italic! {
             attributes[NSAttributedString.Key.font] = Font.italic(parsedFontSize)
+        } else if mono != nil, mono! {
+            attributes[NSAttributedString.Key.font] = Font.monospace(parsedFontSize)
         } else {
             attributes[NSAttributedString.Key.font] = Font.regular(parsedFontSize)
         }
@@ -108,12 +150,16 @@ final class ContentTextStyleStack {
             attributes[NSAttributedString.Key.underlineStyle] = NSUnderlineStyle.single.rawValue as NSNumber
         }
 
-        if let linkColor = linkColor {
-            attributes[NSAttributedString.Key.foregroundColor] = linkColor
+        if let textColor = textColor {
+            attributes[NSAttributedString.Key.foregroundColor] = textColor
         } else {
             attributes[NSAttributedString.Key.foregroundColor] = UIColor.black
         }
 
+        if let link = link {
+            attributes[NSAttributedString.Key.link] = link
+        }
+//
         if let markerColor = markerColor {
             attributes[NSAttributedString.Key(rawValue: ContentMarkerColorAttribute)] = markerColor
         }

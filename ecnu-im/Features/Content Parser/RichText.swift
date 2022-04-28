@@ -22,7 +22,7 @@ public indirect enum RichTextType: Equatable {
     case link
 }
 
-public indirect enum RichText: Equatable {
+public indirect enum RichText {
     case empty
     case concat([RichText])
     case plain(String)
@@ -36,6 +36,37 @@ public indirect enum RichText: Equatable {
     case superscript(RichText)
     case link(text: RichText, url: String)
 
+    var plainText: String {
+        switch self {
+        case .empty:
+            return ""
+        case let .concat(array):
+            return array.map { $0.plainText }.joined()
+        case let .plain(string):
+            return string
+        case let .bold(richText):
+            return richText.plainText
+        case let .italic(richText):
+            return richText.plainText
+        case let .underline(richText):
+            return richText.plainText
+        case let .strikethrough(richText):
+            return richText.plainText
+        case let .marked(richText):
+            return richText.plainText
+        case let .codeInline(string):
+            return string
+        case let .subscript(richText):
+            return richText.plainText
+        case let .superscript(richText):
+            return richText.plainText
+        case .link:
+            return " [链接] "
+        }
+    }
+}
+
+extension RichText: Equatable {
     public static func == (lhs: RichText, rhs: RichText) -> Bool {
         switch lhs {
         case .empty:

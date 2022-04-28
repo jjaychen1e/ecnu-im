@@ -14,13 +14,21 @@ private struct DiscussionViewPostCell: View {
     @State private var post: FlarumPost
     @State private var index: Int
 
+    var contentString: String {
+        if let content = post.attributes?.content,
+           case let .comment(comment) = content {
+            return comment
+        }
+        return ""
+    }
+
     init(post: FlarumPost, index: Int) {
         _post = State(wrappedValue: post)
         _index = State(wrappedValue: index)
     }
 
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             HStack {
                 PostAuthorAvatarView(name: post.authorName, url: post.authorAvatarURL, size: 40)
                 VStack(alignment: .leading) {
@@ -34,11 +42,10 @@ private struct DiscussionViewPostCell: View {
                 }
                 Spacer()
             }
-            parseConvertedHTMLViewComponents(views: post.postContentViews,
-                                             configuration: .init(imageOnTapAction: { ImageBrowser.shared.present(imageURLs: $1, selectedImageIndex: $0) },
-                                                                  imageGridDisplayMode: horizontalSizeClass == .compact ? .narrow : .wide))
+            PostContentView(content: contentString)
         }
         .padding(.horizontal, 16)
+        .padding(.vertical, 4)
         .tag(index)
     }
 }

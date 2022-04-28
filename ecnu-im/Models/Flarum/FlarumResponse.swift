@@ -84,7 +84,30 @@ struct FlarumResponse {
                     case .post:
                         if let id = dataJSON["id"].string {
                             let post = FlarumPost(id: id)
-                            post.attributes = dataJSON["attributes"].decode(FlarumPostAttributes.self)
+                            var attributes = dataJSON["attributes"]
+                            if attributes["content"].exists() {
+                                if attributes["contentType"] == "comment" {
+                                    var json = JSON()
+                                    json["_0"] = attributes["content"]
+                                    attributes["content"] = JSON(dictionaryLiteral: ("comment", json))
+                                } else if attributes["contentType"] == "discussionTagged" {
+                                    var json = JSON()
+                                    json["_0"] = attributes["content"]
+                                    attributes["content"] = JSON(dictionaryLiteral: ("discussionTagged", json))
+                                } else if attributes["contentType"] == "discussionRenamed" {
+                                    var json = JSON()
+                                    json["_0"] = attributes["content"]
+                                    attributes["content"] = JSON(dictionaryLiteral: ("discussionRenamed", json))
+                                } else if attributes["contentType"] == "discussionLocked" {
+                                    var json = JSON()
+                                    json["_0"] = attributes["content"]
+                                    attributes["content"] = JSON(dictionaryLiteral: ("discussionLocked", json))
+                                } else {
+                                    // discussionSuperStickied
+                                    attributes = attributes.removing(key: "content")
+                                }
+                            }
+                            post.attributes = attributes.decode(FlarumPostAttributes.self)
                             if withRelationship, let includedData = includedData {
                                 var relationships = FlarumPostRelationships()
                                 for relationship in FlarumPostRelationships.Relationship.allCases {

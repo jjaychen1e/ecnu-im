@@ -18,7 +18,8 @@ extension JSON {
     func decode<T>(_ type: T.Type) -> T? where T: Decodable {
         let jsonDecoder = JSONDecoder()
         if let data = try? rawData() {
-            return try? jsonDecoder.decode(type, from: data)
+//            print(String(data: data, encoding: .utf8))
+            return try! jsonDecoder.decode(type, from: data)
         }
         return nil
     }

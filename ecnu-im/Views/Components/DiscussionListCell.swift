@@ -66,7 +66,8 @@ struct DiscussionListCell: View {
 
             if discussion.firstPost != nil
                 && discussion.lastPost != nil
-                && discussion.firstPost != discussion.lastPost {
+                && discussion.firstPost != discussion.lastPost
+            {
                 Button {
                     if AppGlobalState.shared.tokenPrepared {
                         splitVC?.setSplitViewRoot(viewController: DiscussionViewController(discussion: discussion, near: 0),
@@ -202,79 +203,9 @@ private struct LastPostCell: View {
 }
 
 // TODO: Move to a new file
-struct ParsedSingleImageView: View {
-    @State var urls: [URL]
-    @State var index: Int
-    @State var onTapAction: (Int, [URL]) -> Void
-
-    var body: some View {
-        KFImage.url(urls[index])
-            .placeholder {
-                ProgressView()
-            }
-            .loadDiskFileSynchronously()
-            .cancelOnDisappear(true)
-            .resizable()
-            .aspectRatio(contentMode: .fit)
-            .frame(maxHeight: 300)
-            .onTapGesture {
-                onTapAction(index, urls)
-            }
-            .contextMenu {
-                Button(action: {}) {
-                    Text("This is a test")
-                    Image(systemName: "paintbrush")
-                }
-            }
-    }
-}
-
-struct ParsedGridImageView: View {
-    @State var urls: [URL]
-    @State var index: Int
-    @State var onTapAction: (Int, [URL]) -> Void
-
-    var body: some View {
-        KFImage.url(urls[index])
-            .placeholder {
-                ProgressView()
-            }
-            .loadDiskFileSynchronously()
-            .cancelOnDisappear(true)
-            .resizable()
-            .scaledToFill()
-            .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
-            .aspectRatio(1, contentMode: .fill)
-            .clipped()
-            .contentShape(Rectangle()) // Clipped cause tappable area overflow
-            .onTapGesture {
-                onTapAction(index, urls)
-            }
-            .contextMenu {
-                Button(action: {}) {
-                    Text("This is a test")
-                    Image(systemName: "paintbrush")
-                }
-            }
-    }
-}
-
-// TODO: Move to a new file
-struct HTMLParseConfiguration {
-    var imageOnTapAction: (Int, [URL]) -> Void
-
-    enum ImageGridDisplayMode {
-        case wide
-        case narrow
-    }
-
-    var imageGridDisplayMode: ImageGridDisplayMode
-}
-
-// TODO: Move to a new file
 extension View {
     @ViewBuilder
-    func parseConvertedHTMLViewComponents(views: [Any], configuration: HTMLParseConfiguration) -> some View {
+    func parseConvertedHTMLViewComponents(views: [Any], configuration: ParseConfiguration) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Color.clear
                 .frame(maxHeight: 1)
@@ -292,21 +223,9 @@ extension View {
                 if let imageURLs = view as? [URL?] {
                     let nonNilImageURLs = imageURLs.compactMap { $0 }
                     if nonNilImageURLs.count == 1 {
-                        ParsedSingleImageView(urls: nonNilImageURLs, index: 0, onTapAction: configuration.imageOnTapAction)
+                        ContentItemSingleImage(url: nonNilImageURLs[0], onTapAction: configuration.imageOnTapAction)
                     } else if nonNilImageURLs.count > 1 {
-                        // https://stackoverflow.com/a/64252041
-                        let gridLayout: [GridItem] = {
-                            if configuration.imageGridDisplayMode == .wide || nonNilImageURLs.count > 4 {
-                                return Array(repeating: .init(.flexible()), count: 3)
-                            } else {
-                                return Array(repeating: .init(.flexible()), count: 2)
-                            }
-                        }()
-                        LazyVGrid(columns: gridLayout, alignment: .center, spacing: 10) {
-                            ForEach(0 ..< nonNilImageURLs.count, id: \.self) { i in
-                                ParsedGridImageView(urls: nonNilImageURLs, index: i, onTapAction: configuration.imageOnTapAction)
-                            }
-                        }
+                        ContentItemImagesGrid(urls: nonNilImageURLs, configuration: configuration)
                     }
                 }
             }
