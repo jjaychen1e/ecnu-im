@@ -58,15 +58,7 @@ class ContentItemSingleImageUIView: UIView {
         }
         imageView.kf.indicatorType = .activity
         // , placeholder: UIProgressView()
-        imageView.kf.setImage(with: url, options: [.transition(.fade(0.2))]) { result in
-            switch result {
-            case let .success(value):
-//                print(value)
-                break
-            case let .failure(error):
-//                print(error) // The error happens
-                break
-            }
+        imageView.kf.setImage(with: url, options: [.transition(.fade(0.2))]) { _ in
         }
 
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(imageTapped(tapGestureRecognizer:)))
