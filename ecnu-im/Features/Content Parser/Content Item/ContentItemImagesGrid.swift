@@ -43,13 +43,7 @@ struct ContentItemImagesGrid: View {
     @State var configuration: ParseConfiguration
 
     var body: some View {
-        let gridLayout: [GridItem] = {
-            if configuration.imageGridDisplayMode == .wide || urls.count > 4 {
-                return Array(repeating: .init(.flexible()), count: 3)
-            } else {
-                return Array(repeating: .init(.flexible()), count: 2)
-            }
-        }()
+        let gridLayout: [GridItem] = Array(repeating: .init(.flexible()), count: 3)
 
         // https://stackoverflow.com/a/64252041
         LazyVGrid(columns: gridLayout, alignment: .center, spacing: 10) {
@@ -60,19 +54,90 @@ struct ContentItemImagesGrid: View {
     }
 }
 
+private class ContentItemGridImageUIView: UIView {
+    var urls: [URL]
+    var index: Int
+    var onTapAction: (Int, [URL]) -> Void
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    init(urls: [URL], index: Int, onTapAction: @escaping (Int, [URL]) -> Void) {
+        self.urls = urls
+        self.index = index
+        self.onTapAction = onTapAction
+        super.init(frame: .zero)
+
+        let imageView = UIImageView(frame: .zero)
+        imageView.contentMode = .scaleAspectFill
+        addSubview(imageView)
+        imageView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        imageView.kf.indicatorType = .activity
+        imageView.kf.setImage(with: urls[index], options: [.transition(.fade(0.2))]) { _ in
+        }
+
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(imageTapped(tapGestureRecognizer:)))
+        imageView.isUserInteractionEnabled = true
+        imageView.addGestureRecognizer(tapGestureRecognizer)
+    }
+
+    @objc func imageTapped(tapGestureRecognizer: UITapGestureRecognizer) {
+        onTapAction(index, urls)
+    }
+}
+
 class ContentItemImagesGridUIView: UIView {
     var urls: [URL]
     var configuration: ParseConfiguration
+
+    private lazy var verticalStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.spacing = 4
+        stackView.axis = .vertical
+        stackView.alignment = .fill
+        stackView.distribution = .fillEqually
+        return stackView
+    }()
+
+    private func horizontalStackView(imageIndices: [Int]) -> UIStackView {
+        let stackView = UIStackView()
+        stackView.spacing = 4
+        stackView.axis = .horizontal
+        stackView.alignment = .fill
+        stackView.distribution = .fillEqually
+
+        for imageIndex in imageIndices {
+            let imageView = ContentItemGridImageUIView(urls: urls, index: imageIndex, onTapAction: configuration.imageOnTapAction)
+            imageView.clipsToBounds = true
+            imageView.snp.makeConstraints { make in
+                make.width.equalTo(imageView.snp.height)
+            }
+            stackView.addArrangedSubview(imageView)
+        }
+
+        return stackView
+    }
 
     init(urls: [URL], configuration: ParseConfiguration) {
         self.urls = urls
         self.configuration = configuration
         super.init(frame: .zero)
-
-        let hostingVC = UIHostingController(rootView: ContentItemImagesGrid(urls: urls, configuration: configuration))
-        addSubview(hostingVC.view)
-        hostingVC.view.snp.makeConstraints { make in
+        addSubview(verticalStackView)
+        verticalStackView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
+        }
+
+        let size = 3
+        stride(from: 0, to: urls.count, by: size).map {
+            Array($0 ..< min(urls.count, $0 + size))
+        }.map {
+            horizontalStackView(imageIndices: $0)
+        }.forEach { horizontalStackView in
+            verticalStackView.addArrangedSubview(horizontalStackView)
         }
     }
 

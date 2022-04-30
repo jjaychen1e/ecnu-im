@@ -62,7 +62,7 @@ class ContentItemSingleImageUIView: UIView {
             switch result {
             case let .success(value):
 //                print(value)
-                break 
+                break
             case let .failure(error):
 //                print(error) // The error happens
                 break

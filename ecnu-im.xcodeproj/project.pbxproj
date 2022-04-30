@@ -36,7 +36,6 @@
 		631E59E32813FA79009A1A94 /* FlarumUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631E59E22813FA79009A1A94 /* FlarumUser.swift */; };
 		631E59E52813FB15009A1A94 /* FlarumLinks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631E59E42813FB15009A1A94 /* FlarumLinks.swift */; };
 		63272FD327F5B7FE00D106CF /* Lightbox in Frameworks */ = {isa = PBXBuildFile; productRef = 63272FD227F5B7FE00D106CF /* Lightbox */; };
-		63272FD527F5D14800D106CF /* DiscussionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63272FD427F5D14800D106CF /* DiscussionView.swift */; };
 		6329EE6B281A9C78001BE8DD /* ContentItemDivider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6329EE6A281A9C78001BE8DD /* ContentItemDivider.swift */; };
 		6329EE6E281AAD5F001BE8DD /* SwiftLinkPreview in Frameworks */ = {isa = PBXBuildFile; productRef = 6329EE6D281AAD5F001BE8DD /* SwiftLinkPreview */; };
 		6329EE70281AAEFC001BE8DD /* ContentItemSingleImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6329EE6F281AAEFC001BE8DD /* ContentItemSingleImage.swift */; };
@@ -181,7 +180,6 @@
 		631E59E02813EE7E009A1A94 /* FlarumTag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlarumTag.swift; sourceTree = "<group>"; };
 		631E59E22813FA79009A1A94 /* FlarumUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlarumUser.swift; sourceTree = "<group>"; };
 		631E59E42813FB15009A1A94 /* FlarumLinks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlarumLinks.swift; sourceTree = "<group>"; };
-		63272FD427F5D14800D106CF /* DiscussionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscussionView.swift; sourceTree = "<group>"; };
 		6329EE6A281A9C78001BE8DD /* ContentItemDivider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentItemDivider.swift; sourceTree = "<group>"; };
 		6329EE6F281AAEFC001BE8DD /* ContentItemSingleImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentItemSingleImage.swift; sourceTree = "<group>"; };
 		6329EE71281AB031001BE8DD /* ContentItemImagesGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentItemImagesGrid.swift; sourceTree = "<group>"; };
@@ -521,7 +519,6 @@
 				63150ABA27F0340B00D83D9D /* LinkPreviewView.swift */,
 				6365777127F19638008AD10E /* DiscussionCellTagView.swift */,
 				638F90902802B4BB002308E0 /* AllDiscussionsView.swift */,
-				63272FD427F5D14800D106CF /* DiscussionView.swift */,
 				63706E1227F5F08800BE3A48 /* PostAuthorAvatarView.swift */,
 			);
 			path = Components;
@@ -1186,7 +1183,6 @@
 				63127828281A4D710090BAE3 /* DynamicHeightTextView.swift in Sources */,
 				635B2A5327EEB0DD00FF6109 /* NetworkError.swift in Sources */,
 				63A6CCD128157FE0000075F7 /* DiscussionHeaderTagsView.swift in Sources */,
-				63272FD527F5D14800D106CF /* DiscussionView.swift in Sources */,
 				6316117A27EF480F002CD6C4 /* Tag.swift in Sources */,
 				631BB03D2805E4FD007D4138 /* SwiftDown.swift in Sources */,
 				634C470327F9C18E00FC591D /* AllDiscussionsViewController.swift in Sources */,

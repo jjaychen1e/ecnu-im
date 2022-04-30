@@ -121,7 +121,6 @@ class DiscussionViewController: NoNavigationBarViewController, UICollectionViewD
 
         let postDeletedCellRegistration = UICollectionView.CellRegistration<PostDeletedCell, Post> {
             cell, indexPath, item in
-            return
         }
 
         return DataSource(collectionView: collectionView) { collectionView, indexPath, item -> UICollectionViewCell? in
@@ -157,27 +156,6 @@ class DiscussionViewController: NoNavigationBarViewController, UICollectionViewD
         }
         return .deleted(index)
     }
-
-//    private func loadData() {
-//        Task {
-//            if let response = try? await flarumProvider.request(.posts(discussionID: Int(discussion.id)!,
-//                                                                       offset: 0,
-//                                                                       limit: limit)) {
-//                if let json = try? JSON(data: response.data) {
-//                    // If empty, maybe we should fetch prev
-//                    let posts = FlarumResponse(json: json).data.posts
-//
-//                    // Update data source based on current data source
-//                    var snapshot = dataSource.snapshot(for: .main)
-//                    snapshot.append(posts.map {
-//                        convertFlarumPostToPost(flarumPost: $0,
-//                                                index: $0.attributes?.number ?? Int.random(in: Int.min ..< Int.max))
-//                    })
-//                    await dataSource.apply(snapshot, to: .main, animatingDifferences: true)
-//                }
-//            }
-//        }
-//    }
 }
 
 extension DiscussionViewController {
@@ -272,5 +250,79 @@ extension DiscussionViewController {
         snapshot.deleteAll()
         snapshot.append(posts)
         dataSource.apply(snapshot, to: .main, animatingDifferences: true)
+    }
+}
+
+actor DiscussionPostsLoaderInfo {
+    private var isOffsetLoading: Set<Int> = []
+    private var isPaused = false
+    private var loadedOffset: Set<Int> = []
+
+    func setPaused(_ paused: Bool) {
+        isPaused = paused
+    }
+
+    func shouldLoad(offset: Int) -> Bool {
+        let should = !(isPaused || loadedOffset.contains(offset) || isOffsetLoading.contains(offset) || isOffsetLoading.count > 0)
+        if should {
+            isOffsetLoading.insert(offset)
+        }
+        return should
+    }
+
+    func finishLoad(offset: Int) {
+        isOffsetLoading.remove(offset)
+        loadedOffset.insert(offset)
+    }
+}
+
+@MainActor
+class DiscussionPostsLoader: ObservableObject {
+    @Published private var discussionID: Int
+    @Published private var limit: Int
+    private var info = DiscussionPostsLoaderInfo()
+
+    internal init(discussionID: Int, limit: Int) {
+        self.discussionID = discussionID
+        self.limit = limit
+    }
+
+    func pause() async {
+        await info.setPaused(true)
+    }
+
+    func resume() async {
+        await info.setPaused(false)
+    }
+
+    func loadData(offset: Int) async -> (posts: [FlarumPost], loadMoreState: FlarumPost.FlarumPostLoadMoreState)? {
+        guard await info.shouldLoad(offset: offset) else { return nil }
+        print("loading: \(offset)")
+        var postLists: [FlarumPost] = []
+        var loadMoreState = FlarumPost.FlarumPostLoadMoreState()
+        if let response = try? await flarumProvider.request(.posts(discussionID: discussionID,
+                                                                   offset: offset,
+                                                                   limit: limit)),
+            let json = try? JSON(data: response.data) {
+            let linksJSON = json["links"]
+            let regex = Regex("page\\[offset\\]=(\\d+)")
+            if let prev = linksJSON["prev"].string?.removingPercentEncoding {
+                loadMoreState.prevOffset = 0
+                if let offset = regex.firstMatch(in: prev)?.captures[0] {
+                    loadMoreState.prevOffset = Int(offset) ?? 0
+                }
+            }
+            if let next = linksJSON["next"].string?.removingPercentEncoding,
+               let offset = regex.firstMatch(in: next)?.captures[0] {
+                loadMoreState.nextOffset = Int(offset) ?? 0
+            }
+
+//             If empty, maybe we should fetch `prev`
+            let posts = FlarumResponse(json: json).data.posts
+            postLists.append(contentsOf: posts)
+        }
+        await info.finishLoad(offset: offset)
+        print("finish loading: \(offset)")
+        return (posts: postLists, loadMoreState: loadMoreState)
     }
 }
