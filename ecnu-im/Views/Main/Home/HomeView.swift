@@ -15,30 +15,65 @@ struct ScrollPreferenceKey: PreferenceKey {
     }
 }
 
+private class FlarumDiscussionPreviewViewModel: ObservableObject {
+    @Published var discussion: FlarumDiscussion
+    @Published var postExcerpt: String = "帖子预览内容加载中..."
+    init(discussion: FlarumDiscussion) {
+        self.discussion = discussion
+    }
+}
+
+private class HomeViewViewModel: ObservableObject {
+    @Published var stickyDiscussions: [FlarumDiscussionPreviewViewModel] = []
+    @Published var newestDiscussions: [FlarumDiscussionPreviewViewModel] = []
+}
+
 struct HomeView: View {
     @Environment(\.splitVC) var splitVC
+    @ObservedObject private var viewModel = HomeViewViewModel()
 
     @State var hasScrolled = false
 
-    @State var stickyDiscussions: [FlarumDiscussion] = []
-    @State var newestDiscussions: [FlarumDiscussion] = []
-
-    private func processDiscussions(discussions: [FlarumDiscussion]) {
-        stickyDiscussions = discussions.filter {
+    private func processDiscussions(discussions: [FlarumDiscussion]) async {
+        viewModel.stickyDiscussions = discussions.filter {
             if let attributes = $0.attributes {
                 return (attributes.lastReadPostNumber ?? 0 < attributes.lastPostNumber ?? 0) && (attributes.isSticky ?? false || attributes.isStickiest ?? false)
             } else {
                 return false
             }
+        }.map {
+            FlarumDiscussionPreviewViewModel(discussion: $0)
         }
-        newestDiscussions = discussions.filter { !stickyDiscussions.contains($0) }
+
+        viewModel.newestDiscussions = discussions.filter {
+            !viewModel.stickyDiscussions.map { $0.discussion }.contains($0)
+        }.map {
+            FlarumDiscussionPreviewViewModel(discussion: $0)
+        }
+
+        let ids = viewModel.newestDiscussions.compactMap { $0.discussion.lastPost?.id }.compactMap { Int($0) }
+        if let response = try? await flarumProvider.request(.postsByIds(ids: ids)),
+           let json = try? JSON(data: response.data) {
+            let posts = FlarumResponse(json: json).data.posts
+            for post in posts {
+                if let correspondingDiscussionViewModel = viewModel.newestDiscussions.first(where: { $0.discussion.lastPost?.id == post.id }) {
+                    if let content = post.attributes?.content,
+                       case let .comment(comment) = content {
+                        let parser = ContentParser(content: comment, configuration: .init(imageOnTapAction: { _, _ in },
+                                                                                          imageGridDisplayMode: .narrow))
+                        let postExcerptText = parser.getExcerptContent(configuration: .init(textLengthMax: 100, textLineMax: 4, imageCountMax: 0)).text
+                        correspondingDiscussionViewModel.postExcerpt = postExcerptText
+                    }
+                }
+            }
+        }
     }
 
     func load() async {
         if let response = try? await flarumProvider.request(.allDiscussions(pageOffset: 0, pageItemLimit: 20)),
            let json = try? JSON(data: response.data) {
             let newDiscussions = FlarumResponse(json: json).data.discussions
-            processDiscussions(discussions: newDiscussions)
+            await processDiscussions(discussions: newDiscussions)
         }
     }
 
@@ -166,7 +201,7 @@ struct HomeView: View {
 
     @ViewBuilder
     func stickySection() -> some View {
-        if stickyDiscussions.count > 0 {
+        if viewModel.stickyDiscussions.count > 0 {
             VStack(alignment: .leading, spacing: 4) {
                 Text("置顶")
                     .font(.system(.largeTitle, design: .rounded).bold())
@@ -176,18 +211,19 @@ struct HomeView: View {
 
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 16) {
-                        ForEach(Array(zip(stickyDiscussions.indices, stickyDiscussions)), id: \.1.id) { _, discussion in
+                        ForEach(0 ..< viewModel.newestDiscussions.count, id: \.self) { index in
+                            let viewModel = viewModel.newestDiscussions[index]
                             Button {
                                 if AppGlobalState.shared.tokenPrepared {
-                                    let near = (discussion.attributes?.lastReadPostNumber ?? 1) - 1
-                                    splitVC?.setSplitViewRoot(viewController: DiscussionViewController(discussion: discussion, near: near),
+                                    let near = (viewModel.discussion.attributes?.lastReadPostNumber ?? 1) - 1
+                                    splitVC?.setSplitViewRoot(viewController: DiscussionViewController(discussion: viewModel.discussion, near: near),
                                                               column: .secondary,
                                                               immediatelyShow: true)
                                 } else {
                                     splitVC?.presentSignView()
                                 }
                             } label: {
-                                HomePostCardView(discussion: discussion)
+                                HomePostCardView(viewModel: viewModel)
                                     .overlay(alignment: .topTrailing) {
                                         Image(systemName: "pin.circle.fill")
                                             .symbolRenderingMode(.palette)
@@ -216,7 +252,7 @@ struct HomeView: View {
 
     @ViewBuilder
     func latestSection() -> some View {
-        if newestDiscussions.count > 0 {
+        if viewModel.newestDiscussions.count > 0 {
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Text("最新动态")
@@ -233,18 +269,19 @@ struct HomeView: View {
 
                 ScrollView(.vertical, showsIndicators: false) {
                     VStack(spacing: 16) {
-                        ForEach(Array(zip(newestDiscussions.indices, newestDiscussions)), id: \.1.id) { _, discussion in
+                        ForEach(0 ..< viewModel.newestDiscussions.count, id: \.self) { index in
+                            let viewModel = viewModel.newestDiscussions[index]
                             Button {
                                 if AppGlobalState.shared.tokenPrepared {
-                                    let near = (discussion.attributes?.lastReadPostNumber ?? 1) - 1
-                                    splitVC?.setSplitViewRoot(viewController: DiscussionViewController(discussion: discussion, near: near),
+                                    let near = (viewModel.discussion.attributes?.lastReadPostNumber ?? 1) - 1
+                                    splitVC?.setSplitViewRoot(viewController: DiscussionViewController(discussion: viewModel.discussion, near: near),
                                                               column: .secondary,
                                                               immediatelyShow: true)
                                 } else {
                                     splitVC?.presentSignView()
                                 }
                             } label: {
-                                HomePostCardViewLarge(discussion: discussion)
+                                HomePostCardViewLarge(viewModel: viewModel)
                             }
                             .buttonStyle(.plain)
                         }
@@ -265,38 +302,41 @@ struct HomeView: View {
     }
 }
 
-struct HomePostCardView: View {
-    @State var discussion: FlarumDiscussion
-    @State var postExcerptText: String = ""
+private struct HomePostCardView: View {
+    @ObservedObject private var viewModel: FlarumDiscussionPreviewViewModel
+
+    fileprivate init(viewModel: FlarumDiscussionPreviewViewModel) {
+        self.viewModel = viewModel
+    }
 
     var body: some View {
         Group {
             VStack(spacing: 4) {
                 HStack(alignment: .top) {
-                    PostAuthorAvatarView(name: discussion.starterName, url: discussion.starterAvatarURL, size: 40)
+                    PostAuthorAvatarView(name: viewModel.discussion.starterName, url: viewModel.discussion.starterAvatarURL, size: 40)
                         .mask(Circle())
                         .overlay(Circle().stroke(Color.white, lineWidth: 1))
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(discussion.discussionTitle)
+                        Text(viewModel.discussion.discussionTitle)
                             .lineLimit(1)
                             .font(.system(size: 14, weight: .semibold, design: .rounded))
                             .foregroundColor(Asset.SpecialColors.cardTitleColor.swiftUIColor)
                         HStack(alignment: .top, spacing: 2) {
                             HStack(alignment: .center, spacing: 2) {
-                                Text(discussion.lastPostedUserName)
+                                Text(viewModel.discussion.lastPostedUserName)
                                     .font(.system(size: 12, weight: .semibold, design: .rounded))
-                                Text(discussion.lastPostDateDescription)
+                                Text(viewModel.discussion.lastPostDateDescription)
                                     .font(.system(size: 10, weight: .regular, design: .rounded))
                                     .fixedSize()
                             }
                             Spacer(minLength: 0)
-                            DiscussionTagsView(tags: discussion.synthesizedTags)
+                            DiscussionTagsView(tags: viewModel.discussion.synthesizedTags)
                                 .fixedSize()
 //                                .frame(maxWidth: .infinity, alignment: .trailing)
                         }
                     }
                 }
-                Text(postExcerptText)
+                Text(viewModel.postExcerpt)
                     .multilineTextAlignment(.leading)
                     .lineLimit(Int.max)
                     .truncationMode(.tail)
@@ -319,14 +359,14 @@ struct HomePostCardView: View {
                             Image(systemName: "eye")
                                 .font(.system(size: 10))
                                 .frame(width: 16, height: 16)
-                            Text("\(discussion.viewCount)")
+                            Text("\(viewModel.discussion.viewCount)")
                                 .font(.system(size: 10, weight: .semibold, design: .rounded))
                         }
                         HStack(spacing: 1) {
                             Image(systemName: "message")
                                 .font(.system(size: 10))
                                 .frame(width: 16, height: 16)
-                            Text("\(discussion.commentCount)")
+                            Text("\(viewModel.discussion.commentCount)")
                                 .font(.system(size: 10, weight: .semibold, design: .rounded))
                         }
                     }
@@ -340,54 +380,42 @@ struct HomePostCardView: View {
             .background(.ultraThinMaterial)
             .backgroundStyle(cornerRadius: 30, opacity: 0.3)
         }
-        .onLoad {
-            if let post = discussion.lastPost, let id = Int(post.id) {
-                Task {
-                    let result = try await flarumProvider.request(.postsById(id: id))
-                    if let json = try? JSON(data: result.data),
-                       let post = FlarumResponse(json: json).data.posts.first,
-                       let content = post.attributes?.content,
-                       case let .comment(comment) = content {
-                        let parser = ContentParser(content: comment, configuration: .init(imageOnTapAction: { _, _ in },
-                                                                                          imageGridDisplayMode: .narrow))
-                        postExcerptText = parser.getExcerptContent(configuration: .init(textLengthMax: 100, textLineMax: 4, imageCountMax: 0)).text
-                    }
-                }
-            }
-        }
     }
 }
 
 struct HomePostCardViewLarge: View {
-    @State var discussion: FlarumDiscussion
-    @State var postExcerptText: String = ""
+    @ObservedObject private var viewModel: FlarumDiscussionPreviewViewModel
+
+    fileprivate init(viewModel: FlarumDiscussionPreviewViewModel) {
+        self.viewModel = viewModel
+    }
 
     var body: some View {
         Group {
             VStack(spacing: 4) {
                 HStack(alignment: .top) {
-                    PostAuthorAvatarView(name: discussion.starterName, url: discussion.starterAvatarURL, size: 40)
+                    PostAuthorAvatarView(name: viewModel.discussion.starterName, url: viewModel.discussion.starterAvatarURL, size: 40)
                         .mask(Circle())
                         .overlay(Circle().stroke(Color.white, lineWidth: 1))
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(discussion.discussionTitle)
+                        Text(viewModel.discussion.discussionTitle)
                             .lineLimit(1)
                             .font(.system(size: 14, weight: .semibold, design: .rounded))
                             .foregroundColor(Asset.SpecialColors.cardTitleColor.swiftUIColor)
                         HStack(alignment: .top, spacing: 2) {
                             HStack(alignment: .center, spacing: 2) {
-                                Text(discussion.lastPostedUserName)
+                                Text(viewModel.discussion.lastPostedUserName)
                                     .font(.system(size: 12, weight: .semibold, design: .rounded))
-                                Text(discussion.lastPostDateDescription)
+                                Text(viewModel.discussion.lastPostDateDescription)
                                     .font(.system(size: 10, weight: .regular, design: .rounded))
                             }
                             Spacer(minLength: 0)
-                            DiscussionTagsView(tags: discussion.synthesizedTags)
+                            DiscussionTagsView(tags: viewModel.discussion.synthesizedTags)
                                 .fixedSize()
                         }
                     }
                 }
-                Text(postExcerptText)
+                Text(viewModel.postExcerpt)
                     .multilineTextAlignment(.leading)
                     .lineLimit(Int.max)
                     .truncationMode(.tail)
@@ -410,14 +438,14 @@ struct HomePostCardViewLarge: View {
                             Image(systemName: "eye")
                                 .font(.system(size: 10))
                                 .frame(width: 16, height: 16)
-                            Text("\(discussion.viewCount)")
+                            Text("\(viewModel.discussion.viewCount)")
                                 .font(.system(size: 10, weight: .semibold, design: .rounded))
                         }
                         HStack(spacing: 1) {
                             Image(systemName: "message")
                                 .font(.system(size: 10))
                                 .frame(width: 16, height: 16)
-                            Text("\(discussion.commentCount)")
+                            Text("\(viewModel.discussion.commentCount)")
                                 .font(.system(size: 10, weight: .semibold, design: .rounded))
                         }
                     }
@@ -428,21 +456,6 @@ struct HomePostCardViewLarge: View {
             .padding(.bottom, 6)
             .background(.ultraThinMaterial)
             .backgroundStyle(cornerRadius: 15, opacity: 0.3)
-        }
-        .onLoad {
-            if let post = discussion.lastPost, let id = Int(post.id) {
-                Task {
-                    let result = try await flarumProvider.request(.postsById(id: id))
-                    if let json = try? JSON(data: result.data),
-                       let post = FlarumResponse(json: json).data.posts.first,
-                       let content = post.attributes?.content,
-                       case let .comment(comment) = content {
-                        let parser = ContentParser(content: comment, configuration: .init(imageOnTapAction: { _, _ in },
-                                                                                          imageGridDisplayMode: .narrow))
-                        postExcerptText = parser.getExcerptContent(configuration: .init(textLengthMax: 100, textLineMax: 4, imageCountMax: 0)).text
-                    }
-                }
-            }
         }
     }
 }
