@@ -103,8 +103,9 @@ struct FlarumResponse {
                                     json["_0"] = attributes["content"]
                                     attributes["content"] = JSON(dictionaryLiteral: ("discussionLocked", json))
                                 } else {
-                                    // discussionSuperStickied
+                                    // discussionSuperStickied, discussionMerged
                                     attributes = attributes.removing(key: "content")
+                                    attributes = attributes.removing(key: "contentType")
                                 }
                             }
                             post.attributes = attributes.decode(FlarumPostAttributes.self)

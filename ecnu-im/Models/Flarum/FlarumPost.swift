@@ -40,7 +40,7 @@ struct FlarumPostAttributes: Decodable {
 
     var number: Int? // Possible nil
     var createdAt: String
-    var contentType: FlarumPostContentType
+    var contentType: FlarumPostContentType?
     var contentHtml: String?
     var content: FlarumPostContent? // Only available when login, and should be decoded manually.
     var canEdit: Bool?
@@ -61,6 +61,7 @@ struct FlarumPostAttributes: Decodable {
 }
 
 struct FlarumPostRelationships {
+    
     enum Relationship: CaseIterable {
         case user
         case discussion
@@ -76,7 +77,11 @@ struct FlarumPostRelationships {
     var mentionedBy: [FlarumUser]?
 }
 
-class FlarumPost {
+class FlarumPost: Hashable {
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
     init(id: String, attributes: FlarumPostAttributes? = nil, relationships: FlarumPostRelationships? = nil) {
         self.id = id
         self.attributes = attributes

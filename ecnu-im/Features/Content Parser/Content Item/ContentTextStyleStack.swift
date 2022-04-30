@@ -108,21 +108,14 @@ final class ContentTextStyleStack {
             parsedFontSize = 16.0
         }
 
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineSpacing = parsedFontSize * 0.4
+        attributes[NSAttributedString.Key.paragraphStyle] = paragraphStyle
+
         if let baselineOffset = baselineOffset {
             attributes[NSAttributedString.Key.baselineOffset] = round(parsedFontSize * baselineOffset)
             parsedFontSize = round(parsedFontSize * 0.85)
         }
-
-//        if bold != nil, bold!, italic != nil, italic! {
-//            attributes[NSAttributedString.Key.font] = Font.semiboldItalic(parsedFontSize)
-//        } else if bold != nil, bold! {
-//            attributes[NSAttributedString.Key.font] = Font.bold(parsedFontSize)
-//        } else if italic != nil, italic! {
-//            attributes[NSAttributedString.Key.font] = Font.italic(parsedFontSize)
-//        } else {
-//            attributes[NSAttributedString.Key.font] = Font.regular(parsedFontSize)
-//        }
-        // mono, bold, italic
 
         if mono != nil, mono!, bold != nil, bold!, italic != nil, italic! {
             attributes[NSAttributedString.Key.font] = Font.semiboldItalicMonospace(parsedFontSize)
@@ -153,7 +146,7 @@ final class ContentTextStyleStack {
         if let textColor = textColor {
             attributes[NSAttributedString.Key.foregroundColor] = textColor
         } else {
-            attributes[NSAttributedString.Key.foregroundColor] = UIColor.black
+            attributes[NSAttributedString.Key.foregroundColor] = Asset.DynamicColors.dynamicBlack.color
         }
 
         if let link = link {

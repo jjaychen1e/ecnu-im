@@ -9,6 +9,7 @@ import CoreGraphics
 import Foundation
 import MarkdownKit
 import Regex
+import UIKit
 
 class ContentParser {
     private var content: String = ""
@@ -26,20 +27,22 @@ class ContentParser {
     /// - Parameter content: original markdown content
     /// - Returns: processed markdown content
     private func processParagraph(content: String) -> String {
-        // A strong regex to match urls
-        let _us = "(https?:\\/\\/)?(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&\\/\\/=]*)"
+        // A strong regex to match urls(and possible alt text)
+        let _us = "(https?:\\/\\/)(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&\\/\\/=]*)"
+        
+        // Remove possible alt text
+        let _us_with_alt_text = "\\[(.*?)\\]\\((\(_us))(\\s+.*?)?\\)"
+        let _r0 = try! Regex(string: "\(_us_with_alt_text)", options: .ignoreCase)
+        var content = content.replacingAll(matching: _r0, with: "[$1]($2)")
+        
         let _r1 = try! Regex(string: "(\(_us))", options: .ignoreCase)
-        var content = content.replacingAll(matching: _r1, with: "[\(Self.magicStringLink)]($1)")
+        content = content.replacingAll(matching: _r1, with: "[\(Self.magicStringLink)]($1)")
 
         let _r2 = try! Regex(string: "\\[(.*?)\\]\\(\\[\(Self.magicStringLink)\\]\\((.*?)\\)\\s*?\\)", options: .ignoreCase)
         content = content.replacingAll(matching: _r2, with: "[$1]($2)")
 
         let _r3 = try! Regex(string: "\\[\(Self.magicStringLink)\\]\\((\(_us)\\.(png|jpe?g|gif))\\)", options: .ignoreCase)
         content = content.replacingAll(matching: _r3, with: "![\(Self.magicStringImage)]($1)")
-        
-        // IP Address is processed as a link...
-        let _r4 = try! Regex(string: "\\[\(Self.magicStringLink)\\]\\((((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})(\\.((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})){3}(\\/?\\d+)?)\\)", options: .ignoreCase)
-        content = content.replacingAll(matching: _r4, with: "$1")
         
         return content
     }
@@ -302,45 +305,51 @@ class ContentParser {
         }
     }
 
-    private func _parseContentBlocksToContentItems(contentBlocks: [ContentBlock]) -> [Any] {
-        var contentItems: [Any] = []
+    private func _parseContentBlocksToContentItems(contentBlocks: [ContentBlock]) -> [UIView] {
+        var contentItems: [UIView] = []
 
         for contentBlock in contentBlocks {
             switch contentBlock {
             case let .paragraph(richText):
                 let styleStack = ContentTextStyleStack()
                 let attributedString = attributedStringForRichText(richText, styleStack: styleStack)
-                contentItems.append(ContentItemParagraph(text: attributedString))
+                contentItems.append(ContentItemParagraphUIView(attributedText: attributedString))
             case let .header(richText, level):
                 let styleStack = ContentTextStyleStack()
                 styleStack.push(.fontSize(-2.0 * CGFloat(level) + 30.0))
                 styleStack.push(.bold)
                 let attributedString = attributedStringForRichText(richText, styleStack: styleStack)
-                contentItems.append(ContentItemParagraph(text: attributedString))
+                contentItems.append(ContentItemParagraphUIView(attributedText: attributedString))
             case let .blockQuote(contentBlocks):
-                contentItems.append(ContentItemBlockquote(contentItems: _parseContentBlocksToContentItems(contentBlocks: contentBlocks)))
+                let subContentItems = _parseContentBlocksToContentItems(contentBlocks: contentBlocks)
+                if subContentItems.count > 0 {
+                    contentItems.append(ContentItemBlockquoteUIView(contentItems: subContentItems))
+                }
             case let .list(contentBlockList):
                 break
             case .divider:
-                contentItems.append(ContentItemDivider())
+                contentItems.append(ContentItemDividerUIView())
             case let .codeBlock(optional, string):
                 let attributes: [NSAttributedString.Key: Any] = [
                     NSAttributedString.Key.font: Font.monospace(17),
+                    NSAttributedString.Key.foregroundColor: Asset.DynamicColors.dynamicBlack.color,
                 ]
                 let attributedString: NSAttributedString = .init(string: string, attributes: attributes)
-                contentItems.append(ContentItemCodeBlock(text: attributedString))
+                contentItems.append(ContentItemCodeBlockUIView(attributedText: attributedString))
             case let .linkPreview(link):
-                contentItems.append(LinkPreviewView(link: link))
+                if let url = URL(string: link) {
+                    contentItems.append(ContentItemLinkPreview(link: url))
+                }
             case let .image(url):
                 if let url = URL(string: url) {
-                    contentItems.append(ContentItemSingleImage(url: url, onTapAction: {
+                    contentItems.append(ContentItemSingleImageUIView(url: url, onTapAction: {
                         ImageBrowser.shared.present(imageURLs: $1, selectedImageIndex: $0)
                     }))
                 }
             case let .images(urls):
                 let urls = urls.compactMap { URL(string: $0) }
                 if urls.count > 0 {
-                    contentItems.append(ContentItemImagesGrid(urls: urls, configuration: configuration))
+                    contentItems.append(ContentItemImagesGridUIView(urls: urls, configuration: configuration))
                 }
             case let .table(rows):
                 break
@@ -350,7 +359,7 @@ class ContentParser {
         return contentItems
     }
 
-    func parse() -> [Any] {
+    func parse() -> [UIView] {
         let markdown = MarkdownParser.standard.parse(content)
         guard case let .document(topLevelBlocks) = markdown else {
             return []

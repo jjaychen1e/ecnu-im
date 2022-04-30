@@ -131,6 +131,7 @@
 		63EB854B27F2E8A00064F5A8 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 63EB854A27F2E8A00064F5A8 /* Kingfisher */; };
 		63EB854E27F2EC1D0064F5A8 /* AvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63EB854D27F2EC1D0064F5A8 /* AvatarView.swift */; };
 		63EB855727F300080064F5A8 /* SwiftUIPullToRefresh in Frameworks */ = {isa = PBXBuildFile; productRef = 63EB855627F300080064F5A8 /* SwiftUIPullToRefresh */; };
+		63F1AF3B281BDB9400EF5CAF /* ContentItemLinkPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63F1AF3A281BDB9400EF5CAF /* ContentItemLinkPreview.swift */; };
 		63F584512806C4620053DB3A /* MarkdownKit in Frameworks */ = {isa = PBXBuildFile; productRef = 63F584502806C4620053DB3A /* MarkdownKit */; };
 		63F584542806C5E90053DB3A /* Down in Frameworks */ = {isa = PBXBuildFile; productRef = 63F584532806C5E90053DB3A /* Down */; };
 		6AFAE93FCA5ED3B4EA84F433 /* Pods_ecnu_im.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F333BE20CEB71A89E66678B0 /* Pods_ecnu_im.framework */; };
@@ -260,6 +261,7 @@
 		63E8BF0527F98ADC0021E4C2 /* MainSplitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainSplitViewController.swift; sourceTree = "<group>"; };
 		63E971FD28118AD0003974B6 /* TabController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabController.swift; sourceTree = "<group>"; };
 		63EB854D27F2EC1D0064F5A8 /* AvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarView.swift; sourceTree = "<group>"; };
+		63F1AF3A281BDB9400EF5CAF /* ContentItemLinkPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentItemLinkPreview.swift; sourceTree = "<group>"; };
 		8B7643C14C1ECACCA7A6233B /* Pods-ecnu-im.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ecnu-im.debug.xcconfig"; path = "Target Support Files/Pods-ecnu-im/Pods-ecnu-im.debug.xcconfig"; sourceTree = "<group>"; };
 		C360C9BBEFC24D910424BE89 /* Pods-ecnu-im.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ecnu-im.release.xcconfig"; path = "Target Support Files/Pods-ecnu-im/Pods-ecnu-im.release.xcconfig"; sourceTree = "<group>"; };
 		F333BE20CEB71A89E66678B0 /* Pods_ecnu_im.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ecnu_im.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -379,6 +381,7 @@
 				6329EE6F281AAEFC001BE8DD /* ContentItemSingleImage.swift */,
 				6329EE71281AB031001BE8DD /* ContentItemImagesGrid.swift */,
 				63770F3D281AD9EA0071461A /* ContentItemCodeBlock.swift */,
+				63F1AF3A281BDB9400EF5CAF /* ContentItemLinkPreview.swift */,
 			);
 			path = "Content Item";
 			sourceTree = "<group>";
@@ -488,8 +491,8 @@
 			children = (
 				632B6244281A2E0E0064380C /* Content Block */,
 				632B6243281A2E030064380C /* Content Item */,
-				634A57532816A77B0022B27E /* ContentParser.swift */,
 				634A57582816EBC20022B27E /* Font.swift */,
+				634A57532816A77B0022B27E /* ContentParser.swift */,
 				634A575A2816EC0E0022B27E /* RichText.swift */,
 				6329EE73281AB1C7001BE8DD /* ParseConfiguration.swift */,
 			);
@@ -1080,6 +1083,7 @@
 				636BE17327F7FDB800283943 /* DefaultTheme.swift in Sources */,
 				6349B18D27EEAB250002E89A /* RequestTask.swift in Sources */,
 				631BB0392805E4FD007D4138 /* SwiftDownEditor.swift in Sources */,
+				63F1AF3B281BDB9400EF5CAF /* ContentItemLinkPreview.swift in Sources */,
 				635FF1C92803028D00C7CDBF /* Toast.swift in Sources */,
 				63B740A32802793100376B94 /* CustomFieldModifier.swift in Sources */,
 				6391FCD02811B2C8006E086D /* HomeView.swift in Sources */,

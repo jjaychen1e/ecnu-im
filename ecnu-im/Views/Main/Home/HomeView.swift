@@ -381,9 +381,9 @@ struct HomePostCardViewLarge: View {
                                 Text(discussion.lastPostDateDescription)
                                     .font(.system(size: 10, weight: .regular, design: .rounded))
                             }
+                            Spacer(minLength: 0)
                             DiscussionTagsView(tags: discussion.synthesizedTags)
                                 .fixedSize()
-                                .frame(maxWidth: .infinity, alignment: .trailing)
                         }
                     }
                 }
@@ -410,14 +410,14 @@ struct HomePostCardViewLarge: View {
                             Image(systemName: "eye")
                                 .font(.system(size: 10))
                                 .frame(width: 16, height: 16)
-                            Text("140")
+                            Text("\(discussion.viewCount)")
                                 .font(.system(size: 10, weight: .semibold, design: .rounded))
                         }
                         HStack(spacing: 1) {
                             Image(systemName: "message")
                                 .font(.system(size: 10))
                                 .frame(width: 16, height: 16)
-                            Text("26")
+                            Text("\(discussion.commentCount)")
                                 .font(.system(size: 10, weight: .semibold, design: .rounded))
                         }
                     }

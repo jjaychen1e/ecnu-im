@@ -51,10 +51,41 @@ struct PostContentView: View {
         PostContentItemsView(contentItems: $contentItems)
             .onLoad {
                 let parseConfiguration = ParseConfiguration(imageOnTapAction: { ImageBrowser.shared.present(imageURLs: $1, selectedImageIndex: $0) },
-                                                                 imageGridDisplayMode: .narrow)
+                                                            imageGridDisplayMode: .narrow)
                 let contentParser = ContentParser(content: content, configuration: parseConfiguration)
                 let newContentItems = contentParser.parse()
                 contentItems = newContentItems
             }
+    }
+}
+
+class PostContentItemsUIView: UIView {
+    private var views: [UIView]
+    private var stackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.spacing = 4
+        stackView.axis = .vertical
+        stackView.alignment = .fill
+        stackView.distribution = .fill
+        return stackView
+    }()
+
+    init(contentItems: [UIView]) {
+        views = contentItems
+        super.init(frame: .zero)
+
+        addSubview(stackView)
+        stackView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+
+        for view in views {
+            stackView.addArrangedSubview(view)
+        }
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 }

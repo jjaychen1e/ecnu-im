@@ -59,3 +59,25 @@ struct ContentItemImagesGrid: View {
         }
     }
 }
+
+class ContentItemImagesGridUIView: UIView {
+    var urls: [URL]
+    var configuration: ParseConfiguration
+
+    init(urls: [URL], configuration: ParseConfiguration) {
+        self.urls = urls
+        self.configuration = configuration
+        super.init(frame: .zero)
+
+        let hostingVC = UIHostingController(rootView: ContentItemImagesGrid(urls: urls, configuration: configuration))
+        addSubview(hostingVC.view)
+        hostingVC.view.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
