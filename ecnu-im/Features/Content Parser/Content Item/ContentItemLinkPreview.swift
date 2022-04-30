@@ -25,6 +25,7 @@ class ContentItemLinkPreview: UIView {
         if let host = link.host {
             let whiteLists230: [String] = [
                 "bilibili.com",
+                "b23.tv",
                 "youtube.com",
                 "youtu.be",
                 "music.163.com",
@@ -35,12 +36,12 @@ class ContentItemLinkPreview: UIView {
             if whiteLists230.first(where: { url in host.contains(url) }) != nil {
                 return 230
             }
-            
+
             let whiteList500: [String] = [
                 "xiaoyuzhoufm.com",
                 "apple.com",
             ]
-            
+
             if whiteList500.first(where: { url in host.contains(url) }) != nil {
                 return 500
             }
@@ -100,6 +101,7 @@ class ContentItemLinkPreview: UIView {
                 self.provider = metadataProvider
                 if let metadata = try? await metadataProvider.startFetchingMetadata(for: link) {
                     lpView.metadata = metadata
+                    setNeedsLayout()
                     metadataStorage.store(metadata)
                 }
             }

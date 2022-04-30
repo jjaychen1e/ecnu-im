@@ -83,67 +83,9 @@ private struct DiscussionViewPostCellPlaceholder: View {
     }
 }
 
-private struct DiscussionViewHeader: View {
-    @Environment(\.splitVC) var splitVC
-    @Environment(\.nvc) var nvc
-    @State private var discussion: FlarumDiscussion
-
-    init(discussion: FlarumDiscussion) {
-        _discussion = State(initialValue: discussion)
-    }
-
-    var body: some View {
-        VStack {
-            Group {
-                if discussion.synthesizedTags.count > 0 {
-                    DiscussionHeaderTagsView(tags: discussion.synthesizedTags)
-                } else {
-                    Color.clear
-                        .frame(height: 30)
-                }
-                Text(discussion.discussionTitle)
-                    .font(.system(size: 20, weight: .medium, design: .default))
-            }
-        }
-        .padding(.horizontal)
-        .padding(.bottom)
-        .padding(.top, 8)
-        .frame(maxWidth: .infinity)
-        .foregroundColor(Asset.DynamicColors.dynamicWhite.swiftUIColor)
-        .background(discussion.synthesizedTags.first?.backgroundColor ?? .gray)
-        .overlay(
-            Group {
-                if let splitVC = splitVC {
-                    if splitVC.traitCollection.horizontalSizeClass == .compact {
-                        Button(action: {
-                            if let nvc = nvc {
-                                if nvc.viewControllers.count == 1 {
-                                    splitVC.show(.primary)
-                                } else {
-                                    nvc.popViewController(animated: true)
-                                }
-                            }
-                        }, label: {
-                            Image(systemName: "arrow.backward.circle.fill")
-                                .font(.system(size: 30, weight: .medium))
-                                .foregroundColor(Asset.DynamicColors.dynamicWhite.swiftUIColor)
-                        })
-                        .offset(x: 8, y: 0)
-                    }
-                }
-            },
-            alignment: .topLeading
-        )
-    }
-}
-
 struct ScrollTarget: Equatable {
     let id: Int
     let anchor: UnitPoint
-}
-
-class DumbPublisher: ObservableObject {
-    @Published var publishedValue = 0
 }
 
 struct DiscussionView: View {
@@ -167,30 +109,6 @@ struct DiscussionView: View {
         _near = State(initialValue: near)
         loader = DiscussionPostsLoader(discussionID: Int(discussion.id)!, limit: limit)
         _posts = State(initialValue: Array(repeating: nil, count: discussion.attributes?.commentCount ?? 0))
-    }
-
-    private func shouldDisplayPlaceholder(index: Int) -> Bool {
-        var leftBound = index
-        var rightBound = index
-        while leftBound >= 0 {
-            if posts[leftBound] == nil {
-                leftBound -= 1
-            } else {
-                break
-            }
-        }
-        leftBound += 1
-
-        while rightBound < posts.count {
-            if posts[rightBound] == nil {
-                rightBound += 1
-            } else {
-                break
-            }
-        }
-        rightBound -= 1
-
-        return index - leftBound + 1 <= 8
     }
 
     func turnOnMiniEditor() {
@@ -253,7 +171,7 @@ struct DiscussionView: View {
         }
         .background(Asset.DefaultTheme.defaultThemeBackground2.swiftUIColor)
         .safeAreaInset(edge: .top, content: {
-            DiscussionViewHeader(discussion: discussion)
+            DiscussionHeaderView(discussion: discussion)
         })
         .onLoad {
             Task {
@@ -383,7 +301,7 @@ actor DiscussionPostsLoaderInfo {
     }
 
     func shouldLoad(offset: Int) -> Bool {
-        let should = !(isPaused || loadedOffset.contains(offset) || isOffsetLoading.contains(offset))
+        let should = !(isPaused || loadedOffset.contains(offset) || isOffsetLoading.contains(offset) || isOffsetLoading.count >     0)
         if should {
             isOffsetLoading.insert(offset)
         }
@@ -397,7 +315,7 @@ actor DiscussionPostsLoaderInfo {
 }
 
 @MainActor
-private class DiscussionPostsLoader: ObservableObject {
+class DiscussionPostsLoader: ObservableObject {
     @Published private var discussionID: Int
     @Published private var limit: Int
     private var info = DiscussionPostsLoaderInfo()
@@ -417,6 +335,7 @@ private class DiscussionPostsLoader: ObservableObject {
 
     func loadData(offset: Int) async -> (posts: [FlarumPost], loadMoreState: FlarumPost.FlarumPostLoadMoreState)? {
         guard await info.shouldLoad(offset: offset) else { return nil }
+        print("loading: \(offset)")
         var postLists: [FlarumPost] = []
         var loadMoreState = FlarumPost.FlarumPostLoadMoreState()
         if let response = try? await flarumProvider.request(.posts(discussionID: discussionID,
@@ -441,6 +360,7 @@ private class DiscussionPostsLoader: ObservableObject {
             postLists.append(contentsOf: posts)
         }
         await info.finishLoad(offset: offset)
+        print("finish loading: \(offset)")
         return (posts: postLists, loadMoreState: loadMoreState)
     }
 }

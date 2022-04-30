@@ -19,6 +19,12 @@ class ContentParser {
 
     private static let magicStringLink = "MagicStringLink-1650947"
     private static let magicStringImage = "MagicStringImage-1650947"
+    
+    private static func preprocess(content: String) -> String {
+        let _r1 = Regex("(^>.*?)\n\\s*?\n>")
+        let content = content.replacingAll(matching: _r1, with: "$1\n>")
+        return content
+    }
 
     /// Embed naked link and image url in `[]()` and `![]()`, and make all image urls and naked links in a single line.
     /// We embed all links inside `[]()`, and then re-extract those double embedded links.
@@ -29,12 +35,12 @@ class ContentParser {
     private func processParagraph(content: String) -> String {
         // A strong regex to match urls(and possible alt text)
         let _us = "(https?:\\/\\/)(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&\\/\\/=]*)"
-        
+
         // Remove possible alt text
         let _us_with_alt_text = "\\[(.*?)\\]\\((\(_us))(\\s+.*?)?\\)"
         let _r0 = try! Regex(string: "\(_us_with_alt_text)", options: .ignoreCase)
         var content = content.replacingAll(matching: _r0, with: "[$1]($2)")
-        
+
         let _r1 = try! Regex(string: "(\(_us))", options: .ignoreCase)
         content = content.replacingAll(matching: _r1, with: "[\(Self.magicStringLink)]($1)")
 
@@ -43,12 +49,12 @@ class ContentParser {
 
         let _r3 = try! Regex(string: "\\[\(Self.magicStringLink)\\]\\((\(_us)\\.(png|jpe?g|gif))\\)", options: .ignoreCase)
         content = content.replacingAll(matching: _r3, with: "![\(Self.magicStringImage)]($1)")
-        
+
         return content
     }
 
     init(content: String, configuration: ParseConfiguration) {
-        self.content = content
+        self.content = Self.preprocess(content: content)
         self.configuration = configuration
     }
 

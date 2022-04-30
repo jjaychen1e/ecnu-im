@@ -86,7 +86,7 @@ class MainSplitViewController: UIViewController {
         return nvc
     }()
 
-    private lazy var sidebarViewController = SidebarViewController()
+    private lazy var sidebarViewController = SettingViewController()
     private lazy var primaryViewController = TabController()
 
     override func viewDidLoad() {

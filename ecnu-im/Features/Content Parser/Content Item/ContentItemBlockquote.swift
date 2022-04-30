@@ -57,7 +57,7 @@ class ContentItemBlockquoteUIView: UIView {
         addSubview(contentItemsUIView)
         contentItemsUIView.snp.makeConstraints { make in
             make.top.right.bottom.equalToSuperview()
-            make.left.equalTo(leftIndicator)
+            make.left.equalTo(leftIndicator.snp.right)
         }
     }
 

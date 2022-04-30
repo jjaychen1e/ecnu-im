@@ -1,5 +1,5 @@
 //
-//  SidebarViewController.swift
+//  SettingViewController.swift
 //  ecnu-im
 //
 //  Created by 陈俊杰 on 2022/4/3.
@@ -75,7 +75,7 @@ private enum ThemeOption: String, CaseIterable {
 
 private typealias DataSource = UICollectionViewDiffableDataSource<HeaderItem, ListItem>
 
-class SidebarViewController: UIViewController {
+class SettingViewController: UIViewController {
     private var modelObjects: [HeaderItem]!
     private var collectionView: UICollectionView!
     private lazy var dataSource = makeDataSource()
@@ -335,7 +335,7 @@ class SidebarViewController: UIViewController {
     }
 }
 
-extension SidebarViewController: UICollectionViewDelegate {
+extension SettingViewController: UICollectionViewDelegate {
     func collectionView(_: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
         if let item = dataSource.itemIdentifier(for: indexPath) {
             if case let .rowItem(rowItem) = item {

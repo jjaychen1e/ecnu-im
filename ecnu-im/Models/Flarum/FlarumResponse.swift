@@ -33,6 +33,8 @@ struct FlarumResponse {
         //  relationship info between tags. That means in the data section, it only
         //  contains first level relationships.
         // We can easily tackle this problem with one more time traverse.
+        // TODO: It seems 2 round traversing is insufficient? We should use reference
+        //  type for all root types.
         let included = parseData(json: json["included"], withRelationship: true, includedData: includedFirst)
         data = parseData(json: json["data"], withRelationship: true, includedData: included)
     }
@@ -103,7 +105,7 @@ struct FlarumResponse {
                                     json["_0"] = attributes["content"]
                                     attributes["content"] = JSON(dictionaryLiteral: ("discussionLocked", json))
                                 } else {
-                                    // discussionSuperStickied, discussionMerged
+                                    // discussionSuperStickied, discussionMerged, recipientsModified
                                     attributes = attributes.removing(key: "content")
                                     attributes = attributes.removing(key: "contentType")
                                 }

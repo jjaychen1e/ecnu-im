@@ -57,8 +57,8 @@ class TabController: UIViewController {
         let tabBarItems: [TabItem] = [
             .init(tab: .posts, icon: "message", name: "帖子", color: .teal, viewController: homeViewController),
             .init(tab: .notifications, icon: "bell", name: "通知", color: .red, viewController: allDiscussionsViewController),
-            .init(tab: .profile, icon: "person", name: "个人资料", color: .blue, viewController: SidebarViewController()),
-            .init(tab: .setting, icon: "gearshape", name: "设置", color: .gray, viewController: SidebarViewController()),
+            .init(tab: .profile, icon: "person", name: "个人资料", color: .blue, viewController: SettingViewController()),
+            .init(tab: .setting, icon: "gearshape", name: "设置", color: .gray, viewController: SettingViewController()),
         ]
         tabBarViewModel = .init(
             totalWidth: view.frame.width,
