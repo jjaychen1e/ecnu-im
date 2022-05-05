@@ -20,7 +20,7 @@ struct ContentItemCodeBlock: View {
     }
 }
 
-class ContentItemCodeBlockUIView: UIView {
+class ContentItemCodeBlockUIView: UIView & ContentBlockUIView {
     var attributedText: NSAttributedString
     private lazy var textView: UITextView = {
         let textView = UITextView()
@@ -34,9 +34,22 @@ class ContentItemCodeBlockUIView: UIView {
         super.init(frame: .zero)
         textView.attributedText = attributedText
         addSubview(textView)
-        textView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
+    }
+
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        guard size.width > 0 else { return .zero }
+        return CGSize(width: size.width, height: textView.sizeThatFits(frame.size).height)
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        let size = textView.sizeThatFits(bounds.size)
+        textView.frame = .init(origin: .zero, size: size)
+        invalidateIntrinsicContentSize()
+    }
+
+    override var intrinsicContentSize: CGSize {
+        return .init(width: bounds.width, height: textView.frame.size.height)
     }
 
     @available(*, unavailable)

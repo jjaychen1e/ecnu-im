@@ -5,6 +5,7 @@
 //  Created by 陈俊杰 on 2022/4/21.
 //
 
+import Combine
 import SwiftUI
 import SwiftyJSON
 
@@ -17,7 +18,7 @@ struct ScrollPreferenceKey: PreferenceKey {
 
 private class FlarumDiscussionPreviewViewModel: ObservableObject {
     @Published var discussion: FlarumDiscussion
-    @Published var postExcerpt: String = "帖子预览内容加载中..."
+    @Published var postExcerpt: String = ""
     init(discussion: FlarumDiscussion) {
         self.discussion = discussion
     }
@@ -32,6 +33,7 @@ struct HomeView: View {
     @Environment(\.splitVC) var splitVC
     @ObservedObject private var viewModel = HomeViewViewModel()
 
+    @State private var subscriptions: Set<AnyCancellable> = []
     @State var hasScrolled = false
 
     private func processDiscussions(discussions: [FlarumDiscussion]) async {
@@ -51,17 +53,29 @@ struct HomeView: View {
             FlarumDiscussionPreviewViewModel(discussion: $0)
         }
 
-        let ids = viewModel.newestDiscussions.compactMap { $0.discussion.lastPost?.id }.compactMap { Int($0) }
+        (viewModel.newestDiscussions + viewModel.stickyDiscussions)
+            .compactMap { $0 }
+            .forEach {
+                $0.postExcerpt = AppGlobalState.shared.tokenPrepared ? "帖子预览内容加载中..." : "登录以查看内容预览"
+            }
+
+        let ids = (viewModel.newestDiscussions + viewModel.stickyDiscussions).compactMap { $0.discussion.lastPost?.id }.compactMap { Int($0) }
         if let response = try? await flarumProvider.request(.postsByIds(ids: ids)),
            let json = try? JSON(data: response.data) {
             let posts = FlarumResponse(json: json).data.posts
             for post in posts {
-                if let correspondingDiscussionViewModel = viewModel.newestDiscussions.first(where: { $0.discussion.lastPost?.id == post.id }) {
+                if let correspondingDiscussionViewModel = (viewModel.newestDiscussions + viewModel.stickyDiscussions).first(where: { $0.discussion.lastPost?.id == post.id }) {
                     if let content = post.attributes?.content,
                        case let .comment(comment) = content {
-                        let parser = ContentParser(content: comment, configuration: .init(imageOnTapAction: { _, _ in },
-                                                                                          imageGridDisplayMode: .narrow))
-                        let postExcerptText = parser.getExcerptContent(configuration: .init(textLengthMax: 100, textLineMax: 4, imageCountMax: 0)).text
+                        let parser = ContentParser(content: comment,
+                                                   configuration: .init(imageOnTapAction: { _, _ in },
+                                                                        imageGridDisplayMode: .narrow),
+                                                   updateLayout: nil)
+                        let postExcerptText = parser.getExcerptContent(configuration:
+                            .init(textLengthMax: 100,
+                                  textLineMax: 4,
+                                  imageCountMax: 0)
+                        ).text
                         correspondingDiscussionViewModel.postExcerpt = postExcerptText
                     }
                 }
@@ -102,6 +116,12 @@ struct HomeView: View {
             Task {
                 await load()
             }
+
+            AppGlobalState.shared.$tokenPrepared.sink { change in
+                Task {
+                    await load()
+                }
+            }.store(in: &subscriptions)
         }
     }
 
@@ -211,8 +231,8 @@ struct HomeView: View {
 
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 16) {
-                        ForEach(0 ..< viewModel.newestDiscussions.count, id: \.self) { index in
-                            let viewModel = viewModel.newestDiscussions[index]
+                        ForEach(0 ..< viewModel.stickyDiscussions.count, id: \.self) { index in
+                            let viewModel = viewModel.stickyDiscussions[index]
                             Button {
                                 if AppGlobalState.shared.tokenPrepared {
                                     let near = (viewModel.discussion.attributes?.lastReadPostNumber ?? 1) - 1

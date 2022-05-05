@@ -16,7 +16,7 @@ struct ContentItemDivider: View {
     }
 }
 
-class ContentItemDividerUIView: UIView {
+class ContentItemDividerUIView: UIView & ContentBlockUIView {
     private lazy var dividerLineView: UIView = {
         let line = UIView()
         line.backgroundColor = .gray
@@ -26,19 +26,25 @@ class ContentItemDividerUIView: UIView {
     init() {
         super.init(frame: .zero)
         backgroundColor = .clear
-        snp.makeConstraints { make in
-            make.height.equalTo(50)
-        }
-
         addSubview(dividerLineView)
-        dividerLineView.snp.makeConstraints { make in
-            make.left.right.equalToSuperview()
-            make.height.equalTo(1)
-            make.centerY.equalToSuperview()
-        }
     }
-    
+
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        CGSize(width: size.width, height: 50)
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        dividerLineView.frame = .init(origin: .init(x: 0, y: 24.5), size: .init(width: bounds.width, height: 1))
+        invalidateIntrinsicContentSize()
+    }
+
+    override var intrinsicContentSize: CGSize {
+        return .init(width: bounds.width, height: 50)
     }
 }

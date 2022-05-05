@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import MarkdownKit
+import Regex
 
 indirect enum ContentBlockType: Equatable {
     case paragraph
@@ -58,7 +60,7 @@ enum ContentBlock {
         case let .blockQuote(array):
             return array.map { $0.excerptText }.joined()
         case let .list(contentBlockList):
-            return ""
+            return Self.excerptText(list: contentBlockList)
         case .divider:
             return ""
         case let .codeBlock(optional, content):
@@ -72,6 +74,30 @@ enum ContentBlock {
         case let .table(rows):
             return ""
         }
+    }
+
+    private static func excerptText(list: ContentBlockList) -> String {
+        var text = ""
+
+        for (index, item) in list.items.enumerated() {
+            let leadingCharacter: String = {
+                switch list.listType {
+                case .bullet:
+                    return "\u{2022} "
+                case let .ordered(number):
+                    return "\(number + index). "
+                }
+            }()
+            switch item {
+            case let .text(richText):
+                text.append(leadingCharacter)
+                text.append(richText.plainText)
+                text.append("\n")
+            case let .list(contentBlockList):
+                text.append(excerptText(list: contentBlockList))
+            }
+        }
+        return text
     }
 }
 
@@ -139,5 +165,179 @@ extension ContentBlock: Equatable {
                 return false
             }
         }
+    }
+}
+
+extension ContentBlock {
+    private static let magicStringLink = "MagicStringLink-1650947"
+    private static let magicStringImage = "MagicStringImage-1650947"
+
+    static func parseFrom(block: Block) -> [ContentBlock] {
+        switch block {
+        case .document, .definitionList, .referenceDef:
+            // TODO: Or, we need to parse them as normal text in case...
+            break
+        case let .paragraph(text):
+            // A strong regex to match urls
+            let content = processParagraph(content: text.description.trimmingCharacters(in: .newlines))
+            let markdown = MarkdownParser.standard.parse(content)
+            if case let .document(blocks) = markdown,
+               blocks.count == 1,
+               case let .paragraph(text) = blocks[0] {
+                var paragraphContentBlocks: [ContentBlock] = []
+                var tempText = Text()
+
+                let processTempText = {
+                    if tempText.count > 0 {
+                        if let _ = tempText.rawDescription.first(where: { !$0.isWhitespace && !$0.isNewline }) {
+                            paragraphContentBlocks.append(.paragraph(RichText.parseFrom(text: tempText)))
+                            tempText = Text()
+                        }
+                    }
+                }
+
+                for textFragment in text {
+                    if case let .image(_, url, _) = textFragment, let url = url {
+                        processTempText()
+                        paragraphContentBlocks.append(.image(url: url))
+                    } else if case let .link(text, url, _) = textFragment,
+                              let url = url,
+                              case let .text(t) = text[0],
+                              t == Self.magicStringLink {
+                        processTempText()
+                        paragraphContentBlocks.append(.linkPreview(url))
+                    } else {
+                        tempText.append(fragment: textFragment)
+                    }
+                }
+                processTempText()
+                return paragraphContentBlocks
+            }
+            return []
+        case let .heading(level, text):
+            return [.header(RichText.parseFrom(text: text), level)]
+        case let .blockquote(blocks):
+            return [.blockQuote(blocks.flatMap { ContentBlock.parseFrom(block: $0) })]
+        case .list:
+            // All blocks are .listItem
+            // .listItem's block could be:
+            // 1. single paragraph
+            // 2. A paragraph, with list(s) (When nested)
+            if let list = parseList(block: block) {
+                return [.list(list)]
+            } else {
+                return []
+            }
+        case .listItem:
+            break
+        case let .indentedCode(lines):
+            return [.codeBlock(nil, lines.joined(separator: "\n"))]
+        case let .fencedCode(fence, lines):
+            return [.codeBlock(fence, lines.joined(separator: "\n"))]
+        case let .htmlBlock(lines):
+            // TODO: HTML is not supported in the web, so we will regard html block as a normal code block.
+            return [.codeBlock(nil, lines.joined(separator: "\n"))]
+        case .thematicBreak:
+            return [.divider]
+        case let .table(header, alignments, rows):
+            break
+        case let .custom(customBlock):
+            // TODO: Custom blocks
+            break
+        }
+        return []
+    }
+
+    static func parseFrom(blocks: Blocks) -> [ContentBlock] {
+        let parsedBlocks = blocks.flatMap { parseFrom(block: $0) }
+        return extractContinuousImages(blocks: parsedBlocks)
+    }
+
+    /// Embed naked link and image url in `[]()` and `![]()`, and make all image urls and naked links in a single line.
+    /// We embed all links inside `[]()`, and then re-extract those double embedded links.
+    /// Next add `!` mark before all `.jp(e)g`, `.png` and `.gif` links.
+    /// Finally, make all image urls and naked links in a single line.
+    /// - Parameter content: original markdown content
+    /// - Returns: processed markdown content
+    private static func processParagraph(content: String) -> String {
+        // A strong regex to match urls(and possible alt text)
+        let _us = "(https?:\\/\\/)(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&\\/\\/=]*)"
+
+        // Remove possible alt text
+        let _us_with_alt_text = "\\[(.*?)\\]\\((\(_us))(\\s+.*?)?\\)"
+        let _r0 = try! Regex(string: "\(_us_with_alt_text)", options: .ignoreCase)
+        var content = content.replacingAll(matching: _r0, with: "[$1]($2)")
+
+        let _r1 = try! Regex(string: "(\(_us))", options: .ignoreCase)
+        content = content.replacingAll(matching: _r1, with: "[\(Self.magicStringLink)]($1)")
+
+        let _r2 = try! Regex(string: "\\[(.*?)\\]\\(\\[\(Self.magicStringLink)\\]\\((.*?)\\)\\s*?\\)", options: .ignoreCase)
+        content = content.replacingAll(matching: _r2, with: "[$1]($2)")
+
+        let _r3 = try! Regex(string: "\\[\(Self.magicStringLink)\\]\\((\(_us)\\.(png|jpe?g|gif))\\)", options: .ignoreCase)
+        content = content.replacingAll(matching: _r3, with: "![\(Self.magicStringImage)]($1)")
+
+        return content
+    }
+
+    private static func parseList(block: Block) -> ContentBlockList? {
+        if case let .list(topListType, _, topBlocks) = block {
+            var topListItems: [ContentBlockList.ContentListItem] = []
+            for topBlock in topBlocks {
+                if case let .listItem(_, _, subListBlocks) = topBlock {
+                    for subListBlock in subListBlocks {
+                        if case let .paragraph(text) = subListBlock {
+                            topListItems.append(.text(RichText.parseFrom(text: text)))
+                        } else if case .list = subListBlock, let list = parseList(block: subListBlock) {
+                            topListItems.append(.list(list))
+                        }
+                    }
+                }
+            }
+            return .init(items: topListItems, listType: topListType == nil ? .bullet : .ordered(topListType!))
+        }
+        return nil
+    }
+
+    private static func extractContinuousImages(blocks: [ContentBlock]) -> [ContentBlock] {
+        // Merge images and paragraphs
+        var extractedBlocks: [ContentBlock] = []
+        for block in blocks {
+            if case let .image(currentUrl) = block {
+                if let lastblock = extractedBlocks.last {
+                    if case let .image(url) = lastblock {
+                        _ = extractedBlocks.popLast()
+                        let imagesContentBlock = ContentBlock.images(urls: [url, currentUrl])
+                        extractedBlocks.append(imagesContentBlock)
+                        continue
+                    } else if case let .images(urls) = lastblock {
+                        _ = extractedBlocks.popLast()
+                        var newUrls: [String] = urls
+                        newUrls.append(currentUrl)
+                        let imagesContentBlock = ContentBlock.images(urls: newUrls)
+                        extractedBlocks.append(imagesContentBlock)
+                        continue
+                    }
+                }
+            } else if case let .blockQuote(blocks) = block {
+                extractedBlocks.append(.blockQuote(extractContinuousImages(blocks: blocks)))
+                continue
+            }
+
+//             TODO: Header? This should be processed in attributed string level.
+//            if case let .paragraph(richText) = block {
+//                if let lastblock = finalContentBlocks.last {
+//                    if case let .paragraph(lastRichText) = lastblock {
+//                        _ = finalContentBlocks.popLast()
+//                        let paragraphContentBlock = ContentBlock.paragraph(.concat([lastRichText, .plain("\n\n"), richText]))
+//                        finalContentBlocks.append(paragraphContentBlock)
+//                        continue
+//                    }
+//                }
+//            }
+
+            extractedBlocks.append(block)
+        }
+        return extractedBlocks
     }
 }

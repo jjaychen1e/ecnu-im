@@ -98,7 +98,7 @@ class MainSplitViewController: UIViewController {
         mainSplitViewController.setSplitViewRoot(viewController: primaryNavigationViewController, column: .primary)
 //        mainSplitViewController.setSplitViewRoot(viewController: sidebarViewController, column: .primary)
         mainSplitViewController.setSplitViewRoot(viewController: primaryViewController, column: .primary)
-        mainSplitViewController.maximumPrimaryColumnWidth = 420
+        mainSplitViewController.maximumPrimaryColumnWidth = 500
         mainSplitViewController.preferredPrimaryColumnWidthFraction = 0.5
         mainSplitViewController.setSplitViewRoot(viewController: secondaryNavigationViewController, column: .secondary)
         mainSplitViewController.preferredDisplayMode = .twoDisplaceSecondary

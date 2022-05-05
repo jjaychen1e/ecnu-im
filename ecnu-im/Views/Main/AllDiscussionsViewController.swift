@@ -12,8 +12,8 @@ import UIKit
 
 class AllDiscussionsViewController: UIViewController {
     private var hostingViewController: Any!
-    var splitVC: UISplitViewController?
-    var nvc: UINavigationController?
+    weak var splitVC: UISplitViewController?
+    weak var nvc: UINavigationController?
 
     override func viewDidLoad() {
         super.viewDidLoad()

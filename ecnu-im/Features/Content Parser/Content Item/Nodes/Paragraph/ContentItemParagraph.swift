@@ -18,11 +18,12 @@ struct ContentItemParagraph: View {
     }
 }
 
-class ContentItemParagraphUIView: UIView {
+class ContentItemParagraphUIView: UIView & ContentBlockUIView {
     var attributedText: NSAttributedString
     private lazy var textView: UITextView = {
         let textView = UITextView()
         textView.isEditable = false
+        textView.isSelectable = false
         textView.isScrollEnabled = false
         return textView
     }()
@@ -31,14 +32,28 @@ class ContentItemParagraphUIView: UIView {
         self.attributedText = attributedText
         super.init(frame: .zero)
         textView.attributedText = attributedText
+        textView.textContainerInset = .zero
         addSubview(textView)
-        textView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
     }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        guard size.width > 0 else { return .zero }
+        return CGSize(width: size.width, height: textView.sizeThatFits(size).height)
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        let size = textView.sizeThatFits(bounds.size)
+        textView.frame = .init(origin: .zero, size: size)
+        invalidateIntrinsicContentSize()
+    }
+
+    override var intrinsicContentSize: CGSize {
+        return .init(width: bounds.width, height: textView.frame.size.height)
     }
 }

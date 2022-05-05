@@ -5,138 +5,209 @@
 //  Created by 陈俊杰 on 2022/4/29.
 //
 
+import AVFoundation
+import Cache
 import LinkPresentation
-import RxSwift
 import UIKit
 
-class ContentItemLinkPreview: UIView {
+class ContentItemLinkPreview: UIView & ContentBlockUIView {
     var link: URL
     private var lpView: LPLinkView!
 
-    private var provider: LPMetadataProvider?
-    private let metadataStorage = MetadataStorage()
+    private let metadataStorage = LPLinkMetadataStorage.shared
+    var updateLayout: (() -> Void)?
+
+    private weak var onAppearTimer: Timer?
+
+    private func currentProperSize(boundWidth: CGFloat) -> CGSize {
+        let intrinsicContentSize = lpView.intrinsicContentSize
+        // Aspect ratio
+        let width = min(boundWidth, 450, intrinsicContentSize.width)
+        let height = width / (intrinsicContentSize.width / intrinsicContentSize.height)
+        return CGSize(width: width, height: height)
+    }
+
+    private var currentSize: CGSize?
 
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    private var restrictHeight: CGFloat? {
-        if let host = link.host {
-            let whiteLists230: [String] = [
-                "bilibili.com",
-                "b23.tv",
-                "youtube.com",
-                "youtu.be",
-                "music.163.com",
-                "y.qq.com",
-                "v.qq.com",
-            ]
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        guard size.width > 0 else { return .zero }
 
-            if whiteLists230.first(where: { url in host.contains(url) }) != nil {
-                return 230
-            }
+        var returnSize: CGSize
 
-            let whiteList500: [String] = [
-                "xiaoyuzhoufm.com",
-                "apple.com",
-            ]
-
-            if whiteList500.first(where: { url in host.contains(url) }) != nil {
-                return 500
-            }
+        defer {
+            currentSize = returnSize
         }
 
-        return 50
+        let mappedSize: CGSize? = {
+            if let cachedSize = metadataStorage.size(for: link) {
+                // Keep aspect ratio
+                let width = min(450, size.width, cachedSize.width)
+                let height = width / (cachedSize.width / cachedSize.height)
+                let finalSize = CGSize(width: width, height: height)
+                return finalSize
+            }
+            return nil
+        }()
+
+        let nextSize = currentProperSize(boundWidth: size.width)
+//        print("\(Unmanaged.passUnretained(self).toOpaque()), Next size: \(nextSize), mappedSize: \(mappedSize)")
+        if mappedSize == nil || (nextSize.width > mappedSize!.width || nextSize.height > mappedSize!.height) {
+            metadataStorage.store(size: nextSize, url: link)
+
+            returnSize = nextSize
+            return nextSize
+        } else {
+            returnSize = mappedSize!
+            return mappedSize!
+        }
     }
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        if let lpView = lpView {
-            let threshold: CGFloat = 450
-            if frame.size.width > threshold {
-                lpView.snp.remakeConstraints { make in
-                    make.top.bottom.equalToSuperview()
-                    make.centerX.equalToSuperview()
-                    make.width.equalTo(threshold)
-                    if let restrictHeight = restrictHeight {
-                        make.height.lessThanOrEqualTo(restrictHeight)
-                    }
-                }
-            } else {
-                lpView.snp.remakeConstraints { make in
-                    make.edges.equalToSuperview()
-                    if let restrictHeight = restrictHeight {
-                        make.height.lessThanOrEqualTo(restrictHeight)
-                    }
-                }
-            }
-        }
-    }
-
-    init(link: URL) {
-        self.link = link
-        super.init(frame: .zero)
-        let dumbView = UIView()
-        addSubview(dumbView)
-        dumbView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
-
-        let lpView = LPLinkView(url: link)
-        self.lpView = lpView
-        dumbView.addSubview(lpView)
-        lpView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-            if let restrictHeight = restrictHeight {
-                make.height.lessThanOrEqualTo(restrictHeight)
-            }
-        }
-
-        Task {
-            if let metadata = metadataStorage.metadata(for: link) {
-                lpView.metadata = metadata
-            } else {
-                let metadataProvider = LPMetadataProvider()
-                self.provider = metadataProvider
-                if let metadata = try? await metadataProvider.startFetchingMetadata(for: link) {
-                    lpView.metadata = metadata
-                    setNeedsLayout()
-                    metadataStorage.store(metadata)
-                }
-            }
+        let oldCurrentSize = currentSize
+        let size = sizeThatFits(bounds.size)
+        lpView.frame = .init(origin: .init(x: (bounds.width - size.width) / 2,
+                                           y: 0),
+                             size: size)
+//        print("\(Unmanaged.passUnretained(self).toOpaque()), layoutSubviews: \(size)")
+        if oldCurrentSize != currentSize {
+//            print("\(Unmanaged.passUnretained(self).toOpaque()), updateLayout1: \(currentSize!), \(oldCurrentSize)")
+            updateLayout?()
+            setNeedsLayout()
+//            print("\(Unmanaged.passUnretained(self).toOpaque()), updateLayout2: \(currentSize!), \(oldCurrentSize)")
         }
     }
 
     deinit {
-        provider?.cancel()
+        onAppearTimer?.invalidate()
+        onAppearTimer = nil
+    }
+
+    private func initTimer() {
+        DispatchQueue.main.async { [weak self] in
+            if let self = self {
+                self.onAppearTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+                    if let self = self {
+                        var v: UIView = self
+                        var frame = self.frame
+                        while let superview = v.superview {
+                            if let scrollView = superview as? UIScrollView {
+                                if let tableView = superview as? UITableView,
+                                   let cell = v as? UITableViewCell,
+                                   tableView.visibleCells.contains(cell) {
+                                    frame = self.superview!.convert(frame, to: scrollView)
+                                    var screenFrame = scrollView.frame
+                                    screenFrame.origin = scrollView.contentOffset
+                                    if frame.intersects(screenFrame) {
+//                                        print("intersect\(Unmanaged.passUnretained(self).toOpaque()), \(Unmanaged.passUnretained(scrollView).toOpaque()). \(frame), \(screenFrame)")
+//                                        print("Request: \(Unmanaged.passUnretained(self).toOpaque()), link: \(self.link)")
+                                        LPMetadataLoader.shared.request(url: self.link) { [weak self] metadata in
+                                            if let self = self, let metadata = metadata {
+                                                DispatchQueue.main.async { [weak self] in
+                                                    if let self = self {
+                                                        self.lpView.metadata = metadata
+                                                        self.setNeedsLayout()
+                                                        print("\(Unmanaged.passUnretained(self).toOpaque()), set metadata")
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        self.onAppearTimer?.invalidate()
+                                        self.onAppearTimer = nil
+                                    }
+                                }
+                                break
+                            } else {
+                                v = superview
+                            }
+                        }
+                    }
+                }
+                self.onAppearTimer?.fire()
+            }
+        }
+    }
+
+    init(link: URL, updateLayout: (() -> Void)?) {
+        self.link = link
+        self.updateLayout = updateLayout
+
+        super.init(frame: .zero)
+        let lpView = LPLinkView(url: link)
+        self.lpView = lpView
+        addSubview(lpView)
+
+        metadataStorage.metadata(for: link) { [weak self] metadata in
+            if let self = self {
+                if let metadata = metadata {
+                    DispatchQueue.main.async { [weak self] in
+                        if let self = self {
+                            self.lpView.metadata = metadata
+                            self.setNeedsLayout()
+                        }
+                    }
+                } else {
+                    self.initTimer()
+                }
+            }
+        }
     }
 }
 
-struct MetadataStorage {
-    private let storage = UserDefaults.standard
+struct LPLinkMetadataStorage {
+    private static let lpLinkMetadataDiskConfig = DiskConfig(name: "LPMetadataStorage", expiry: .never, maxSize: 10000)
+    private static let lpLinkPreviewSizeDiskConfig = DiskConfig(name: "LPLinkPreviewSizeStorage", expiry: .never, maxSize: 10000)
+    private static let lpLinkMetadataMemoryConfig = MemoryConfig(expiry: .never, countLimit: 1000, totalCostLimit: 1000)
+    private static let lpLinkPreviewSizeMemoryConfig = MemoryConfig(expiry: .never, countLimit: 1000, totalCostLimit: 1000)
+
+    static let shared = LPLinkMetadataStorage()
+
+    private let lpLinkMetadataStorage = try? Cache.Storage<URL, Data>(
+        diskConfig: lpLinkMetadataDiskConfig,
+        memoryConfig: lpLinkMetadataMemoryConfig,
+        transformer: TransformerFactory.forData()
+    )
+
+    private let sizeStorage = try? Cache.Storage<URL, CGSize>(
+        diskConfig: lpLinkPreviewSizeDiskConfig,
+        memoryConfig: lpLinkPreviewSizeMemoryConfig,
+        transformer: TransformerFactory.forCodable(ofType: CGSize.self)
+    )
+
     func store(_ metadata: LPLinkMetadata) {
-        do {
-            let data = try NSKeyedArchiver.archivedData(withRootObject: metadata, requiringSecureCoding: true)
-            var metadatas = storage.dictionary(forKey: "Metadata") as? [String: Data] ?? [String: Data]()
-            while metadatas.count > 200 {
-                metadatas.removeValue(forKey: metadatas.randomElement()!.key)
-            }
-            metadatas[metadata.originalURL!.absoluteString] = data
-            storage.set(metadatas, forKey: "Metadata")
-        } catch {
-            print("Failed storing metadata with error \(error as NSError)")
+        if let storage = lpLinkMetadataStorage,
+           let url = metadata.originalURL,
+           let data = try? NSKeyedArchiver.archivedData(withRootObject: metadata, requiringSecureCoding: true) {
+            try! storage.setObject(data, forKey: url, expiry: .never)
         }
     }
 
     func metadata(for url: URL) -> LPLinkMetadata? {
-        guard let metadatas = storage.dictionary(forKey: "Metadata") as? [String: Data] else { return nil }
-        guard let data = metadatas[url.absoluteString] else { return nil }
-        do {
-            return try NSKeyedUnarchiver.unarchivedObject(ofClass: LPLinkMetadata.self, from: data)
-        } catch {
-            print("Failed to unarchive metadata with error \(error as NSError)")
-            return nil
+        guard let data = try? lpLinkMetadataStorage?.object(forKey: url) else { return nil }
+        return try? NSKeyedUnarchiver.unarchivedObject(ofClass: LPLinkMetadata.self, from: data)
+    }
+
+    func metadata(for url: URL, completion: @escaping (LPLinkMetadata?) -> Void) {
+        lpLinkMetadataStorage?.async.object(forKey: url) { result in
+            if case let .value(data) = result {
+                let metadata = try? NSKeyedUnarchiver.unarchivedObject(ofClass: LPLinkMetadata.self, from: data)
+                completion(metadata)
+            } else {
+                completion(nil)
+            }
         }
+    }
+
+    func store(size: CGSize, url: URL) {
+        try? sizeStorage?.setObject(size, forKey: url, expiry: .never)
+    }
+
+    func size(for url: URL) -> CGSize? {
+        try? sizeStorage?.object(forKey: url)
     }
 }

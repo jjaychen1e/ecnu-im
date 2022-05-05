@@ -124,55 +124,55 @@ extension UISplitViewController {
 
     func setSplitViewRoot(viewController: UIViewController, column: UISplitViewController.Column, immediatelyShow: Bool = false, animated: Bool = false) {
         if let nvc = self.viewController(for: column) as? UINavigationController {
-            if configuredViewControllers == nil || !configuredViewControllers!.contains(viewController) {
-                // TODO: When app is going to compact mode, this should change as well...
-                if configuredViewControllers == nil {
-                    configuredViewControllers = WeakArray<UIViewController>([])
-                }
-                configuredViewControllers!.append(viewController)
-                configuredViewControllers!.clearNilElements()
-
-                if column == .supplementary {
-                    let barButtonItem = UIBarButtonItem.supplementaryToggleSidebarBarButtonItem(splitViewController: self)
-                    let enterCompactAction = { [weak barButtonItem] in
-                        // TODO: Can I remove this?
-                        viewController.navigationItem.setHidesBackButton(true, animated: false)
-                        if let barButtonItem = barButtonItem {
-                            viewController.navigationItem.prependLeftBarButtonItems(barButtonItem)
-                        }
-                    }
-
-                    let exitCompactAction = { [weak barButtonItem] in
-                        viewController.navigationItem.setHidesBackButton(false, animated: false)
-                        if let barButtonItem = barButtonItem {
-                            if let index = viewController.navigationItem.leftBarButtonItems?.firstIndex(of: barButtonItem) {
-                                viewController.navigationItem.leftBarButtonItems?.remove(at: index)
-                            }
-                        }
-                    }
-
-                    if traitCollection.horizontalSizeClass == .compact {
-                        enterCompactAction()
-                    }
-
-                    if horizontalSizeClassObservations == nil {
-                        horizontalSizeClassObservations = WeakArray<HorizontalSizeClassObservation>([])
-                    }
-                    horizontalSizeClassObservations!.append(.init(enter: enterCompactAction, exit: exitCompactAction))
-                } else if column == .primary {
-//                    viewController.navigationItem.prependLeftBarButtonItems(.primaryToggleSidebarBarButtonItem(splitViewController: self))
-                } else if column == .secondary {
-//                    let appearance = UINavigationBarAppearance()
-//                    appearance.shadowColor = nil
-//                    appearance.configureWithTransparentBackground()
-//                    viewController.navigationItem.scrollEdgeAppearance = appearance
-//                    viewController.navigationItem.standardAppearance = appearance
-//                    viewController.navigationItem.setHidesBackButton(true, animated: false)
-//                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
-//                        nvc.setNavigationBarHidden(true, animated: false)
+//            if configuredViewControllers == nil || !configuredViewControllers!.contains(viewController) {
+//                // TODO: When app is going to compact mode, this should change as well...
+//                if configuredViewControllers == nil {
+//                    configuredViewControllers = WeakArray<UIViewController>([])
+//                }
+//                configuredViewControllers!.append(viewController)
+//                configuredViewControllers!.clearNilElements()
+//
+//                if column == .supplementary {
+//                    let barButtonItem = UIBarButtonItem.supplementaryToggleSidebarBarButtonItem(splitViewController: self)
+//                    let enterCompactAction = { [weak barButtonItem] in
+//                        // TODO: Can I remove this?
+//                        viewController.navigationItem.setHidesBackButton(true, animated: false)
+//                        if let barButtonItem = barButtonItem {
+//                            viewController.navigationItem.prependLeftBarButtonItems(barButtonItem)
+//                        }
 //                    }
-                }
-            }
+//
+//                    let exitCompactAction = { [weak barButtonItem] in
+//                        viewController.navigationItem.setHidesBackButton(false, animated: false)
+//                        if let barButtonItem = barButtonItem {
+//                            if let index = viewController.navigationItem.leftBarButtonItems?.firstIndex(of: barButtonItem) {
+//                                viewController.navigationItem.leftBarButtonItems?.remove(at: index)
+//                            }
+//                        }
+//                    }
+//
+//                    if traitCollection.horizontalSizeClass == .compact {
+//                        enterCompactAction()
+//                    }
+//
+//                    if horizontalSizeClassObservations == nil {
+//                        horizontalSizeClassObservations = WeakArray<HorizontalSizeClassObservation>([])
+//                    }
+//                    horizontalSizeClassObservations!.append(.init(enter: enterCompactAction, exit: exitCompactAction))
+//                } else if column == .primary {
+////                    viewController.navigationItem.prependLeftBarButtonItems(.primaryToggleSidebarBarButtonItem(splitViewController: self))
+//                } else if column == .secondary {
+////                    let appearance = UINavigationBarAppearance()
+////                    appearance.shadowColor = nil
+////                    appearance.configureWithTransparentBackground()
+////                    viewController.navigationItem.scrollEdgeAppearance = appearance
+////                    viewController.navigationItem.standardAppearance = appearance
+////                    viewController.navigationItem.setHidesBackButton(true, animated: false)
+////                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+////                        nvc.setNavigationBarHidden(true, animated: false)
+////                    }
+//                }
+//            }
 
             nvc.setSplitViewRoot(viewController: viewController, animated: animated)
             if immediatelyShow {
@@ -195,6 +195,7 @@ extension UINavigationController {
                 viewController.navigationItem.scrollEdgeAppearance = UINavigationBarAppearance()
             }
         }
+        popToRootViewController(animated: false)
         setViewControllers(viewControllers, animated: animated)
     }
 }

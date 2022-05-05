@@ -10,6 +10,15 @@
       }
     },
     {
+      "identity" : "cache",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/hyperoslo/Cache",
+      "state" : {
+        "revision" : "c7f4d633049c3bd649a353bad36f6c17e9df085f",
+        "version" : "6.0.0"
+      }
+    },
+    {
       "identity" : "down",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/johnxnguyen/Down",
@@ -61,6 +70,15 @@
       "state" : {
         "revision" : "d458564516e5676af9c70b4f4b2a9178294f1bc6",
         "version" : "5.0.1"
+      }
+    },
+    {
+      "identity" : "swift-collections",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-collections.git",
+      "state" : {
+        "branch" : "feature/SortedCollections",
+        "revision" : "8b1436f9283c299d060fe6e07b781a431c09846f"
       }
     },
     {

@@ -23,3 +23,12 @@ struct FlarumUser {
     var id: String
     var attributes: FlarumUserAttributes
 }
+
+extension FlarumUser {
+    var avatarURL: URL? {
+        if let url = attributes.avatarUrl {
+            return URL(string: url)
+        }
+        return nil
+    }
+}

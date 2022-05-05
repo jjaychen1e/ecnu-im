@@ -34,59 +34,28 @@ private struct DiscussionViewPostCellPlaceholder: View {
     }
 }
 
-final class PostPlaceholderCell: UICollectionViewCell {
-    override func updateConfiguration(using state: UICellConfigurationState) {
-        contentConfiguration = PostPlaceholderCellConfiguration().updated(for: state)
-    }
-}
+final class PostPlaceholderCell: UITableViewCell {
+    static let identifier = "PostPlaceholderCell"
+    private var hostingVC: UIHostingController<DiscussionViewPostCellPlaceholder>?
 
-struct PostPlaceholderCellConfiguration: UIContentConfiguration, Hashable {
-    func makeContentView() -> UIView & UIContentView {
-        PostPlaceholderCellContentView(configuration: self)
-    }
-
-    func updated(for state: UIConfigurationState) -> PostPlaceholderCellConfiguration {
-        guard state is UICellConfigurationState else {
-            return self
-        }
-
-        return self
-    }
-}
-
-class PostPlaceholderCellContentView: UIView, UIContentView {
-    private var hostingVC: UIHostingController<DiscussionViewPostCellPlaceholder>!
-    
-    private var currentConfiguration: PostPlaceholderCellConfiguration!
-    var configuration: UIContentConfiguration {
-        get { currentConfiguration }
-        set {
-            guard let newConfiguration = newValue as? PostPlaceholderCellConfiguration else { return }
-            apply(configuration: newConfiguration)
+    func configure() {
+        if hostingVC == nil {
+            let hostingVC = UIHostingController(rootView: DiscussionViewPostCellPlaceholder())
+            self.hostingVC = hostingVC
+            contentView.addSubview(hostingVC.view)
         }
     }
 
-    @available(*, unavailable)
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+    let margin: CGFloat = 8.0
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        let size = hostingVC?.view.systemLayoutSizeFitting(CGSize(width: bounds.width, height: .greatestFiniteMagnitude)) ?? .zero
+        hostingVC?.view.frame = .init(origin: .init(x: 0, y: margin), size: size)
     }
 
-    init(configuration: PostPlaceholderCellConfiguration) {
-        super.init(frame: .zero)
-        setViewHierarchy()
-        apply(configuration: configuration)
-    }
-
-    private func setViewHierarchy() {
-        hostingVC = UIHostingController(rootView: DiscussionViewPostCellPlaceholder())
-        addSubview(hostingVC.view)
-        hostingVC.view.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
-    }
-
-    func apply(configuration: PostPlaceholderCellConfiguration) {
-        guard currentConfiguration != configuration else { return }
-        currentConfiguration = configuration
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        let s = hostingVC?.view.systemLayoutSizeFitting(CGSize(width: size.width, height: .greatestFiniteMagnitude)) ?? .zero
+        return CGSize(width: s.width, height: s.height + margin * 2)
     }
 }

@@ -102,7 +102,7 @@ struct FlarumResponse {
                                     attributes["content"] = JSON(dictionaryLiteral: ("discussionRenamed", json))
                                 } else if attributes["contentType"] == "discussionLocked" {
                                     var json = JSON()
-                                    json["_0"] = attributes["content"]
+                                    json["_0"] = attributes["content"]["locked"]
                                     attributes["content"] = JSON(dictionaryLiteral: ("discussionLocked", json))
                                 } else {
                                     // discussionSuperStickied, discussionMerged, recipientsModified

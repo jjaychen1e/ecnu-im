@@ -39,49 +39,72 @@ struct PostContentItemsView: View {
     }
 }
 
-struct PostContentView: View {
-    @State var content: String
-    @State var contentItems: [Any] = []
-
-    init(content: String) {
-        self.content = content
-    }
-
-    var body: some View {
-        PostContentItemsView(contentItems: $contentItems)
-            .onLoad {
-                let parseConfiguration = ParseConfiguration(imageOnTapAction: { ImageBrowser.shared.present(imageURLs: $1, selectedImageIndex: $0) },
-                                                            imageGridDisplayMode: .narrow)
-                let contentParser = ContentParser(content: content, configuration: parseConfiguration)
-                let newContentItems = contentParser.parse()
-                contentItems = newContentItems
-            }
-    }
-}
+// struct PostContentView: View {
+//    @State var content: String
+//    @State var contentItems: [Any] = []
+//
+//    init(content: String) {
+//        self.content = content
+//    }
+//
+//    var body: some View {
+//        PostContentItemsView(contentItems: $contentItems)
+//            .onLoad {
+//                let parseConfiguration = ParseConfiguration(imageOnTapAction: { ImageBrowser.shared.present(imageURLs: $1, selectedImageIndex: $0) },
+//                                                            imageGridDisplayMode: .narrow)
+//                let contentParser = ContentParser(content: content, configuration: parseConfiguration)
+//                let newContentItems = contentParser.parse()
+//                contentItems = newContentItems
+//            }
+//    }
+// }
 
 class PostContentItemsUIView: UIView {
     private var views: [UIView]
-    private var stackView: UIStackView = {
-        let stackView = UIStackView()
-        stackView.spacing = 4
-        stackView.axis = .vertical
-        stackView.alignment = .fill
-        stackView.distribution = .fill
-        return stackView
-    }()
 
     init(contentItems: [UIView]) {
         views = contentItems
         super.init(frame: .zero)
 
-        addSubview(stackView)
-        stackView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
-
         for view in views {
-            stackView.addArrangedSubview(view)
+            addSubview(view)
         }
+    }
+
+    private let margin: CGFloat = 10.0
+    private var totalHeight: CGFloat = 0.0
+
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        guard size.width > 0 else { return .zero }
+        var totalHeight = 0.0
+        for view in views {
+            let size = view.sizeThatFits(.init(width: size.width, height: .infinity))
+            totalHeight += size.height + margin
+        }
+        totalHeight -= margin
+        self.totalHeight = totalHeight
+        return CGSize(width: size.width, height: totalHeight)
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        guard bounds.width > 0 else { return }
+
+        var totalHeight = 0.0
+        for view in views {
+            let size = view.sizeThatFits(.init(width: bounds.width, height: .infinity))
+            let frame = CGRect(origin: .init(x: (bounds.width - size.width) / 2.0, y: totalHeight), size: size)
+            view.frame = frame
+            totalHeight += size.height + margin
+        }
+    }
+
+    override func systemLayoutSizeFitting(_ targetSize: CGSize, withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority, verticalFittingPriority: UILayoutPriority) -> CGSize {
+        return .zero
+    }
+
+    override var intrinsicContentSize: CGSize {
+        return .init(width: bounds.width, height: totalHeight)
     }
 
     @available(*, unavailable)

@@ -9,8 +9,8 @@ import SwiftUI
 import UIKit
 
 class HomeViewController: NoNavigationBarViewController {
-    var splitVC: UISplitViewController?
-    var nvc: UINavigationController?
+    weak var splitVC: UISplitViewController?
+    weak var nvc: UINavigationController?
 
     override func viewDidLoad() {
         super.viewDidLoad()

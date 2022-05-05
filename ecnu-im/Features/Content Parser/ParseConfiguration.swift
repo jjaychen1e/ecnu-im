@@ -10,7 +10,7 @@ import Foundation
 struct ParseConfiguration {
     var imageOnTapAction: (Int, [URL]) -> Void
 
-    enum ImageGridDisplayMode {
+    enum ImageGridDisplayMode: Equatable {
         case wide
         case narrow
     }

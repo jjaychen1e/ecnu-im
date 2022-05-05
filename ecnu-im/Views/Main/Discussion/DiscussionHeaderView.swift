@@ -35,26 +35,23 @@ struct DiscussionHeaderView: View {
         .overlay(
             Group {
                 if let splitVC = splitVC {
-                    if splitVC.traitCollection.horizontalSizeClass == .compact {
-                        Button(action: {
-                            if let nvc = nvc {
-                                if nvc.viewControllers.count == 1 {
-                                    splitVC.show(.primary)
-                                } else {
-                                    nvc.popViewController(animated: true)
-                                }
+                    Button(action: {
+                        if let nvc = nvc {
+                            if nvc.viewControllers.count == 1 {
+                                splitVC.show(.primary)
+                            } else {
+                                nvc.popViewController(animated: true)
                             }
-                        }, label: {
-                            Image(systemName: "arrow.backward.circle.fill")
-                                .font(.system(size: 30, weight: .medium))
-                                .foregroundColor(Asset.DynamicColors.dynamicWhite.swiftUIColor)
-                        })
-                        .offset(x: 8, y: 0)
-                    }
+                        }
+                    }, label: {
+                        Image(systemName: "arrow.backward.circle.fill")
+                            .font(.system(size: 30, weight: .medium))
+                            .foregroundColor(Asset.DynamicColors.dynamicWhite.swiftUIColor)
+                    })
+                    .offset(x: 8, y: 0)
                 }
             },
             alignment: .topLeading
         )
     }
 }
-

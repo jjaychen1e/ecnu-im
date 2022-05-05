@@ -59,9 +59,15 @@ private class ContentItemGridImageUIView: UIView {
     var index: Int
     var onTapAction: (Int, [URL]) -> Void
 
+    var imageView: UIImageView!
+
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    deinit {
+        imageView.kf.cancelDownloadTask()
     }
 
     init(urls: [URL], index: Int, onTapAction: @escaping (Int, [URL]) -> Void) {
@@ -71,13 +77,17 @@ private class ContentItemGridImageUIView: UIView {
         super.init(frame: .zero)
 
         let imageView = UIImageView(frame: .zero)
+        self.imageView = imageView
         imageView.contentMode = .scaleAspectFill
         addSubview(imageView)
         imageView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
         imageView.kf.indicatorType = .activity
-        imageView.kf.setImage(with: urls[index], options: [.transition(.fade(0.2))]) { _ in
+        imageView.kf.setImage(with: urls[index], placeholder: urls[index].hashedColor.image(), options: [.transition(.fade(0.2))]) { [weak self] result in
+            if case let .success(value) = result {
+                ImageSizeStorage.shared.store(size: value.image.size, url: urls[index])
+            }
         }
 
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(imageTapped(tapGestureRecognizer:)))
@@ -90,55 +100,64 @@ private class ContentItemGridImageUIView: UIView {
     }
 }
 
-class ContentItemImagesGridUIView: UIView {
+class ContentItemImagesGridUIView: UIView & ContentBlockUIView {
     var urls: [URL]
     var configuration: ParseConfiguration
 
-    private lazy var verticalStackView: UIStackView = {
-        let stackView = UIStackView()
-        stackView.spacing = 4
-        stackView.axis = .vertical
-        stackView.alignment = .fill
-        stackView.distribution = .fillEqually
-        return stackView
-    }()
+    private var imageViews: [ContentItemGridImageUIView] = []
 
-    private func horizontalStackView(imageIndices: [Int]) -> UIStackView {
-        let stackView = UIStackView()
-        stackView.spacing = 4
-        stackView.axis = .horizontal
-        stackView.alignment = .fill
-        stackView.distribution = .fillEqually
-
-        for imageIndex in imageIndices {
-            let imageView = ContentItemGridImageUIView(urls: urls, index: imageIndex, onTapAction: configuration.imageOnTapAction)
-            imageView.clipsToBounds = true
-            imageView.snp.makeConstraints { make in
-                make.width.equalTo(imageView.snp.height)
-            }
-            stackView.addArrangedSubview(imageView)
-        }
-
-        return stackView
+    private let margin: CGFloat = 4.0
+    private let columnCount = 3
+    private var lineCount: CGFloat {
+        ceil(CGFloat(urls.count) / CGFloat(columnCount))
     }
 
-    init(urls: [URL], configuration: ParseConfiguration) {
+    private func imageWidth(frameWidth: CGFloat) -> CGFloat {
+        (frameWidth - CGFloat(columnCount - 1) * margin) / CGFloat(columnCount)
+    }
+
+    private func imageSize(frameWidth: CGFloat) -> CGSize {
+        let imageWidth = imageWidth(frameWidth: frameWidth)
+        return CGSize(width: imageWidth, height: imageWidth)
+    }
+
+    private var currentSize: CGSize = .zero
+
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        guard size.width > 0 else { return .zero }
+        return CGSize(width: size.width, height: lineCount * (imageWidth(frameWidth: size.width) + margin) - margin)
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        for i in 0 ..< urls.count {
+            let lineOffset = i / columnCount
+            let inlineOffset = i % columnCount
+            let imageWidth = imageWidth(frameWidth: bounds.width)
+            imageViews[i].frame = .init(origin: .init(x: (imageWidth + margin) * CGFloat(inlineOffset),
+                                                      y: (imageWidth + margin) * CGFloat(lineOffset)),
+                                        size: imageSize(frameWidth: bounds.width))
+        }
+        currentSize = sizeThatFits(bounds.size)
+        invalidateIntrinsicContentSize()
+    }
+
+    init(urls: [URL], configuration: ParseConfiguration, updateLayout: (() -> Void)?) {
         self.urls = urls
         self.configuration = configuration
         super.init(frame: .zero)
-        addSubview(verticalStackView)
-        verticalStackView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
 
-        let size = 3
-        stride(from: 0, to: urls.count, by: size).map {
-            Array($0 ..< min(urls.count, $0 + size))
-        }.map {
-            horizontalStackView(imageIndices: $0)
-        }.forEach { horizontalStackView in
-            verticalStackView.addArrangedSubview(horizontalStackView)
+        imageViews = (0 ..< urls.count).map {
+            let imageView = ContentItemGridImageUIView(urls: urls, index: $0, onTapAction: configuration.imageOnTapAction)
+            addSubview(imageView)
+            imageView.clipsToBounds = true
+            return imageView
         }
+    }
+
+    override var intrinsicContentSize: CGSize {
+        let size = currentSize
+        return size
     }
 
     @available(*, unavailable)
