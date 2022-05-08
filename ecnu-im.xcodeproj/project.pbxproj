@@ -93,6 +93,7 @@
 		636BE17D27F81FF500283943 /* SwiftGen+SwiftUI+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 636BE17C27F81FF500283943 /* SwiftGen+SwiftUI+Extension.swift */; };
 		636BE18227F8287900283943 /* Introspect+UINavigationViewController+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 636BE18127F8287900283943 /* Introspect+UINavigationViewController+Extension.swift */; };
 		636BE18627F84D5C00283943 /* Introspect+UISplitViewController+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 636BE18527F84D5C00283943 /* Introspect+UISplitViewController+Extension.swift */; };
+		636C450D28276F4200EDE6F5 /* ECNUTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 636C450C28276F4200EDE6F5 /* ECNUTextView.swift */; };
 		63706E1127F5EDFE00BE3A48 /* SwiftyJSON+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63706E1027F5EDFE00BE3A48 /* SwiftyJSON+Extension.swift */; };
 		63706E1327F5F08800BE3A48 /* PostAuthorAvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63706E1227F5F08800BE3A48 /* PostAuthorAvatarView.swift */; };
 		63706E1527F6BA9700BE3A48 /* View+ViewDidLoad+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63706E1427F6BA9700BE3A48 /* View+ViewDidLoad+Extension.swift */; };
@@ -243,6 +244,7 @@
 		636BE17C27F81FF500283943 /* SwiftGen+SwiftUI+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SwiftGen+SwiftUI+Extension.swift"; sourceTree = "<group>"; };
 		636BE18127F8287900283943 /* Introspect+UINavigationViewController+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Introspect+UINavigationViewController+Extension.swift"; sourceTree = "<group>"; };
 		636BE18527F84D5C00283943 /* Introspect+UISplitViewController+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Introspect+UISplitViewController+Extension.swift"; sourceTree = "<group>"; };
+		636C450C28276F4200EDE6F5 /* ECNUTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ECNUTextView.swift; sourceTree = "<group>"; };
 		63706E1027F5EDFE00BE3A48 /* SwiftyJSON+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SwiftyJSON+Extension.swift"; sourceTree = "<group>"; };
 		63706E1227F5F08800BE3A48 /* PostAuthorAvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostAuthorAvatarView.swift; sourceTree = "<group>"; };
 		63706E1427F6BA9700BE3A48 /* View+ViewDidLoad+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+ViewDidLoad+Extension.swift"; sourceTree = "<group>"; };
@@ -716,6 +718,14 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
+		636C450B28276F2D00EDE6F5 /* Others */ = {
+			isa = PBXGroup;
+			children = (
+				636C450C28276F4200EDE6F5 /* ECNUTextView.swift */,
+			);
+			path = Others;
+			sourceTree = "<group>";
+		};
 		637751792822862800BE52D5 /* Others */ = {
 			isa = PBXGroup;
 			children = (
@@ -728,6 +738,7 @@
 		637751B6281D144500A13241 /* Discussion */ = {
 			isa = PBXGroup;
 			children = (
+				636C450B28276F2D00EDE6F5 /* Others */,
 				637751B9281D154700A13241 /* DiscussionHeaderView.swift */,
 				637751B7281D145600A13241 /* DiscussionHeaderViewController.swift */,
 				634C470A27FABC3A00FC591D /* DiscussionViewController.swift */,
@@ -1315,6 +1326,7 @@
 				6349B19127EEABD20002E89A /* APIProvider.swift in Sources */,
 				63C607D7281E4FBB0008E2F3 /* SelfSizingTextView.swift in Sources */,
 				634A57572816EB6E0022B27E /* ContentTextStyleStack.swift in Sources */,
+				636C450D28276F4200EDE6F5 /* ECNUTextView.swift in Sources */,
 				6377517D282289A600BE52D5 /* Pool.swift in Sources */,
 				636BE18227F8287900283943 /* Introspect+UINavigationViewController+Extension.swift in Sources */,
 				636BE17527F7FE0C00283943 /* ThemeManager.swift in Sources */,

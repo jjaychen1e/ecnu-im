@@ -250,10 +250,8 @@ extension RichText {
             styleStack.pop()
             return result
         case let .link(text, url):
-            styleStack.push(.textColor(.systemBlue))
             styleStack.push(.link(url))
             let result = text.attributedString(styleStack: styleStack)
-            styleStack.pop()
             styleStack.pop()
             return result
         case let .concat(texts):

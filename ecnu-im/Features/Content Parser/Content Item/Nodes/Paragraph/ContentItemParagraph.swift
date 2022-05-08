@@ -20,10 +20,9 @@ struct ContentItemParagraph: View {
 
 class ContentItemParagraphUIView: UIView & ContentBlockUIView {
     var attributedText: NSAttributedString
-    private lazy var textView: UITextView = {
-        let textView = UITextView()
+    private lazy var textView: ECNUTextView = {
+        let textView = ECNUTextView()
         textView.isEditable = false
-        textView.isSelectable = false
         textView.isScrollEnabled = false
         return textView
     }()

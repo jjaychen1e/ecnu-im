@@ -96,6 +96,12 @@ final class ContentTextStyleStack {
                 if link == nil {
                     link = url
                 }
+                if textColor == nil {
+                    textColor = .systemTeal
+                }
+                if underline == nil {
+                    underline = true
+                }
             }
         }
 
@@ -117,7 +123,9 @@ final class ContentTextStyleStack {
             parsedFontSize = round(parsedFontSize * 0.85)
         }
 
-        if mono != nil, mono!, bold != nil, bold!, italic != nil, italic! {
+        if link != nil {
+            attributes[NSAttributedString.Key.font] = Font.medium(parsedFontSize)
+        } else if mono != nil, mono!, bold != nil, bold!, italic != nil, italic! {
             attributes[NSAttributedString.Key.font] = Font.semiboldItalicMonospace(parsedFontSize)
         } else if mono != nil, mono!, italic != nil, italic! {
             attributes[NSAttributedString.Key.font] = Font.italicMonospace(parsedFontSize)
@@ -140,7 +148,12 @@ final class ContentTextStyleStack {
         }
 
         if underline != nil, underline! {
-            attributes[NSAttributedString.Key.underlineStyle] = NSUnderlineStyle.single.rawValue as NSNumber
+            if link != nil {
+                attributes[NSAttributedString.Key.underlineStyle] = NSUnderlineStyle.single.rawValue
+                attributes[NSAttributedString.Key.underlineColor] = UIColor.gray.withAlphaComponent(0.5)
+            } else {
+                attributes[NSAttributedString.Key.underlineStyle] = NSUnderlineStyle.single.rawValue
+            }
         }
 
         if let textColor = textColor {
@@ -152,7 +165,7 @@ final class ContentTextStyleStack {
         if let link = link {
             attributes[NSAttributedString.Key.link] = link
         }
-//
+
         if let markerColor = markerColor {
             attributes[NSAttributedString.Key(rawValue: ContentMarkerColorAttribute)] = markerColor
         }
