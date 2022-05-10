@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftSoup
+import UIKit
 
 struct FlarumPostAttributes: Decodable {
     enum FlarumPostContent: Decodable {
@@ -26,6 +27,7 @@ struct FlarumPostAttributes: Decodable {
     enum CodingKeys: String, CodingKey {
         case number
         case createdAt
+        case editedAt
         case contentType
         case contentHtml
         case content
@@ -40,6 +42,7 @@ struct FlarumPostAttributes: Decodable {
 
     var number: Int? // Possible nil
     var createdAt: String
+    var editedAt: String?
     var contentType: FlarumPostContentType?
     var contentHtml: String?
     var content: FlarumPostContent? // Only available when login, and should be decoded manually.
@@ -58,10 +61,19 @@ struct FlarumPostAttributes: Decodable {
         let dateString = createdAt.prefix(25)
         return dateFormatter.date(from: String(dateString))
     }
+
+    var editedDate: Date? {
+        // date format, example: 2022-03-23T13:37:49+00:00
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+        if let dateString = editedAt?.prefix(25) {
+            return dateFormatter.date(from: String(dateString))
+        }
+        return nil
+    }
 }
 
 struct FlarumPostRelationships {
-    
     enum Relationship: CaseIterable {
         case user
         case discussion
@@ -74,14 +86,14 @@ struct FlarumPostRelationships {
     var discussion: FlarumDiscussion?
     var likes: [FlarumUser]?
     var reactions: [FlarumPostReaction]?
-    var mentionedBy: [FlarumUser]?
+    var mentionedBy: [FlarumPost]?
 }
 
 class FlarumPost: Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
-    
+
     init(id: String, attributes: FlarumPostAttributes? = nil, relationships: FlarumPostRelationships? = nil) {
         self.id = id
         self.attributes = attributes
@@ -149,6 +161,14 @@ extension FlarumPost {
             return date.localeDescription
         } else {
             return "Unknown"
+        }
+    }
+
+    var editedDateDescription: String? {
+        if let date = attributes?.editedDate {
+            return date.localeDescription
+        } else {
+            return nil
         }
     }
 }

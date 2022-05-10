@@ -43,6 +43,7 @@ enum Flarum {
     case posts(discussionID: Int, offset: Int, limit: Int)
     case postsById(id: Int)
     case postsByIds(ids: [Int])
+    case postLikeAction(id: Int, like: Bool)
     case register(email: String, username: String, nickname: String, password: String, recaptcha: String)
     case newPost(discussionID: String, content: String)
 }
@@ -68,6 +69,8 @@ extension Flarum: TargetType {
             return "/api/posts"
         case .postsByIds:
             return "/api/posts"
+        case let .postLikeAction(id, _):
+            return "/api/posts/\(id)"
         case .register:
             return "/register"
         case .newPost:
@@ -91,6 +94,8 @@ extension Flarum: TargetType {
             return .get
         case .postsByIds:
             return .get
+        case .postLikeAction:
+            return .patch
         case .register:
             return .post
         case .newPost:
@@ -122,14 +127,24 @@ extension Flarum: TargetType {
                 "page[offset]": max(0, offset),
                 "page[limit]": limit,
             ], encoding: URLEncoding.default)
-        case let .postsById(id: id):
+        case let .postsById(id):
             return .requestParameters(parameters: [
                 "filter[id]": "\(id)",
             ], encoding: URLEncoding.default)
-        case let .postsByIds(ids: ids):
+        case let .postsByIds(ids):
             return .requestParameters(parameters: [
                 "filter[id]": ids.map { String($0) }.joined(separator: ","),
             ], encoding: URLEncoding.default)
+        case let .postLikeAction(id, like):
+            return .requestParameters(parameters: [
+                "data": [
+                    "type": "posts",
+                    "attributes": [
+                        "isLiked": like,
+                    ],
+                    "id": id,
+                ],
+            ], encoding: JSONEncoding.default)
         case let .register(email, username, nickname, password, recaptcha):
             return .requestParameters(parameters: [
                 "username": username,
@@ -165,7 +180,7 @@ extension Flarum: TargetType {
                 "Accept-Language": "zh-CN,zh;",
             ]
             switch self {
-            case .register, .newPost:
+            case .register, .newPost, .postLikeAction:
                 let regex = Regex("\"csrfToken\":\"(.*?)\"")
                 if let homeResult = try? await flarumProvider.request(.home),
                    let homeContentStr = try? homeResult.mapString(),

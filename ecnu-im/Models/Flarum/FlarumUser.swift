@@ -6,12 +6,34 @@
 //
 
 import Foundation
+import UIKit
 
 struct FlarumUserAttributes: Decodable {
     var username: String
     var displayName: String
     var avatarUrl: String?
+    var lastSeenAt: String?
     var slug: String
+
+    var lastSeenAtDate: Date? {
+        // date format, example: 2022-03-23T13:37:49+00:00
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+        if let dateString = lastSeenAt?.prefix(25) {
+            return dateFormatter.date(from: String(dateString))
+        }
+        return nil
+    }
+    
+    var isOnline: Bool {
+        if let lastSeenAtDate = lastSeenAtDate {
+            // Less than 10 minutes
+            if lastSeenAtDate.timeIntervalSinceNow > -600 {
+                return true
+            }
+        }
+        return false
+    }
 }
 
 struct FlarumUser {
@@ -30,5 +52,20 @@ extension FlarumUser {
             return URL(string: url)
         }
         return nil
+    }
+
+    func avatarPlaceholder(size: CGFloat) -> UIImage {
+        let avatarView = AvatarView(frame: .init(x: 0, y: 0, width: size, height: size))
+        avatarView.configuration.avatar = .init(image: nil,
+                                                initials: String(attributes.displayName).filter {
+                                                    $0 != "@"
+                                                })
+        return avatarView.image ?? UIImage()
+    }
+}
+
+extension FlarumUser: Equatable {
+    static func == (lhs: FlarumUser, rhs: FlarumUser) -> Bool {
+        lhs.id == rhs.id
     }
 }

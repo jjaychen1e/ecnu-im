@@ -5,7 +5,6 @@
 //  Created by 陈俊杰 on 2022/3/27.
 //
 
-import Introspect
 import Kingfisher
 import SwiftSoup
 import SwiftUI
@@ -66,8 +65,7 @@ struct DiscussionListCell: View {
 
             if discussion.firstPost != nil
                 && discussion.lastPost != nil
-                && discussion.firstPost != discussion.lastPost
-            {
+                && discussion.firstPost != discussion.lastPost {
                 Button {
                     if AppGlobalState.shared.tokenPrepared {
                         splitVC?.setSplitViewRoot(viewController: DiscussionViewController(discussion: discussion, near: 0),

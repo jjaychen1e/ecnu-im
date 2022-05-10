@@ -28,6 +28,15 @@
       }
     },
     {
+      "identity" : "flexlayout",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/layoutBox/FlexLayout.git",
+      "state" : {
+        "revision" : "2db7eaafbc9c988ca9ea4a236a41f67c07f7d1b6",
+        "version" : "1.3.24"
+      }
+    },
+    {
       "identity" : "fontawesome.swift",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/thii/FontAwesome.swift",
@@ -52,6 +61,15 @@
       "state" : {
         "branch" : "master",
         "revision" : "65c1618b1bfb1f6b822cec75119b108ae60f2d51"
+      }
+    },
+    {
+      "identity" : "pinlayout",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/layoutBox/PinLayout",
+      "state" : {
+        "revision" : "b44e3c8891a75fc711d85b86c03fed582d6c6ca5",
+        "version" : "1.10.2"
       }
     },
     {
@@ -91,30 +109,12 @@
       }
     },
     {
-      "identity" : "swiftlinkpreview",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/LeonardoCardoso/SwiftLinkPreview",
-      "state" : {
-        "revision" : "3eb30b1832a9cf0eaeec3e2cf6cfc0ed18ef763f",
-        "version" : "3.4.0"
-      }
-    },
-    {
       "identity" : "swiftsoup",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/scinfu/SwiftSoup",
       "state" : {
         "revision" : "41e7c263fb8c277e980ebcb9b0b5f6031d3d4886",
         "version" : "2.4.2"
-      }
-    },
-    {
-      "identity" : "swiftui-introspect",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/siteline/SwiftUI-Introspect",
-      "state" : {
-        "revision" : "f2616860a41f9d9932da412a8978fec79c06fe24",
-        "version" : "0.1.4"
       }
     },
     {

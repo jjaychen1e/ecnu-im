@@ -41,144 +41,149 @@ struct FlarumResponse {
 
     private func parseData(json: JSON, withRelationship: Bool = false, includedData: FlarumResponseData? = nil) -> FlarumResponseData {
         var responseData = FlarumResponseData()
+        var jsonArray: [JSON] = []
         if let dataJSONArray = json.array {
-            for dataJSON in dataJSONArray {
-                // Different type's attributes
-                if let dataType = FlarumDataType(rawValue: dataJSON["type"].string ?? "") {
-                    switch dataType {
-                    case .discussion:
-                        if let id = dataJSON["id"].string {
-                            let discussion = FlarumDiscussion(id: id)
-                            discussion.attributes = dataJSON["attributes"].decode(FlarumDiscussionAttributes.self)
-                            if withRelationship, let includedData = includedData {
-                                var relationships = FlarumDiscussionRelationships()
-                                if let dic = dataJSON["relationships"].dictionary {
-                                    for relationship in FlarumDiscussionRelationships.Relationship.allCases {
-                                        switch relationship {
-                                        case .user:
-                                            if let userId = dic["user"]?["data"]["id"].string {
-                                                relationships.user = includedData.users.first(where: { $0.id == userId })
-                                            }
-                                        case .lastPostedUser:
-                                            if let userId = dic["lastPostedUser"]?["data"]["id"].string {
-                                                relationships.lastPostedUser = includedData.users.first(where: { $0.id == userId })
-                                            }
-                                        case .firstPost:
-                                            if let postId = dic["firstPost"]?["data"]["id"].string {
-                                                relationships.firstPost = includedData.posts.first(where: { $0.id == postId })
-                                            }
-                                        case .lastPost:
-                                            if let postId = dic["lastPost"]?["data"]["id"].string {
-                                                relationships.lastPost = includedData.posts.first(where: { $0.id == postId })
-                                            }
-                                        case .tags:
-                                            if let tagIds = dic["tags"]?["data"].array?.compactMap({ $0["id"].string }) {
-                                                relationships.tags = includedData.tags.filter { tagIds.contains($0.id) }
-                                            }
-                                        }
-                                    }
-                                }
-                                discussion.relationships = relationships
-                            }
-                            responseData.allData.append(.discussion(discussion))
-                            responseData.discussions.append(discussion)
-                        }
-                    case .post:
-                        if let id = dataJSON["id"].string {
-                            let post = FlarumPost(id: id)
-                            var attributes = dataJSON["attributes"]
-                            if attributes["content"].exists() {
-                                if attributes["contentType"] == "comment" {
-                                    var json = JSON()
-                                    json["_0"] = attributes["content"]
-                                    attributes["content"] = JSON(dictionaryLiteral: ("comment", json))
-                                } else if attributes["contentType"] == "discussionTagged" {
-                                    var json = JSON()
-                                    json["_0"] = attributes["content"]
-                                    attributes["content"] = JSON(dictionaryLiteral: ("discussionTagged", json))
-                                } else if attributes["contentType"] == "discussionRenamed" {
-                                    var json = JSON()
-                                    json["_0"] = attributes["content"]
-                                    attributes["content"] = JSON(dictionaryLiteral: ("discussionRenamed", json))
-                                } else if attributes["contentType"] == "discussionLocked" {
-                                    var json = JSON()
-                                    json["_0"] = attributes["content"]["locked"]
-                                    attributes["content"] = JSON(dictionaryLiteral: ("discussionLocked", json))
-                                } else {
-                                    // discussionSuperStickied, discussionMerged, recipientsModified
-                                    attributes = attributes.removing(key: "content")
-                                    attributes = attributes.removing(key: "contentType")
-                                }
-                            }
-                            post.attributes = attributes.decode(FlarumPostAttributes.self)
-                            if withRelationship, let includedData = includedData {
-                                var relationships = FlarumPostRelationships()
-                                for relationship in FlarumPostRelationships.Relationship.allCases {
+            jsonArray.append(contentsOf: dataJSONArray)
+        } else {
+            jsonArray.append(json)
+        }
+
+        for dataJSON in jsonArray {
+            // Different type's attributes
+            if let dataType = FlarumDataType(rawValue: dataJSON["type"].string ?? "") {
+                switch dataType {
+                case .discussion:
+                    if let id = dataJSON["id"].string {
+                        let discussion = FlarumDiscussion(id: id)
+                        discussion.attributes = dataJSON["attributes"].decode(FlarumDiscussionAttributes.self)
+                        if withRelationship, let includedData = includedData {
+                            var relationships = FlarumDiscussionRelationships()
+                            if let dic = dataJSON["relationships"].dictionary {
+                                for relationship in FlarumDiscussionRelationships.Relationship.allCases {
                                     switch relationship {
-                                    case .discussion:
-                                        if let discussionId = dataJSON["relationships"]["discussion"]["data"]["id"].string {
-                                            relationships.discussion = includedData.discussions.first(where: { $0.id == discussionId })
-                                        }
                                     case .user:
-                                        if let userId = dataJSON["relationships"]["user"]["data"]["id"].string {
+                                        if let userId = dic["user"]?["data"]["id"].string {
                                             relationships.user = includedData.users.first(where: { $0.id == userId })
                                         }
-                                    case .reactions:
-                                        if let reactionIds = dataJSON["relationships"]["reactions"]["data"].array?.compactMap({ $0["post_reactions"].string }) {
-                                            relationships.reactions = includedData.postReactions.filter { reactionIds.contains($0.id) }
+                                    case .lastPostedUser:
+                                        if let userId = dic["lastPostedUser"]?["data"]["id"].string {
+                                            relationships.lastPostedUser = includedData.users.first(where: { $0.id == userId })
                                         }
-                                    case .likes:
-                                        if let likeIds = dataJSON["relationships"]["likes"]["data"].array?.compactMap({ $0["id"].string }) {
-                                            relationships.likes = includedData.users.filter { likeIds.contains($0.id) }
+                                    case .firstPost:
+                                        if let postId = dic["firstPost"]?["data"]["id"].string {
+                                            relationships.firstPost = includedData.posts.first(where: { $0.id == postId })
                                         }
-                                    case .mentionedBy:
-                                        if let mentionedByIds = dataJSON["relationships"]["mentionedBy"]["data"].array?.compactMap({ $0["id"].string }) {
-                                            relationships.mentionedBy = includedData.users.filter { mentionedByIds.contains($0.id) }
+                                    case .lastPost:
+                                        if let postId = dic["lastPost"]?["data"]["id"].string {
+                                            relationships.lastPost = includedData.posts.first(where: { $0.id == postId })
+                                        }
+                                    case .tags:
+                                        if let tagIds = dic["tags"]?["data"].array?.compactMap({ $0["id"].string }) {
+                                            relationships.tags = includedData.tags.filter { tagIds.contains($0.id) }
                                         }
                                     }
                                 }
-                                post.relationships = relationships
                             }
-                            responseData.allData.append(.post(post))
-                            responseData.posts.append(post)
+                            discussion.relationships = relationships
                         }
-                    case .user:
-                        if let id = dataJSON["id"].string {
-                            if let attributes = dataJSON["attributes"].decode(FlarumUserAttributes.self) {
-                                let user = FlarumUser(id: id, attributes: attributes)
-                                responseData.allData.append(.user(user))
-                                responseData.users.append(user)
+                        responseData.allData.append(.discussion(discussion))
+                        responseData.discussions.append(discussion)
+                    }
+                case .post:
+                    if let id = dataJSON["id"].string {
+                        let post = FlarumPost(id: id)
+                        var attributes = dataJSON["attributes"]
+                        if attributes["content"].exists() {
+                            if attributes["contentType"] == "comment" {
+                                var json = JSON()
+                                json["_0"] = attributes["content"]
+                                attributes["content"] = JSON(dictionaryLiteral: ("comment", json))
+                            } else if attributes["contentType"] == "discussionTagged" {
+                                var json = JSON()
+                                json["_0"] = attributes["content"]
+                                attributes["content"] = JSON(dictionaryLiteral: ("discussionTagged", json))
+                            } else if attributes["contentType"] == "discussionRenamed" {
+                                var json = JSON()
+                                json["_0"] = attributes["content"]
+                                attributes["content"] = JSON(dictionaryLiteral: ("discussionRenamed", json))
+                            } else if attributes["contentType"] == "discussionLocked" {
+                                var json = JSON()
+                                json["_0"] = attributes["content"]["locked"]
+                                attributes["content"] = JSON(dictionaryLiteral: ("discussionLocked", json))
+                            } else {
+                                // discussionSuperStickied, discussionMerged, recipientsModified
+                                attributes = attributes.removing(key: "content")
+                                attributes = attributes.removing(key: "contentType")
                             }
                         }
-                    case .tag:
-                        if let id = dataJSON["id"].string {
-                            if let tagAttributes = dataJSON["attributes"].decode(FlarumTagAttributes.self) {
-                                let tag = FlarumTag(id: id, attributes: tagAttributes)
-                                if withRelationship, let includedData = includedData {
-                                    var relationships = FlarumTagRelationships()
-                                    if let parentId = dataJSON["relationships"]["parent"]["data"]["id"].string {
-                                        if let parentTag = includedData.tags.first(where: { $0.id == parentId }) {
-                                            relationships.parent = parentTag
-                                        }
-                                        tag.relationships = relationships
+                        post.attributes = attributes.decode(FlarumPostAttributes.self)
+                        if withRelationship, let includedData = includedData {
+                            var relationships = FlarumPostRelationships()
+                            for relationship in FlarumPostRelationships.Relationship.allCases {
+                                switch relationship {
+                                case .discussion:
+                                    if let discussionId = dataJSON["relationships"]["discussion"]["data"]["id"].string {
+                                        relationships.discussion = includedData.discussions.first(where: { $0.id == discussionId })
+                                    }
+                                case .user:
+                                    if let userId = dataJSON["relationships"]["user"]["data"]["id"].string {
+                                        relationships.user = includedData.users.first(where: { $0.id == userId })
+                                    }
+                                case .reactions:
+                                    if let reactionIds = dataJSON["relationships"]["reactions"]["data"].array?.compactMap({ $0["post_reactions"].string }) {
+                                        relationships.reactions = includedData.postReactions.filter { reactionIds.contains($0.id) }
+                                    }
+                                case .likes:
+                                    if let likeIds = dataJSON["relationships"]["likes"]["data"].array?.compactMap({ $0["id"].string }) {
+                                        relationships.likes = includedData.users.filter { likeIds.contains($0.id) }
+                                    }
+                                case .mentionedBy:
+                                    if let mentionedByIds = dataJSON["relationships"]["mentionedBy"]["data"].array?.compactMap({ $0["id"].string }) {
+                                        relationships.mentionedBy = includedData.posts.filter { mentionedByIds.contains($0.id) }
                                     }
                                 }
-                                responseData.allData.append(.tag(tag))
-                                responseData.tags.append(tag)
                             }
+                            post.relationships = relationships
                         }
-                    case .postReaction:
-                        if let id = dataJSON["id"].string {
-                            if let userId = dataJSON["attributes"]["userId"].string,
-                               let postId = dataJSON["attributes"]["postId"].string,
-                               let reactionId = dataJSON["attributes"]["reactionId"].string,
-                               let user = includedData?.users.first(where: { userId == $0.id }),
-                               let post = includedData?.posts.first(where: { postId == $0.id }),
-                               let reaction = FlarumReactionsPublisher.shared.allReactions.first(where: { reactionId == $0.id }) {
-                                let postReaction = FlarumPostReaction(id: id, attributes: .init(user: user, post: post, reaction: reaction))
-                                responseData.allData.append(.postReaction(postReaction))
-                                responseData.postReactions.append(postReaction)
+                        responseData.allData.append(.post(post))
+                        responseData.posts.append(post)
+                    }
+                case .user:
+                    if let id = dataJSON["id"].string {
+                        if let attributes = dataJSON["attributes"].decode(FlarumUserAttributes.self) {
+                            let user = FlarumUser(id: id, attributes: attributes)
+                            responseData.allData.append(.user(user))
+                            responseData.users.append(user)
+                        }
+                    }
+                case .tag:
+                    if let id = dataJSON["id"].string {
+                        if let tagAttributes = dataJSON["attributes"].decode(FlarumTagAttributes.self) {
+                            let tag = FlarumTag(id: id, attributes: tagAttributes)
+                            if withRelationship, let includedData = includedData {
+                                var relationships = FlarumTagRelationships()
+                                if let parentId = dataJSON["relationships"]["parent"]["data"]["id"].string {
+                                    if let parentTag = includedData.tags.first(where: { $0.id == parentId }) {
+                                        relationships.parent = parentTag
+                                    }
+                                    tag.relationships = relationships
+                                }
                             }
+                            responseData.allData.append(.tag(tag))
+                            responseData.tags.append(tag)
+                        }
+                    }
+                case .postReaction:
+                    if let id = dataJSON["id"].string {
+                        if let userId = dataJSON["attributes"]["userId"].string,
+                           let postId = dataJSON["attributes"]["postId"].string,
+                           let reactionId = dataJSON["attributes"]["reactionId"].string,
+                           let user = includedData?.users.first(where: { userId == $0.id }),
+                           let post = includedData?.posts.first(where: { postId == $0.id }),
+                           let reaction = FlarumReactionsPublisher.shared.allReactions.first(where: { reactionId == $0.id }) {
+                            let postReaction = FlarumPostReaction(id: id, attributes: .init(user: user, post: post, reaction: reaction))
+                            responseData.allData.append(.postReaction(postReaction))
+                            responseData.postReactions.append(postReaction)
                         }
                     }
                 }

@@ -11,6 +11,7 @@ import UIKit
 class AppGlobalState: ObservableObject {
     @AppStorage("isLogged") var isLogged = false
     @AppStorage("account") var account: String = ""
+    @AppStorage("userId") var userId: String = ""
     @AppStorage("password") var password: String = ""
     @Published var tokenPrepared = false
     private var flarumTokenCookie: HTTPCookie?
@@ -45,6 +46,7 @@ class AppGlobalState: ObservableObject {
                 HTTPCookiePropertyKey.value: token.token,
             ])!
             flarumProvider.session.sessionConfiguration.httpCookieStorage?.setCookie(flarumTokenCookie)
+            AppGlobalState.shared.userId = "\(token.userId)"
             DispatchQueue.main.async {
                 self.tokenPrepared = true
             }

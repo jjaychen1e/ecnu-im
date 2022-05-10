@@ -37,7 +37,7 @@ class ContentParser {
         let styleStack = ContentTextStyleStack()
         let attributedString = NSMutableAttributedString()
 
-        let indentWhitespaces = String(repeating: "\t", count: level)
+        let indentWhitespaces = String(repeating: "\t", count: level + 1)
 
         for (index, item) in list.items.enumerated() {
             let leadingCharacter: RichText = {

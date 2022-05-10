@@ -183,7 +183,7 @@ extension DiscussionViewController {
     private func loadData(near: Int) async {
         let offset = max(0, near - limit / 2)
         await loadData(offset: offset, completionHandler: { [weak self] in
-            self?.tableView.scrollToRow(at: IndexPath(row: near, section: 0), at: .middle, animated: false)
+            self?.tableView.scrollToRow(at: IndexPath(row: near, section: 0), at: .top, animated: false)
         })
         initialized = true
     }

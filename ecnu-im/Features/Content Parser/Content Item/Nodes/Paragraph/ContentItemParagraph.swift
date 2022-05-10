@@ -22,6 +22,9 @@ class ContentItemParagraphUIView: UIView & ContentBlockUIView {
     var attributedText: NSAttributedString
     private lazy var textView: ECNUTextView = {
         let textView = ECNUTextView()
+        textView.textContainerInset = .zero
+        textView.textContainer.lineFragmentPadding = 0
+        textView.contentInset = .zero
         textView.isEditable = false
         textView.isScrollEnabled = false
         return textView
