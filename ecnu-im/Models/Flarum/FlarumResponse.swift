@@ -95,24 +95,33 @@ struct FlarumResponse {
                         let post = FlarumPost(id: id)
                         var attributes = dataJSON["attributes"]
                         if attributes["content"].exists() {
-                            if attributes["contentType"] == "comment" {
-                                var json = JSON()
-                                json["_0"] = attributes["content"]
-                                attributes["content"] = JSON(dictionaryLiteral: ("comment", json))
-                            } else if attributes["contentType"] == "discussionTagged" {
-                                var json = JSON()
-                                json["_0"] = attributes["content"]
-                                attributes["content"] = JSON(dictionaryLiteral: ("discussionTagged", json))
-                            } else if attributes["contentType"] == "discussionRenamed" {
-                                var json = JSON()
-                                json["_0"] = attributes["content"]
-                                attributes["content"] = JSON(dictionaryLiteral: ("discussionRenamed", json))
-                            } else if attributes["contentType"] == "discussionLocked" {
-                                var json = JSON()
-                                json["_0"] = attributes["content"]["locked"]
-                                attributes["content"] = JSON(dictionaryLiteral: ("discussionLocked", json))
+                            if let contentType = FlarumPostAttributes.FlarumPostContentType(rawValue: attributes["contentType"].string ?? "") {
+                                switch contentType {
+                                case .comment:
+                                    var json = JSON()
+                                    json["_0"] = attributes["content"]
+                                    attributes["content"] = JSON(dictionaryLiteral: ("comment", json))
+                                case .discussionRenamed:
+                                    var json = JSON()
+                                    json["_0"] = attributes["content"]
+                                    attributes["content"] = JSON(dictionaryLiteral: ("discussionRenamed", json))
+                                case .discussionTagged:
+                                    var json = JSON()
+                                    json["_0"] = attributes["content"]
+                                    attributes["content"] = JSON(dictionaryLiteral: ("discussionTagged", json))
+                                case .discussionLocked:
+                                    var json = JSON()
+                                    json["_0"] = attributes["content"]["locked"]
+                                    attributes["content"] = JSON(dictionaryLiteral: ("discussionLocked", json))
+                                }
                             } else {
-                                // discussionSuperStickied, discussionMerged, recipientsModified
+                                #if DEBUG
+                                    let whitelist = ["discussionSuperStickied", "discussionMerged", "recipientsModified"]
+                                    if let contentType = attributes["contentType"].string,
+                                       !whitelist.contains(contentType) {
+                                        fatalError("\(contentType) is not in the whitelist.")
+                                    }
+                                #endif
                                 attributes = attributes.removing(key: "content")
                                 attributes = attributes.removing(key: "contentType")
                             }
@@ -191,35 +200,52 @@ struct FlarumResponse {
                     if let id = dataJSON["id"].string {
                         var attributes = dataJSON["attributes"]
                         if attributes["content"].exists() {
-                            if attributes["contentType"] == "postLiked" {
-                                attributes["content"] = JSON([
-                                    "postLiked": [:],
-                                ])
-                            } else if attributes["contentType"] == "postMentioned" {
-                                attributes["content"] = JSON([
-                                    "postMentioned": attributes["content"],
-                                ])
-                            } else if attributes["contentType"] == "postReacted" {
-                                if let reactionString = attributes["content"].string {
-                                    var json = JSON(parseJSON: reactionString)
+                            if let contentType = FlarumNotificationAttributes.FlarumNotificationContentType(rawValue: attributes["contentType"].string ?? "") {
+                                switch contentType {
+                                case .postLiked:
+                                    attributes["content"] = JSON([
+                                        "postLiked": [:],
+                                    ])
+                                case .postMentioned:
+                                    attributes["content"] = JSON([
+                                        "postMentioned": attributes["content"],
+                                    ])
+                                case .postReacted:
+                                    if let reactionString = attributes["content"].string {
+                                        var json = JSON(parseJSON: reactionString)
 
-                                    if json["enabled"] == 1 {
-                                        json["enabled"] = true
-                                    } else if json["enabled"] == 0 {
-                                        json["enabled"] = false
-                                    }
-                                    
-                                    if let id = json["id"].int,
-                                       let reactionAtt = json.decode(FlarumReactionAttributes.self) {
-                                        let reaction = FlarumReaction(id: "\(id)", attributes: reactionAtt)
-                                        if let data = try? JSONEncoder().encode(FlarumNotificationAttributes.FlarumNotificationContent.postReacted(reaction: reaction)),
-                                           let json = try? JSON(data: data) {
-                                            attributes["content"] = json
+                                        if json["enabled"] == 1 {
+                                            json["enabled"] = true
+                                        } else if json["enabled"] == 0 {
+                                            json["enabled"] = false
+                                        }
+
+                                        if let id = json["id"].int,
+                                           let reactionAtt = json.decode(FlarumReactionAttributes.self) {
+                                            let reaction = FlarumReaction(id: "\(id)", attributes: reactionAtt)
+                                            if let data = try? JSONEncoder().encode(FlarumNotificationAttributes.FlarumNotificationContent.postReacted(reaction: reaction)),
+                                               let json = try? JSON(data: data) {
+                                                attributes["content"] = json
+                                            }
                                         }
                                     }
+                                case .privateDiscussionReplied:
+                                    attributes["content"] = JSON([
+                                        "privateDiscussionReplied": attributes["content"],
+                                    ])
+                                case .privateDiscussionCreated:
+                                    attributes["content"] = JSON([
+                                        "privateDiscussionCreated": [:],
+                                    ])
                                 }
                             } else {
-                                // discussionSuperStickied, discussionMerged, recipientsModified
+                                #if DEBUG
+                                    let whitelist: [String] = []
+                                    if let contentType = attributes["contentType"].string,
+                                       !whitelist.contains(contentType) {
+                                        fatalError("\(contentType) is not in the whitelist.")
+                                    }
+                                #endif
                                 attributes = attributes.removing(key: "content")
                                 attributes = attributes.removing(key: "contentType")
                             }
@@ -228,11 +254,33 @@ struct FlarumResponse {
                             let notification = FlarumNotification(id: id, attributes: attributes)
                             if withRelationship, let includedData = includedData {
                                 if let userId = dataJSON["relationships"]["fromUser"]["data"]["id"].string,
-                                   let user = includedData.users.first(where: { $0.id == userId }),
-                                   let postId = dataJSON["relationships"]["subject"]["data"]["id"].string,
-                                   let post = includedData.posts.first(where: { $0.id == postId }) {
-                                    let relationships = FlarumNotificationRelationships(fromUser: user, subject: post)
-                                    notification.relationships = relationships
+                                   let user = includedData.users.first(where: { $0.id == userId }) {
+                                    if let subjectType = FlarumNotificationRelationships.SubjectType(rawValue:
+                                        dataJSON["relationships"]["subject"]["data"]["type"].string ?? ""
+                                    ) {
+                                        switch subjectType {
+                                        case .post:
+                                            if let postId = dataJSON["relationships"]["subject"]["data"]["id"].string,
+                                               let post = includedData.posts.first(where: { $0.id == postId }) {
+                                                let relationships = FlarumNotificationRelationships(fromUser: user, subject: .post(post: post))
+                                                notification.relationships = relationships
+                                            }
+                                        case .discussion:
+                                            if let discussionId = dataJSON["relationships"]["subject"]["data"]["id"].string,
+                                               let discussion = includedData.discussions.first(where: { $0.id == discussionId }) {
+                                                let relationships = FlarumNotificationRelationships(fromUser: user, subject: .discussion(discussion: discussion))
+                                                notification.relationships = relationships
+                                            }
+                                        }
+                                    } else {
+                                        #if DEBUG
+                                            let whitelist: [String] = []
+                                            if let subjectType = dataJSON["relationships"]["subject"]["data"]["type"].string,
+                                               !whitelist.contains(subjectType) {
+                                                fatalError("\(subjectType) is not in the whitelist.")
+                                            }
+                                        #endif
+                                    }
                                 }
                             }
                             responseData.allData.append(.notification(notification))

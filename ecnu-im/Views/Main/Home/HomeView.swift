@@ -6,6 +6,7 @@
 //
 
 import Combine
+import Regex
 import SwiftUI
 import SwiftyJSON
 
@@ -27,6 +28,7 @@ private class FlarumDiscussionPreviewViewModel: ObservableObject {
 private class HomeViewViewModel: ObservableObject {
     @Published var stickyDiscussions: [FlarumDiscussionPreviewViewModel] = []
     @Published var newestDiscussions: [FlarumDiscussionPreviewViewModel] = []
+    @Published var unreadNotifications: (unreadCount: Int, notifications: [FlarumNotification])?
 }
 
 struct HomeView: View {
@@ -72,22 +74,41 @@ struct HomeView: View {
                                                                         imageGridDisplayMode: .narrow),
                                                    updateLayout: nil)
                         let postExcerptText = parser.getExcerptContent(configuration:
-                            .init(textLengthMax: 100,
+                            .init(textLengthMax: 300,
                                   textLineMax: 4,
                                   imageCountMax: 0)
                         ).text
                         correspondingDiscussionViewModel.postExcerpt = postExcerptText
+                    } else {
+                        correspondingDiscussionViewModel.postExcerpt = "无法查看预览内容，请检查账号邮箱是否已验证。"
                     }
                 }
             }
         }
     }
 
-    func load() async {
-        if let response = try? await flarumProvider.request(.allDiscussions(pageOffset: 0, pageItemLimit: 20)),
-           let json = try? JSON(data: response.data) {
-            let newDiscussions = FlarumResponse(json: json).data.discussions
-            await processDiscussions(discussions: newDiscussions)
+    func load() {
+        Task {
+            if let response = try? await flarumProvider.request(.allDiscussions(pageOffset: 0, pageItemLimit: 20)),
+               let json = try? JSON(data: response.data) {
+                let newDiscussions = FlarumResponse(json: json).data.discussions
+                await processDiscussions(discussions: newDiscussions)
+            }
+        }
+        Task {
+            if let response = try? await flarumProvider.request(.home),
+               let string = String(data: response.data, encoding: .utf8) {
+                let regex = Regex("\"unreadNotificationCount\": (\\d+),")
+                if let _str = regex.firstMatch(in: string)?.captures.first,
+                   let str = _str,
+                   let count = Int(str) {
+                    if let response = try? await flarumProvider.request(.notification(offset: 0, limit: count + 15)),
+                       let json = try? JSON(data: response.data) {
+                        let notifications = FlarumResponse(json: json).data.notifications
+                        viewModel.unreadNotifications = (count, notifications)
+                    }
+                }
+            }
         }
     }
 
@@ -97,7 +118,7 @@ struct HomeView: View {
         ScrollView {
             Group {
                 scrollDetector
-                notification
+                notification()
                 stickySection()
                 latestSection()
             }
@@ -113,14 +134,10 @@ struct HomeView: View {
             header
         }
         .onLoad {
-            Task {
-                await load()
-            }
+            load()
 
             AppGlobalState.shared.$tokenPrepared.sink { change in
-                Task {
-                    await load()
-                }
+                load()
             }.store(in: &subscriptions)
         }
     }
@@ -141,52 +158,61 @@ struct HomeView: View {
         .frame(height: 0)
     }
 
-    var notification: some View {
-        HStack {
-            Image(systemName: "bell.badge")
-                .font(.system(size: 20, weight: .medium, design: .rounded))
-                .foregroundColor(Color(rgba: "#265A9A"))
-            VStack(alignment: .leading, spacing: 4) {
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack(spacing: 2) {
-                        Text("共3条新通知")
-                            .font(.system(size: 14, weight: .semibold, design: .rounded))
-                        HStack(spacing: -3) {
-                            ForEach(0 ..< 5) { _ in
-                                Image("avatar")
-                                    .resizable()
-                                    .frame(width: 18, height: 18)
-                                    .mask(Circle())
-                                    .overlay(Circle().stroke(Color.white, lineWidth: 0.5))
+    @ViewBuilder
+    func notification() -> some View {
+        if let (count, notifications) = viewModel.unreadNotifications {
+            let users = notifications
+                .compactMap { $0.relationships?.fromUser }
+                .unique {
+                    $0.id
+                }
+                .prefix(5)
+
+            HStack {
+                Image(systemName: "bell.badge")
+                    .font(.system(size: 20, weight: .medium, design: .rounded))
+                    .foregroundColor(Color(rgba: "#265A9A"))
+                VStack(alignment: .leading, spacing: 4) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: 2) {
+                            Text("共\(count)条新通知")
+                                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                            HStack(spacing: -3) {
+                                ForEach(0 ..< users.count, id: \.self) { index in
+                                    let user = users[index]
+                                    PostAuthorAvatarView(name: user.attributes.displayName, url: user.avatarURL, size: 18)
+                                        .mask(Circle())
+                                        .overlay(Circle().stroke(Color.white, lineWidth: 0.5))
+                                }
                             }
                         }
+                        HStack {
+                            Text("@jjaychen赞了：2018年来华师大的老人回忆上个纪元的生活")
+                                .lineLimit(1)
+                                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            Text("3小时前")
+                                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                .fixedSize(horizontal: true, vertical: true)
+                        }
                     }
-                    HStack {
-                        Text("@jjaychen赞了：2018年来华师大的老人回忆上个纪元的生活")
-                            .lineLimit(1)
-                            .font(.system(size: 12, weight: .semibold, design: .rounded))
-                        Text("3小时前")
-                            .font(.system(size: 12, weight: .semibold, design: .rounded))
-                            .fixedSize(horizontal: true, vertical: true)
-                    }
+                    .foregroundColor(Color(rgba: "#045FA1"))
+                    Text("我敢打包票，这里很多人根本没有经历过真正的大学生活。我时不时会回忆起遥远的过往：没有口罩，没有健康打卡，没有门禁……就像核战后老人在火炉边给孩子们将着还有电力，网络时候的日子那样，我们这些老人娓娓道来……")
+                        .font(.system(size: 12, weight: .regular, design: .rounded))
+                        .lineLimit(3)
+                        .foregroundColor(.black)
                 }
-                .foregroundColor(Color(rgba: "#045FA1"))
-                Text("我敢打包票，这里很多人根本没有经历过真正的大学生活。我时不时会回忆起遥远的过往：没有口罩，没有健康打卡，没有门禁……就像核战后老人在火炉边给孩子们将着还有电力，网络时候的日子那样，我们这些老人娓娓道来……")
-                    .font(.system(size: 12, weight: .regular, design: .rounded))
-                    .lineLimit(3)
-                    .foregroundColor(.black)
+                Image(systemName: "xmark")
+                    .font(.system(size: 15, weight: .medium, design: .rounded))
+                    .foregroundColor(Color(rgba: "#265A9A"))
             }
-            Image(systemName: "xmark")
-                .font(.system(size: 15, weight: .medium, design: .rounded))
-                .foregroundColor(Color(rgba: "#265A9A"))
+            .padding(.vertical, 12)
+            .padding(.horizontal, 8)
+            .background(
+                Color(rgba: "#C8E0F2")
+            )
+            .mask(RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .padding(.horizontal)
         }
-        .padding(.vertical, 12)
-        .padding(.horizontal, 8)
-        .background(
-            Color(rgba: "#C8E0F2")
-        )
-        .mask(RoundedRectangle(cornerRadius: 8, style: .continuous))
-        .padding(.horizontal)
     }
 
     var header: some View {
@@ -437,7 +463,7 @@ struct HomePostCardViewLarge: View {
                 }
                 Text(viewModel.postExcerpt)
                     .multilineTextAlignment(.leading)
-                    .lineLimit(Int.max)
+                    .lineLimit(4)
                     .truncationMode(.tail)
                     .font(.system(size: 12, weight: .regular, design: .rounded))
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)

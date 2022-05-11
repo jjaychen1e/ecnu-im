@@ -54,6 +54,11 @@ final class PostCommentCell: UITableViewCell {
                 let postContentItemsUIView = PostContentItemsUIView(contentItems: newContentItems)
                 self.postContentItemsUIView = postContentItemsUIView
                 contentView.addSubview(postContentItemsUIView)
+            } else {
+                let attributedString = NSAttributedString(string: "无法查看预览内容，请检查账号邮箱是否已验证。")
+                let postContentItemsUIView = PostContentItemsUIView(contentItems: [ContentItemParagraphUIView(attributedText: attributedString)])
+                self.postContentItemsUIView = postContentItemsUIView
+                contentView.addSubview(postContentItemsUIView)
             }
 
             headerViewHostingVC.rootView.update(post: post)
@@ -67,24 +72,29 @@ final class PostCommentCell: UITableViewCell {
     }
 
     private func layout() {
-        headerViewHostingVC.view.pin.top(margin.top).left(margin.left).right(margin.right).sizeToFit(.width)
-        postContentItemsUIView!.pin.below(of: headerViewHostingVC.view, aligned: .left).marginTop(contentVerticalSpacing).right(margin.right).sizeToFit(.width)
-        footerViewHostingVC.view.pin.below(of: [postContentItemsUIView!], aligned: .left).marginTop(contentVerticalSpacing).right(margin.right).sizeToFit(.width)
+        if let postContentItemsUIView = postContentItemsUIView {
+            headerViewHostingVC.view.pin.top(margin.top).left(margin.left).right(margin.right).sizeToFit(.width)
+            postContentItemsUIView.pin.below(of: headerViewHostingVC.view, aligned: .left).marginTop(contentVerticalSpacing).right(margin.right).sizeToFit(.width)
+            footerViewHostingVC.view.pin.below(of: [postContentItemsUIView], aligned: .left).marginTop(contentVerticalSpacing).right(margin.right).sizeToFit(.width)
+        }
     }
 
     override func sizeThatFits(_ size: CGSize) -> CGSize {
-        contentView.pin.width(size.width)
+        if let postContentItemsUIView = postContentItemsUIView {
+            contentView.pin.width(size.width)
 
-        let availableWidth = max(size.width - margin.left - margin.right, 0)
-        let targetSize = CGSize(width: availableWidth,
-                                height: .greatestFiniteMagnitude)
+            let availableWidth = max(size.width - margin.left - margin.right, 0)
+            let targetSize = CGSize(width: availableWidth,
+                                    height: .greatestFiniteMagnitude)
 
-        let headerHeight = headerViewHostingVC.sizeThatFits(in: targetSize).height
-        let heightContent = postContentItemsUIView?.sizeThatFits(targetSize).height ?? 0
-        let footerHeight = footerViewHostingVC.sizeThatFits(in: targetSize).height
-        let heightVerticalSpacing = 2 * contentVerticalSpacing
+            let headerHeight = headerViewHostingVC.sizeThatFits(in: targetSize).height
+            let heightContent = postContentItemsUIView.sizeThatFits(targetSize).height
+            let footerHeight = footerViewHostingVC.sizeThatFits(in: targetSize).height
+            let heightVerticalSpacing = 2 * contentVerticalSpacing
 
-        let totalHeight = headerHeight + heightContent + footerHeight + heightVerticalSpacing + margin.top + margin.bottom
-        return CGSize(width: size.width, height: totalHeight)
+            let totalHeight = headerHeight + heightContent + footerHeight + heightVerticalSpacing + margin.top + margin.bottom
+            return CGSize(width: size.width, height: totalHeight)
+        }
+        return .zero
     }
 }

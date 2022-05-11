@@ -138,6 +138,20 @@ class FlarumPost: Hashable {
 
         return []
     }
+
+    // Excerpt Text
+    func excerptText(configuration: ContentParser.ContentExcerpt.ContentExcerptConfiguration) -> String? {
+        if let content = attributes?.content,
+           case let .comment(comment) = content {
+            let parser = ContentParser(content: comment,
+                                       configuration: .init(imageOnTapAction: { _, _ in },
+                                                            imageGridDisplayMode: .narrow),
+                                       updateLayout: nil)
+            let postExcerptText = parser.getExcerptContent(configuration: configuration).text
+            return postExcerptText
+        }
+        return nil
+    }
 }
 
 extension FlarumPost {

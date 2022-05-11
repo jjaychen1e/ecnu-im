@@ -64,6 +64,7 @@
 		6357EB90282AC135005C0D49 /* FlarumNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6357EB8F282AC135005C0D49 /* FlarumNotification.swift */; };
 		6357EB94282AC7B5005C0D49 /* NotificationCenterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6357EB93282AC7B5005C0D49 /* NotificationCenterView.swift */; };
 		6357EB96282B9D03005C0D49 /* NotificationCenterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6357EB95282B9D03005C0D49 /* NotificationCenterViewController.swift */; };
+		6357EB9A282C076B005C0D49 /* Sequence+Functional.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6357EB99282C076B005C0D49 /* Sequence+Functional.swift */; };
 		635B2A5127EEB08400FF6109 /* Response.swift in Sources */ = {isa = PBXBuildFile; fileRef = 635B2A5027EEB08400FF6109 /* Response.swift */; };
 		635B2A5327EEB0DD00FF6109 /* NetworkError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 635B2A5227EEB0DD00FF6109 /* NetworkError.swift */; };
 		635B2A5727EEB3CA00FF6109 /* Endpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 635B2A5627EEB3CA00FF6109 /* Endpoint.swift */; };
@@ -228,6 +229,7 @@
 		6357EB8F282AC135005C0D49 /* FlarumNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlarumNotification.swift; sourceTree = "<group>"; };
 		6357EB93282AC7B5005C0D49 /* NotificationCenterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCenterView.swift; sourceTree = "<group>"; };
 		6357EB95282B9D03005C0D49 /* NotificationCenterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCenterViewController.swift; sourceTree = "<group>"; };
+		6357EB99282C076B005C0D49 /* Sequence+Functional.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sequence+Functional.swift"; sourceTree = "<group>"; };
 		635B2A5027EEB08400FF6109 /* Response.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Response.swift; sourceTree = "<group>"; };
 		635B2A5227EEB0DD00FF6109 /* NetworkError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkError.swift; sourceTree = "<group>"; };
 		635B2A5627EEB3CA00FF6109 /* Endpoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Endpoint.swift; sourceTree = "<group>"; };
@@ -591,9 +593,26 @@
 			path = Notification;
 			sourceTree = "<group>";
 		};
+		6357EB97282C075B005C0D49 /* Swift */ = {
+			isa = PBXGroup;
+			children = (
+				6357EB98282C0761005C0D49 /* Extensions */,
+			);
+			path = Swift;
+			sourceTree = "<group>";
+		};
+		6357EB98282C0761005C0D49 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				6357EB99282C076B005C0D49 /* Sequence+Functional.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
 		635B2A5E27EEE76D00FF6109 /* Infrastructure */ = {
 			isa = PBXGroup;
 			children = (
+				6357EB97282C075B005C0D49 /* Swift */,
 				635FF1BB2803028D00C7CDBF /* Toast */,
 				634C470427F9C20500FC591D /* UIKit */,
 				636BE17E27F8232000283943 /* SwiftGen */,
@@ -1256,6 +1275,7 @@
 				6365778627F1D897008AD10E /* UserDefaluts+JSON+Extension.swift in Sources */,
 				634A575D2816F0090022B27E /* ContentBlock.swift in Sources */,
 				637751CB281D683D00A13241 /* PostDeletedCell.swift in Sources */,
+				6357EB9A282C076B005C0D49 /* Sequence+Functional.swift in Sources */,
 				6329EE70281AAEFC001BE8DD /* ContentItemSingleImage.swift in Sources */,
 				63B740A72802795900376B94 /* SlideFadeIn.swift in Sources */,
 				631BB03E2805E4FD007D4138 /* Style.swift in Sources */,
