@@ -10,6 +10,7 @@ import SwiftyJSON
 
 private struct NotificationView: View {
     @State var notification: FlarumNotification
+    @State var replyExcerptText: String?
 
     @Environment(\.splitVC) var splitVC
 
@@ -58,12 +59,50 @@ private struct NotificationView: View {
                     .font(.system(size: 15, weight: .medium, design: .rounded))
             }
 
-            if case let .postMentioned(replyNumber) = notification.attributes.content {
-                Text("\(replyNumber)")
+            if case .postMentioned = notification.attributes.content {
+                Text(replyExcerptText ?? "")
+                    .font(.system(size: 15, weight: .regular, design: .rounded))
+                    .lineLimit(2)
+                    .foregroundColor(.primary.opacity(0.9))
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(notification.attributes.isRead ? Color.clear : Color.gray)
+        .onLoad {
+            if case let .postMentioned(replyNumber) = notification.attributes.content {
+                if let discussion = discussion,
+                   let id = Int(discussion.id) {
+                    Task {
+                        if let response = try? await flarumProvider.request(.postsNearNumber(discussionID: id, nearNumber: replyNumber, limit: 4)) {
+                            let json = JSON(response.data)
+                            let flarumResponse = FlarumResponse(json: json)
+                            let post = flarumResponse.data.posts.first { p in
+                                p.attributes?.number == replyNumber
+                            }
+                            if let post = post {
+                                if let content = post.attributes?.content,
+                                   case let .comment(comment) = content {
+                                    let parser = ContentParser(content: comment,
+                                                               configuration: .init(imageOnTapAction: { _, _ in },
+                                                                                    imageGridDisplayMode: .narrow),
+                                                               updateLayout: nil)
+                                    let postExcerptText = parser.getExcerptContent(configuration:
+                                        .init(textLengthMax: 150,
+                                              textLineMax: 3,
+                                              imageCountMax: 0)
+                                    ).text
+                                    replyExcerptText = postExcerptText
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    #if DEBUG
+                        fatalError()
+                    #endif
+                }
+            }
+        }
         .onTapGesture {
             switch notification.attributes.content {
             case .postLiked, .postReacted:
