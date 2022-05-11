@@ -39,6 +39,9 @@ struct PostCommentCellHeaderView: View {
                         .font(.system(size: 14, weight: .medium, design: .rounded))
                     Text("发布于 \(viewModel.post.createdDateDescription)")
                         .font(.system(size: 14, weight: .light, design: .rounded))
+                    Spacer(minLength: 0)
+                    Text("No. \(viewModel.post.attributes?.number ?? -1)")
+                        .font(.system(size: 14, weight: .light, design: .rounded))
                 }
                 HStack {
                     if viewModel.post.author?.attributes.isOnline == true {

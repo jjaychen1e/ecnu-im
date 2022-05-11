@@ -33,7 +33,7 @@ class ContentItemBlockquoteUIView: UIView & ContentBlockUIView {
 
     private lazy var leftIndicator: UIView = {
         let indicator = UIView()
-        indicator.backgroundColor = .blue.withAlphaComponent(0.3)
+        indicator.backgroundColor = try! UIColor(rgba_throws: "#6a737d")
         return indicator
     }()
 

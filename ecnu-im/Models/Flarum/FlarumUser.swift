@@ -36,7 +36,7 @@ struct FlarumUserAttributes: Decodable {
     }
 }
 
-struct FlarumUser {
+class FlarumUser {
     init(id: String, attributes: FlarumUserAttributes) {
         self.id = id
         self.attributes = attributes

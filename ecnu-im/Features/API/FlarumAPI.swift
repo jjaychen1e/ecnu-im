@@ -41,11 +41,13 @@ enum Flarum {
                         pageOffset: Int = 0,
                         pageItemLimit: Int = 20)
     case posts(discussionID: Int, offset: Int, limit: Int)
+    case postsNearNumber(discussionID: Int, nearNumber: Int, limit: Int)
     case postsById(id: Int)
     case postsByIds(ids: [Int])
     case postLikeAction(id: Int, like: Bool)
     case register(email: String, username: String, nickname: String, password: String, recaptcha: String)
     case newPost(discussionID: String, content: String)
+    case notification(offset: Int, limit: Int)
 }
 
 extension Flarum: TargetType {
@@ -65,6 +67,8 @@ extension Flarum: TargetType {
             return "/api/discussions"
         case .posts:
             return "/api/posts"
+        case .postsNearNumber:
+            return "/api/posts"
         case .postsById:
             return "/api/posts"
         case .postsByIds:
@@ -75,6 +79,8 @@ extension Flarum: TargetType {
             return "/register"
         case .newPost:
             return "api/posts"
+        case .notification:
+            return "api/notifications"
         }
     }
 
@@ -90,6 +96,8 @@ extension Flarum: TargetType {
             return .get
         case .posts:
             return .get
+        case .postsNearNumber:
+            return .get
         case .postsById:
             return .get
         case .postsByIds:
@@ -100,6 +108,8 @@ extension Flarum: TargetType {
             return .post
         case .newPost:
             return .post
+        case .notification:
+            return .get
         }
     }
 
@@ -125,6 +135,12 @@ extension Flarum: TargetType {
             return .requestParameters(parameters: [
                 "filter[discussion]": discussionID,
                 "page[offset]": max(0, offset),
+                "page[limit]": limit,
+            ], encoding: URLEncoding.default)
+        case let .postsNearNumber(discussionID, nearNumber, limit):
+            return .requestParameters(parameters: [
+                "filter[discussion]": discussionID,
+                "page[near]": max(0, nearNumber),
                 "page[limit]": limit,
             ], encoding: URLEncoding.default)
         case let .postsById(id):
@@ -171,6 +187,11 @@ extension Flarum: TargetType {
                     ],
                 ],
             ], encoding: JSONEncoding.default)
+        case let .notification(offset, limit):
+            return .requestParameters(parameters: [
+                "page[offset]": max(0, offset),
+                "page[limit]": limit,
+            ], encoding: URLEncoding.default)
         }
     }
 

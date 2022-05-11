@@ -235,8 +235,8 @@ struct HomeView: View {
                             let viewModel = viewModel.stickyDiscussions[index]
                             Button {
                                 if AppGlobalState.shared.tokenPrepared {
-                                    let near = (viewModel.discussion.attributes?.lastReadPostNumber ?? 1) - 1
-                                    splitVC?.setSplitViewRoot(viewController: DiscussionViewController(discussion: viewModel.discussion, near: near),
+                                    let lastReadPostNumber = viewModel.discussion.attributes?.lastReadPostNumber ?? 0
+                                    splitVC?.setSplitViewRoot(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: lastReadPostNumber + 1),
                                                               column: .secondary,
                                                               immediatelyShow: true)
                                 } else {
@@ -293,8 +293,8 @@ struct HomeView: View {
                             let viewModel = viewModel.newestDiscussions[index]
                             Button {
                                 if AppGlobalState.shared.tokenPrepared {
-                                    let near = (viewModel.discussion.attributes?.lastReadPostNumber ?? 1) - 1
-                                    splitVC?.setSplitViewRoot(viewController: DiscussionViewController(discussion: viewModel.discussion, near: near),
+                                    let lastReadPostNumber = viewModel.discussion.attributes?.lastReadPostNumber ?? 0
+                                    splitVC?.setSplitViewRoot(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: lastReadPostNumber + 1),
                                                               column: .secondary,
                                                               immediatelyShow: true)
                                 } else {

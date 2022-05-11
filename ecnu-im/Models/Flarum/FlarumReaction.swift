@@ -7,12 +7,12 @@
 
 import Foundation
 
-struct FlarumReactionAttributes: Decodable {
+struct FlarumReactionAttributes: Codable {
     var identifier: String
     var enabled: Bool
 }
 
-struct FlarumReaction: Decodable {
+struct FlarumReaction: Codable {
     init(id: String, attributes: FlarumReactionAttributes) {
         self.id = id
         self.attributes = attributes
@@ -28,7 +28,7 @@ struct FlarumPostReactionAttributes {
     var reaction: FlarumReaction
 }
 
-struct FlarumPostReaction {
+class FlarumPostReaction {
     init(id: String, attributes: FlarumPostReactionAttributes) {
         self.id = id
         self.attributes = attributes

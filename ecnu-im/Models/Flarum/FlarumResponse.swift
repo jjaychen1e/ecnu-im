@@ -17,6 +17,7 @@ struct FlarumResponse {
         var users: [FlarumUser] = []
         var tags: [FlarumTag] = []
         var postReactions: [FlarumPostReaction] = []
+        var notifications: [FlarumNotification] = []
     }
 
     var links: FlarumLinks?
@@ -186,6 +187,58 @@ struct FlarumResponse {
                             responseData.postReactions.append(postReaction)
                         }
                     }
+                case .notification:
+                    if let id = dataJSON["id"].string {
+                        var attributes = dataJSON["attributes"]
+                        if attributes["content"].exists() {
+                            if attributes["contentType"] == "postLiked" {
+                                attributes["content"] = JSON([
+                                    "postLiked": [:],
+                                ])
+                            } else if attributes["contentType"] == "postMentioned" {
+                                attributes["content"] = JSON([
+                                    "postMentioned": attributes["content"],
+                                ])
+                            } else if attributes["contentType"] == "postReacted" {
+                                if let reactionString = attributes["content"].string {
+                                    var json = JSON(parseJSON: reactionString)
+
+                                    if json["enabled"] == 1 {
+                                        json["enabled"] = true
+                                    } else if json["enabled"] == 0 {
+                                        json["enabled"] = false
+                                    }
+                                    
+                                    if let id = json["id"].int,
+                                       let reactionAtt = json.decode(FlarumReactionAttributes.self) {
+                                        let reaction = FlarumReaction(id: "\(id)", attributes: reactionAtt)
+                                        if let data = try? JSONEncoder().encode(FlarumNotificationAttributes.FlarumNotificationContent.postReacted(reaction: reaction)),
+                                           let json = try? JSON(data: data) {
+                                            attributes["content"] = json
+                                        }
+                                    }
+                                }
+                            } else {
+                                // discussionSuperStickied, discussionMerged, recipientsModified
+                                attributes = attributes.removing(key: "content")
+                                attributes = attributes.removing(key: "contentType")
+                            }
+                        }
+                        if let attributes = attributes.decode(FlarumNotificationAttributes.self) {
+                            let notification = FlarumNotification(id: id, attributes: attributes)
+                            if withRelationship, let includedData = includedData {
+                                if let userId = dataJSON["relationships"]["fromUser"]["data"]["id"].string,
+                                   let user = includedData.users.first(where: { $0.id == userId }),
+                                   let postId = dataJSON["relationships"]["subject"]["data"]["id"].string,
+                                   let post = includedData.posts.first(where: { $0.id == postId }) {
+                                    let relationships = FlarumNotificationRelationships(fromUser: user, subject: post)
+                                    notification.relationships = relationships
+                                }
+                            }
+                            responseData.allData.append(.notification(notification))
+                            responseData.notifications.append(notification)
+                        }
+                    }
                 }
             }
         }
@@ -200,6 +253,7 @@ enum FlarumDataType: String, RawRepresentable {
     case user = "users"
     case tag = "tags"
     case postReaction = "post_reactions"
+    case notification = "notifications"
 }
 
 enum FlarumData {
@@ -208,4 +262,5 @@ enum FlarumData {
     case user(FlarumUser)
     case tag(FlarumTag)
     case postReaction(FlarumPostReaction)
+    case notification(FlarumNotification)
 }

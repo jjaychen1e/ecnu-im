@@ -20,9 +20,16 @@ private enum Post: Hashable {
 
 class DiscussionViewController: NoNavigationBarViewController, UITableViewDelegate, UITableViewDataSource {
     static let margin = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
-    
+
     private var discussion: FlarumDiscussion
-    private var near: Int
+
+    private enum InitState {
+        case nearOffset(Int)
+        case nearNumber(Int)
+    }
+
+    private var initState: InitState
+
     private var loader: DiscussionPostsLoader
 
     private enum LoadMoreState {
@@ -34,6 +41,7 @@ class DiscussionViewController: NoNavigationBarViewController, UITableViewDelega
     private var initialized = false
     private var loadMoreStates: [LoadMoreState] = []
     private var posts: [Post] = []
+    private var numberRangeRecordMap: [Int: (Int, Int)] = [:] // offset : (minIndex, maxIndex)
     private let limit = 30
 
     private var tableView: UITableView!
@@ -44,9 +52,17 @@ class DiscussionViewController: NoNavigationBarViewController, UITableViewDelega
         return max(commentCount, lastPostNumber)
     }
 
-    init(discussion: FlarumDiscussion, near: Int) {
+    init(discussion: FlarumDiscussion, nearOffset: Int) {
         self.discussion = discussion
-        self.near = near
+        initState = .nearOffset(nearOffset)
+        loader = DiscussionPostsLoader(discussionID: Int(discussion.id)!, limit: limit)
+        super.init(nibName: nil, bundle: nil)
+        loadMoreStates = .init(repeating: .placeholder, count: initialPostsCount)
+    }
+
+    init(discussion: FlarumDiscussion, nearNumber: Int) {
+        self.discussion = discussion
+        initState = .nearNumber(nearNumber)
         loader = DiscussionPostsLoader(discussionID: Int(discussion.id)!, limit: limit)
         super.init(nibName: nil, bundle: nil)
         loadMoreStates = .init(repeating: .placeholder, count: initialPostsCount)
@@ -61,7 +77,7 @@ class DiscussionViewController: NoNavigationBarViewController, UITableViewDelega
         super.viewDidLoad()
         Task {
             setTableView()
-            await loadData(near: near)
+            await loadData(initState: initState)
         }
     }
 
@@ -156,21 +172,30 @@ extension DiscussionViewController {
         case let .normal(prev: prev, next: next):
             if let prevOffset = prev {
                 Task {
-                    await loadData(offset: prevOffset)
+                    await loadData(offset: prevOffset, completionHandler: {})
                     loadMoreStates[index] = .finished
                 }
             } else if let nextOffset = next {
                 Task {
-                    await loadData(offset: nextOffset)
+                    await loadData(offset: nextOffset, completionHandler: {})
                     loadMoreStates[index] = .finished
                 }
             }
         case .placeholder:
-            let pivot = max(0, near - limit / 2)
+            var targetNeat: Int
+            switch initState {
+            case let .nearOffset(nearOffset):
+                targetNeat = nearOffset
+            case let .nearNumber(nearNumber):
+                targetNeat = nearNumber
+            }
+
+            // This is inaccurate, since we don't know nearNumber's corresponding offset
+            let pivot = max(0, targetNeat - limit / 2)
             let remain = (index - pivot) % limit
             let offset = max(0, remain > 0 ? index - remain : index - (limit + remain))
             Task {
-                await loadData(offset: offset)
+                await loadData(offset: offset, completionHandler: {})
                 loadMoreStates[index] = .finished
             }
         case .finished:
@@ -178,85 +203,189 @@ extension DiscussionViewController {
         }
     }
 
-    /// Called when first time initialized
-    /// - Parameter near: target post number id
-    private func loadData(near: Int) async {
-        let offset = max(0, near - limit / 2)
-        await loadData(offset: offset, completionHandler: { [weak self] in
-            self?.tableView.scrollToRow(at: IndexPath(row: near, section: 0), at: .top, animated: false)
-        })
+    /// Only called when first time initialized
+    private func loadData(initState: InitState) async {
+        switch initState {
+        case let .nearOffset(nearOffset):
+            let offset = max(0, nearOffset - limit / 2)
+            await loadData(offset: offset, completionHandler: { [weak self] in
+                if let self = self {
+                    if offset < self.posts.count {
+                        self.tableView.scrollToRow(at: IndexPath(row: offset, section: 0), at: .top, animated: false)
+                    } else {
+                        #if DEBUG
+                            fatalError("Scroll target out of index!!")
+                        #endif
+                    }
+                }
+            })
+        case let .nearNumber(nearNumber):
+            await loadData(nearNumber: nearNumber, completionHandler: { [weak self] in
+                if let self = self {
+                    // Find out the closet comment(it could be a re-name, re-rag, actually.
+                    if let closest = self.posts.min(by: { p1, p2 in
+                        if case let .comment(comment1) = p1, case let .comment(comment2) = p2 {
+                            if let number1 = comment1.attributes?.number, let number2 = comment2.attributes?.number {
+                                return abs(nearNumber - number1) < abs(nearNumber - number2)
+                            }
+                            #if DEBUG
+                                fatalError("number is nil...")
+                            #else
+                                return false
+                            #endif
+                        } else if case .comment = p1 {
+                            return true
+                        } else if case .comment = p2 {
+                            return false
+                        } else {
+                            return false
+                        }
+                    }) {
+                        if let index = self.posts.firstIndex(of: closest) {
+                            self.tableView.scrollToRow(at: IndexPath(row: index, section: 0), at: .top, animated: false)
+                        }
+                    } else {
+                        #if DEBUG
+                            fatalError("Can not find nearNumber's row!!")
+                        #endif
+                    }
+                }
+            })
+        }
         initialized = true
     }
 
-    private func loadData(offset: Int, completionHandler: (() -> Void)? = nil) async {
+    private func loadData(offset: Int, completionHandler: @escaping () -> Void) async {
         if let loadedResult = await loader.loadData(offset: offset) {
             process(offset: offset, loadedData: loadedResult.posts, loadMoreState: loadedResult.loadMoreState, completionHandler: completionHandler)
         }
     }
 
-    private func process(offset: Int, loadedData: [FlarumPost], loadMoreState: FlarumPost.FlarumPostLoadMoreState, completionHandler: (() -> Void)? = nil) {
+    private func loadData(nearNumber: Int, completionHandler: @escaping () -> Void) async {
+        let loadedResult = await loader.loadData(nearNumber: nearNumber)
+        if loadedResult.count > 0 {
+            process(nearNumber: nearNumber, loadedData: loadedResult, completionHandler: completionHandler)
+        } else {
+            #if DEBUG
+                fatalError("First init return empty data!")
+            #endif
+        }
+    }
+
+    private func process(offset: Int? = nil, nearNumber: Int? = nil, loadedData: [FlarumPost], loadMoreState: FlarumPost.FlarumPostLoadMoreState? = nil, completionHandler: @escaping () -> Void) {
         guard loadedData.count > 0 else { return }
         // [offset, offset + loadedData.count - 1]
         var posts = posts
 
-        // If the array if too short(may be new posts are sent)
-        if offset + loadedData.count > posts.count {
-            let diffRange = posts.count ..< (offset + loadedData.count)
-            for index in diffRange {
-                posts.append(.placeholder(index))
-                loadMoreStates.append(.placeholder)
+        let comparator: (FlarumPost, FlarumPost) -> Bool = {
+            if let number1 = $0.attributes?.number, let number2 = $1.attributes?.number {
+                return number1 < number2
             }
+            return false
         }
 
-        // Set all posts to `deleted`, and post actual value later.
-        for i in offset ..< min(posts.count, offset + limit) {
-            if case .comment = posts[i] {
-                continue
-            }
-            posts[i] = .deleted(i)
-        }
+        if let maxPostNumber = loadedData.max(by: comparator)?.attributes?.number,
+           let minPostNumber = loadedData.min(by: comparator)?.attributes?.number {
+            #if DEBUG
+                assert(minPostNumber - 1 >= 0)
+                assert(maxPostNumber - 1 >= 0)
+            #endif
 
-        loadedData.sorted(by: { lhs, rhs in Int(lhs.id)! < Int(rhs.id)! })
-            .enumerated()
-            .forEach { indexInArray, post in
-                if let number = post.attributes?.number {
-                    let actualIndex = number - 1
-                    if actualIndex < posts.count {
-                        if case .comment = posts[actualIndex] {
-                            return
-                        }
-                        let isTopHalf = indexInArray < loadedData.count / 2
-                        if isTopHalf {
-                            loadMoreStates[actualIndex] = .normal(prev: loadMoreState.prevOffset, next: nil)
+            let minIndex = max(0, minPostNumber - 1)
+            let maxIndex = max(0, maxPostNumber - 1)
+            if let offset = offset {
+                numberRangeRecordMap[offset] = (minIndex, maxIndex)
+            }
+
+            // If the array if too short(may be new posts are sent)
+            if maxPostNumber > posts.count {
+                let diffRange = posts.count ..< maxPostNumber
+                for index in diffRange {
+                    posts.append(.placeholder(index))
+                    loadMoreStates.append(.placeholder)
+                }
+            }
+
+            // Set all posts to `deleted`, and put actual value later.
+            // And considering the last and next section
+            var rangeLeft = minIndex
+            var rangeRight = maxIndex
+            if let offset = offset {
+                if let lastSectionRange = numberRangeRecordMap[max(0, offset - limit)] {
+                    rangeLeft = min(rangeLeft, lastSectionRange.1 + 1)
+                }
+                if let nextSectionRange = numberRangeRecordMap[offset + limit] {
+                    rangeRight = max(rangeRight, nextSectionRange.0 - 1)
+                }
+            }
+
+            var modified: [IndexPath] = []
+            let range = rangeLeft ... rangeRight
+            for i in range {
+                if case .comment = posts[i] {
+                    // This could actually happen, because we rely on prev & next from API, and
+                    // First time fetch may rely on nearNumber, in that case we don't know the
+                    //  actual offset is, so consequent fetching may overlay with first fetch.
+                    continue
+                }
+                posts[i] = .deleted(i)
+                modified.append(.init(row: i, section: 0))
+                let isTopHalf = i - rangeLeft < range.count / 2
+                if let loadMoreState = loadMoreState {
+                    if isTopHalf {
+                        loadMoreStates[i] = .normal(prev: loadMoreState.prevOffset, next: nil)
+                    } else {
+                        loadMoreStates[i] = .normal(prev: nil, next: loadMoreState.nextOffset)
+                    }
+                } else if let nearNumber = nearNumber {
+                    if isTopHalf {
+                        loadMoreStates[i] = .normal(prev: max(0, nearNumber - limit), next: nil)
+                    } else {
+                        loadMoreStates[i] = .normal(prev: nil, next: nearNumber + limit)
+                    }
+                } else {
+                    #if DEBUG
+                        fatalError("This should never happen.")
+                    #endif
+                }
+            }
+
+            loadedData.sorted(by: { lhs, rhs in Int(lhs.id)! < Int(rhs.id)! })
+                .enumerated()
+                .forEach { indexInArray, post in
+                    if let number = post.attributes?.number {
+                        let actualIndex = number - 1
+                        if actualIndex < posts.count {
+                            if case .comment = posts[actualIndex] {
+                                return
+                            }
                             posts[actualIndex] = convertFlarumPostToPost(flarumPost: post, index: actualIndex)
                         } else {
-                            loadMoreStates[actualIndex] = .normal(prev: nil, next: loadMoreState.nextOffset)
-                            posts[actualIndex] = convertFlarumPostToPost(flarumPost: post, index: actualIndex)
+                            #if DEBUG
+                                fatalError("Out of index!!")
+                            #endif
                         }
                     }
                 }
-            }
 
-        let modified = (offset ..< min(posts.count, offset + limit)).map {
-            IndexPath(row: $0, section: 0)
-        }
-        if posts.count > self.posts.count {
-            UIView.performWithoutAnimation {
-                tableView.performBatchUpdates {
-                    tableView.insertRows(at: (self.posts.count ..< posts.count).map { IndexPath(row: $0, section: 0) }, with: .none)
-                    tableView.reloadRows(at: modified, with: .none)
-                    self.posts = posts
-                } completion: { completed in
-                    completionHandler?()
+            if posts.count > self.posts.count {
+                UIView.performWithoutAnimation {
+                    tableView.performBatchUpdates {
+                        tableView.insertRows(at: (self.posts.count ..< posts.count).map { IndexPath(row: $0, section: 0) }, with: .none)
+                        tableView.reloadRows(at: modified, with: .none)
+                        self.posts = posts
+                    } completion: { completed in
+                        completionHandler()
+                    }
                 }
-            }
-        } else {
-            UIView.performWithoutAnimation {
-                tableView.performBatchUpdates {
-                    tableView.reloadRows(at: modified, with: .none)
-                    self.posts = posts
-                } completion: { completed in
-                    completionHandler?()
+            } else {
+                UIView.performWithoutAnimation {
+                    tableView.performBatchUpdates {
+                        tableView.reloadRows(at: modified, with: .none)
+                        self.posts = posts
+                    } completion: { completed in
+                        completionHandler()
+                    }
                 }
             }
         }
@@ -334,5 +463,19 @@ private class DiscussionPostsLoader: ObservableObject {
         await info.finishLoad(offset: offset)
         print("finish loading: \(offset)")
         return (posts: postLists, loadMoreState: loadMoreState)
+    }
+
+    func loadData(nearNumber: Int) async -> [FlarumPost] {
+        print("loading near number: \(nearNumber)")
+        var postLists: [FlarumPost] = []
+        if let response = try? await flarumProvider.request(.postsNearNumber(discussionID: discussionID,
+                                                                             nearNumber: nearNumber,
+                                                                             limit: limit)),
+            let json = try? JSON(data: response.data) {
+            let posts = FlarumResponse(json: json).data.posts
+            postLists.append(contentsOf: posts)
+        }
+        print("finish loading near number: \(nearNumber)")
+        return postLists
     }
 }

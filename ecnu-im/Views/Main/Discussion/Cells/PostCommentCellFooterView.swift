@@ -116,14 +116,14 @@ struct PostCommentCellFooterView: View {
                         Button {
                             likeButtonAction()
                         } label: {
-                            Image(systemName: "hand.thumbsup.fill")
+                            Image(systemName: "heart.fill")
                                 .font(.system(size: 20, weight: .regular, design: .rounded))
                         }
                     } else {
                         Button {
                             likeButtonAction()
                         } label: {
-                            Image(systemName: "hand.thumbsup")
+                            Image(systemName: "heart")
                                 .font(.system(size: 20, weight: .regular, design: .rounded))
                         }
                     }

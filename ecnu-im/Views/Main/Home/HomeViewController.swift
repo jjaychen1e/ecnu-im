@@ -15,8 +15,6 @@ class HomeViewController: NoNavigationBarViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        navigationController?.isNavigationBarHidden = true
-
         let vc = UIHostingController(rootView: HomeView()
             .environment(\.splitVC, splitViewController ?? splitVC)
             .environment(\.nvc, navigationController ?? nvc)

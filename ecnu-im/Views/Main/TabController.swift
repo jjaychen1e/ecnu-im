@@ -15,6 +15,7 @@ class TabController: UIViewController {
     private var currentController: UIViewController?
     private var allDiscussionsViewController = AllDiscussionsViewController()
     private var homeViewController = HomeViewController()
+    private var notificationCenterViewController = NotificationCenterViewController()
     private var tabBarViewModel: TabBarViewModel2!
 
     private var tabBarViewController: TabBarViewController!
@@ -56,8 +57,8 @@ class TabController: UIViewController {
         initViewControllers()
         let tabBarItems: [TabItem] = [
             .init(tab: .posts, icon: "message", name: "帖子", color: .teal, viewController: homeViewController),
-            .init(tab: .notifications, icon: "bell", name: "通知", color: .red, viewController: allDiscussionsViewController),
-            .init(tab: .profile, icon: "person", name: "个人资料", color: .blue, viewController: SettingViewController()),
+            .init(tab: .notifications, icon: "bell", name: "通知", color: .red, viewController: notificationCenterViewController),
+            .init(tab: .profile, icon: "person", name: "个人资料", color: .blue, viewController: allDiscussionsViewController),
             .init(tab: .setting, icon: "gearshape", name: "设置", color: .gray, viewController: SettingViewController()),
         ]
         tabBarViewModel = .init(
@@ -83,5 +84,8 @@ class TabController: UIViewController {
         
         homeViewController.splitVC = splitViewController
         homeViewController.nvc = navigationController
+        
+        notificationCenterViewController.splitVC = splitViewController
+        notificationCenterViewController.nvc = navigationController
     }
 }
