@@ -61,6 +61,9 @@
 		634C470727F9C21F00FC591D /* UIViewController+Sub+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 634C470627F9C21F00FC591D /* UIViewController+Sub+Extension.swift */; };
 		634C470927F9E76C00FC591D /* UISplitViewController+Helper+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 634C470827F9E76C00FC591D /* UISplitViewController+Helper+Extension.swift */; };
 		634C470B27FABC3A00FC591D /* DiscussionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 634C470A27FABC3A00FC591D /* DiscussionViewController.swift */; };
+		6357EB90282AC135005C0D49 /* FlarumNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6357EB8F282AC135005C0D49 /* FlarumNotification.swift */; };
+		6357EB94282AC7B5005C0D49 /* NotificationCenterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6357EB93282AC7B5005C0D49 /* NotificationCenterView.swift */; };
+		6357EB96282B9D03005C0D49 /* NotificationCenterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6357EB95282B9D03005C0D49 /* NotificationCenterViewController.swift */; };
 		635B2A5127EEB08400FF6109 /* Response.swift in Sources */ = {isa = PBXBuildFile; fileRef = 635B2A5027EEB08400FF6109 /* Response.swift */; };
 		635B2A5327EEB0DD00FF6109 /* NetworkError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 635B2A5227EEB0DD00FF6109 /* NetworkError.swift */; };
 		635B2A5727EEB3CA00FF6109 /* Endpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 635B2A5627EEB3CA00FF6109 /* Endpoint.swift */; };
@@ -222,6 +225,9 @@
 		634C470627F9C21F00FC591D /* UIViewController+Sub+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Sub+Extension.swift"; sourceTree = "<group>"; };
 		634C470827F9E76C00FC591D /* UISplitViewController+Helper+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UISplitViewController+Helper+Extension.swift"; sourceTree = "<group>"; };
 		634C470A27FABC3A00FC591D /* DiscussionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscussionViewController.swift; sourceTree = "<group>"; };
+		6357EB8F282AC135005C0D49 /* FlarumNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlarumNotification.swift; sourceTree = "<group>"; };
+		6357EB93282AC7B5005C0D49 /* NotificationCenterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCenterView.swift; sourceTree = "<group>"; };
+		6357EB95282B9D03005C0D49 /* NotificationCenterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCenterViewController.swift; sourceTree = "<group>"; };
 		635B2A5027EEB08400FF6109 /* Response.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Response.swift; sourceTree = "<group>"; };
 		635B2A5227EEB0DD00FF6109 /* NetworkError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkError.swift; sourceTree = "<group>"; };
 		635B2A5627EEB3CA00FF6109 /* Endpoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Endpoint.swift; sourceTree = "<group>"; };
@@ -446,6 +452,7 @@
 				631E59E02813EE7E009A1A94 /* FlarumTag.swift */,
 				631E59E22813FA79009A1A94 /* FlarumUser.swift */,
 				631E59E42813FB15009A1A94 /* FlarumLinks.swift */,
+				6357EB8F282AC135005C0D49 /* FlarumNotification.swift */,
 			);
 			path = Flarum;
 			sourceTree = "<group>";
@@ -573,6 +580,15 @@
 				634C470827F9E76C00FC591D /* UISplitViewController+Helper+Extension.swift */,
 			);
 			path = Extension;
+			sourceTree = "<group>";
+		};
+		6357EB91282AC7A6005C0D49 /* Notification */ = {
+			isa = PBXGroup;
+			children = (
+				6357EB93282AC7B5005C0D49 /* NotificationCenterView.swift */,
+				6357EB95282B9D03005C0D49 /* NotificationCenterViewController.swift */,
+			);
+			path = Notification;
 			sourceTree = "<group>";
 		};
 		635B2A5E27EEE76D00FF6109 /* Infrastructure */ = {
@@ -960,6 +976,7 @@
 		63E8BF0427F98AAF0021E4C2 /* Main */ = {
 			isa = PBXGroup;
 			children = (
+				6357EB91282AC7A6005C0D49 /* Notification */,
 				637751BC281D15D500A13241 /* Editor */,
 				637751BB281D15C600A13241 /* Setting */,
 				637751B6281D144500A13241 /* Discussion */,
@@ -1256,6 +1273,7 @@
 				635FF1C92803028D00C7CDBF /* Toast.swift in Sources */,
 				637751C0281D1ADB00A13241 /* PostCommentCell.swift in Sources */,
 				63B740A32802793100376B94 /* CustomFieldModifier.swift in Sources */,
+				6357EB96282B9D03005C0D49 /* NotificationCenterViewController.swift in Sources */,
 				6391FCD02811B2C8006E086D /* HomeView.swift in Sources */,
 				63E8BF0327F9769A0021E4C2 /* SettingViewController.swift in Sources */,
 				633BC2E82813D9F900BC0930 /* FlarumPost.swift in Sources */,
@@ -1284,6 +1302,7 @@
 				6312782A281A4E5B0090BAE3 /* ContentItemsView.swift in Sources */,
 				6379A2A928201E2200B31330 /* ContentItemSingleImageNode.swift in Sources */,
 				633BC2EA2813DA4400BC0930 /* FlarumReaction.swift in Sources */,
+				6357EB90282AC135005C0D49 /* FlarumNotification.swift in Sources */,
 				6329EE6B281A9C78001BE8DD /* ContentItemDivider.swift in Sources */,
 				635B2A6427EEF0A700FF6109 /* Token.swift in Sources */,
 				636BE17127F7FD6600283943 /* IMTheme.swift in Sources */,
@@ -1323,6 +1342,7 @@
 				63A6CCCF28156A51000075F7 /* DiscussionTagsView.swift in Sources */,
 				6379A2B5282020D300B31330 /* ContentItemBlockquoteNode.swift in Sources */,
 				635B2A5B27EEBB3500FF6109 /* URLRequest+Network+Extension.swift in Sources */,
+				6357EB94282AC7B5005C0D49 /* NotificationCenterView.swift in Sources */,
 				632B6247281A2E480064380C /* ContentItemBlockquote.swift in Sources */,
 				63B740A92802799300376B94 /* BackgroundColor.swift in Sources */,
 				6365777227F19638008AD10E /* DiscussionCellTagView.swift in Sources */,
