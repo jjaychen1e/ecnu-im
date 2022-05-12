@@ -65,23 +65,25 @@ class ContentParser {
         return attributedString
     }
 
-    private func _parseContentBlocksToContentItems(contentBlocks: [ContentBlock]) -> [ContentBlockUIView] {
+    private func _parseContentBlocksToContentItems(contentBlocks: [ContentBlock], initStyles: [ContentTextStyle] = []) -> [ContentBlockUIView] {
         var contentItems: [ContentBlockUIView] = []
 
         for contentBlock in contentBlocks {
             switch contentBlock {
             case let .paragraph(richText):
-                let styleStack = ContentTextStyleStack()
+                let styleStack = ContentTextStyleStack(items: initStyles)
                 let attributedString = richText.attributedString(styleStack: styleStack)
                 contentItems.append(ContentItemParagraphUIView(attributedText: attributedString))
             case let .header(richText, level):
-                let styleStack = ContentTextStyleStack()
+                let styleStack = ContentTextStyleStack(items: initStyles)
                 styleStack.push(.fontSize(-2.0 * CGFloat(level) + 30.0))
                 styleStack.push(.bold)
                 let attributedString = richText.attributedString(styleStack: styleStack)
                 contentItems.append(ContentItemParagraphUIView(attributedText: attributedString))
             case let .blockQuote(contentBlocks):
-                let subContentItems = _parseContentBlocksToContentItems(contentBlocks: contentBlocks)
+                let subContentItems = _parseContentBlocksToContentItems(contentBlocks: contentBlocks, initStyles: [
+                    .textColor(Asset.DynamicColors.dynamicBlack.color.withAlphaComponent(0.7)),
+                ])
                 if subContentItems.count > 0 {
                     contentItems.append(ContentItemBlockquoteUIView(contentItems: subContentItems))
                 }

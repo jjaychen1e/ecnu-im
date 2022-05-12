@@ -51,7 +51,7 @@ class ContentItemBlockquoteUIView: UIView & ContentBlockUIView {
         if contentItems.count == 0 {
             return CGSize(width: size.width, height: 0.01)
         }
-        let contentItemsViewSize = contentItemsUIView.sizeThatFits(CGSize(width: size.width - 5, height: .greatestFiniteMagnitude))
+        let contentItemsViewSize = contentItemsUIView.sizeThatFits(CGSize(width: size.width - 15, height: .greatestFiniteMagnitude))
         return CGSize(width: size.width, height: contentItemsViewSize.height)
     }
 
@@ -59,9 +59,9 @@ class ContentItemBlockquoteUIView: UIView & ContentBlockUIView {
         super.layoutSubviews()
 
         if contentItems.count > 0 {
-            let contentItemsViewSize = contentItemsUIView.sizeThatFits(CGSize(width: bounds.width - 5, height: .greatestFiniteMagnitude))
+            let contentItemsViewSize = contentItemsUIView.sizeThatFits(CGSize(width: bounds.width - 15, height: .greatestFiniteMagnitude))
             leftIndicator.frame = CGRect(origin: .zero, size: CGSize(width: 5, height: contentItemsViewSize.height))
-            contentItemsUIView.frame = CGRect(origin: .init(x: 5, y: 0), size: contentItemsViewSize)
+            contentItemsUIView.frame = CGRect(origin: .init(x: 15, y: 0), size: contentItemsViewSize)
         }
     }
 

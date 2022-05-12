@@ -67,7 +67,6 @@ struct TabBarContentView: View {
         }
         .onLoad {
             AppGlobalState.shared.$unreadNotificationCount.sink { change in
-                print(change)
                 viewModel.tabBarItems.first { item in
                     item.name == "通知"
                 }?.badgeCount = change

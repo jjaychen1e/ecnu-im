@@ -27,6 +27,12 @@ let ContentMarkerColorAttribute = "MarkerColorAttribute"
 final class ContentTextStyleStack {
     private var items: [ContentTextStyle] = []
 
+    init() {}
+
+    init(items: [ContentTextStyle]) {
+        self.items = items
+    }
+
     func push(_ item: ContentTextStyle) {
         items.append(item)
     }
