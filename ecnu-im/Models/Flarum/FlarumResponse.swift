@@ -22,10 +22,12 @@ struct FlarumResponse {
 
     var links: FlarumLinks?
     var data: FlarumResponseData
+    var included: FlarumResponseData
 
     init(json: JSON) {
         links = json["links"].decode(FlarumLinks.self)
         data = .init()
+        included = .init()
 
         let includedFirst = parseData(json: json["included"])
         // Not all relationships are included in data section!
@@ -37,6 +39,7 @@ struct FlarumResponse {
         // TODO: It seems 2 round traversing is insufficient? We should use reference
         //  type for all root types.
         let included = parseData(json: json["included"], withRelationship: true, includedData: includedFirst)
+        self.included = included
         data = parseData(json: json["data"], withRelationship: true, includedData: included)
     }
 

@@ -82,6 +82,7 @@ class PostContentItemsUIView: UIView {
             totalHeight += size.height + margin
         }
         totalHeight -= margin
+        totalHeight = max(0, totalHeight)
         self.totalHeight = totalHeight
         return CGSize(width: size.width, height: totalHeight)
     }

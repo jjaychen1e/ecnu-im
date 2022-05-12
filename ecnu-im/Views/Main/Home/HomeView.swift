@@ -19,6 +19,7 @@ struct ScrollPreferenceKey: PreferenceKey {
 
 private class FlarumDiscussionPreviewViewModel: ObservableObject {
     @Published var discussion: FlarumDiscussion
+    @Published var relatedUsers: [FlarumUser] = []
     @Published var postExcerpt: String = ""
     init(discussion: FlarumDiscussion) {
         self.discussion = discussion
@@ -74,7 +75,21 @@ struct HomeView: View {
                                                                            imageCountMax: 0)) {
                         correspondingDiscussionViewModel.postExcerpt = excerpt
                     } else {
-                        correspondingDiscussionViewModel.postExcerpt = "无法查看预览内容，请检查账号邮箱是否已验证。"
+                        correspondingDiscussionViewModel.postExcerpt = AppGlobalState.shared.tokenPrepared ? "无法查看预览内容，请检查账号邮箱是否已验证。" : "登录以查看内容预览"
+                    }
+                }
+            }
+        }
+
+        for discussion in discussions {
+            if let id = Int(discussion.id),
+               let response = try? await flarumProvider.request(.posts(discussionID: id, offset: 0, limit: 15)),
+               let json = try? JSON(data: response.data) {
+                if let correspondingDiscussionViewModel = (viewModel.newestDiscussions + viewModel.stickyDiscussions).first(where: { $0.discussion.id == discussion.id }) {
+                    let flarumResponse = FlarumResponse(json: json)
+                    let users = flarumResponse.data.posts.compactMap { $0.author }
+                    withAnimation {
+                        correspondingDiscussionViewModel.relatedUsers = Array(users.unique { $0.id }.prefix(5))
                     }
                 }
             }
@@ -447,10 +462,9 @@ private struct HomePostCardView: View {
                 HStack(spacing: 4) {
                     Spacer()
                     HStack(spacing: -3) {
-                        ForEach(0 ..< 3) { _ in
-                            Image("avatar")
-                                .resizable()
-                                .frame(width: 18, height: 18)
+                        ForEach(0 ..< viewModel.relatedUsers.count, id: \.self) { index in
+                            let user = viewModel.relatedUsers[index]
+                            PostAuthorAvatarView(name: user.attributes.displayName, url: user.avatarURL, size: 18)
                                 .mask(Circle())
                                 .overlay(Circle().stroke(Color.white, lineWidth: 0.5))
                         }
@@ -526,10 +540,9 @@ struct HomePostCardViewLarge: View {
                 HStack(spacing: 4) {
                     Spacer()
                     HStack(spacing: -3) {
-                        ForEach(0 ..< 3) { _ in
-                            Image("avatar")
-                                .resizable()
-                                .frame(width: 18, height: 18)
+                        ForEach(0 ..< viewModel.relatedUsers.count, id: \.self) { index in
+                            let user = viewModel.relatedUsers[index]
+                            PostAuthorAvatarView(name: user.attributes.displayName, url: user.avatarURL, size: 18)
                                 .mask(Circle())
                                 .overlay(Circle().stroke(Color.white, lineWidth: 0.5))
                         }
