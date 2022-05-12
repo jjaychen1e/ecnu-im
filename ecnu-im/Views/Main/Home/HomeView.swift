@@ -166,7 +166,7 @@ struct HomeView: View {
                             }
                         }
                         #if DEBUG
-                            assert(count == notifications.count)
+//                            assert(count == notifications.count)
                         #endif
                     }
                 }
@@ -354,7 +354,9 @@ struct HomeView: View {
                         }
                     }
                     .padding(.horizontal)
+                    .padding(.vertical, 8)
                 }
+                .padding(.vertical, -4)
             }
         }
     }

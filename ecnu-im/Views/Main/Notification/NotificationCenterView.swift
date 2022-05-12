@@ -13,6 +13,7 @@ private struct NotificationView: View {
     @State var notification: FlarumNotification
     @State var replyExcerptText: String?
 
+    @Environment(\.colorScheme) var colorScheme
     @Environment(\.splitVC) var splitVC
 
     var body: some View {
@@ -41,7 +42,7 @@ private struct NotificationView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.all, 8)
-        .background(notification.attributes.isRead ? Color.clear : Color.primary.opacity(0.05))
+        .background(notification.attributes.isRead ? Color.clear : colorScheme == .light ? Color(rgba: "#e4ebf6") : Color(rgba: "#e4ebf6").opacity(0.2))
         .onLoad {
             Task {
                 if let repliedPost = await notification.repliedPost() {
@@ -168,8 +169,11 @@ struct NotificationCenterView: View {
                 }
                 .listStyle(.plain)
             } else {
-                Text("暂无通知")
+                Color.clear
             }
+        }
+        .safeAreaInset(edge: .top) {
+            header
         }
         .onLoad {
             load()
@@ -187,6 +191,38 @@ struct NotificationCenterView: View {
                 self.notifications = flarumResponse.data.notifications
             }
         }
+    }
+
+    var header: some View {
+        ZStack {
+            Text("通知中心")
+                .font(.system(size: 34, weight: .bold, design: .rounded))
+                .foregroundColor(.teal)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.leading)
+                .padding(.top, 20)
+
+            Button {} label: {
+                HStack(spacing: 16) {
+                    Image(systemName: "checkmark")
+                        .font(.body.weight(.bold))
+                        .frame(width: 36, height: 36)
+                        .foregroundColor(.secondary)
+                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .modifier(OutlineOverlay(cornerRadius: 14))
+                }
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .padding(.trailing, 20)
+                .padding(.top, 20)
+            }
+        }
+        .background(
+            Color.clear
+                .background(.ultraThinMaterial)
+                .blur(radius: 10)
+//                .opacity(hasScrolled ? 1 : 0)
+        )
+        .frame(alignment: .top)
     }
 }
 
