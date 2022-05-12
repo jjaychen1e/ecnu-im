@@ -10,9 +10,9 @@ import SwiftUI
 import UIKit
 
 class TabBarViewController: UIViewController {
-    private var viewModel: TabBarViewModel2
+    private var viewModel: TabBarViewModel
 
-    init(viewModel: TabBarViewModel2) {
+    init(viewModel: TabBarViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }

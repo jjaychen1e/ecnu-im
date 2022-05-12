@@ -33,7 +33,7 @@ class TabItem {
     }
 }
 
-class TabBarViewModel2: ObservableObject {
+class TabBarViewModel: ObservableObject {
     @Published var totalWidth: CGFloat
     @Published var tabBarItems: [TabItem]
     @Published var selectedIndex: Int
@@ -52,11 +52,11 @@ struct TabBarContentView: View {
         viewModel.tabBarItems[viewModel.selectedIndex].tab
     }
 
-    @ObservedObject var viewModel: TabBarViewModel2
+    @ObservedObject var viewModel: TabBarViewModel
 
     @State private var subscriptions: Set<AnyCancellable> = []
 
-    init(viewModel: TabBarViewModel2) {
+    init(viewModel: TabBarViewModel) {
         self.viewModel = viewModel
         viewModel.selectAction(selectedTab)
     }

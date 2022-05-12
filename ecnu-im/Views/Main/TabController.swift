@@ -33,7 +33,7 @@ class TabController: UIViewController {
     private var allDiscussionsViewController = AllDiscussionsViewController()
     private var homeViewController = HomeViewController()
     private var notificationCenterViewController = NotificationCenterViewController()
-    private var tabBarViewModel: TabBarViewModel2!
+    private var tabBarViewModel: TabBarViewModel!
 
     private var tabBarViewController: TabBarViewController!
     private var tabBarHeightConstraint: Constraint?
