@@ -48,14 +48,16 @@ class TabBarViewModel2: ObservableObject {
 }
 
 struct TabBarContentView: View {
-    @State var selectedTab: TabItem.Tab
+    private var selectedTab: TabItem.Tab {
+        viewModel.tabBarItems[viewModel.selectedIndex].tab
+    }
+
     @ObservedObject var viewModel: TabBarViewModel2
 
     @State private var subscriptions: Set<AnyCancellable> = []
 
     init(viewModel: TabBarViewModel2) {
         self.viewModel = viewModel
-        selectedTab = viewModel.tabBarItems[viewModel.selectedIndex].tab
         viewModel.selectAction(selectedTab)
     }
 
@@ -81,7 +83,6 @@ struct TabBarContentView: View {
             if index == 0 { Spacer() }
 
             Button {
-                selectedTab = tabItem.tab
                 viewModel.selectAction(tabItem.tab)
             } label: {
                 VStack(spacing: 0) {

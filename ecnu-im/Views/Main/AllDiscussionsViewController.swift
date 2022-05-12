@@ -22,6 +22,7 @@ class AllDiscussionsViewController: UIViewController {
             AllDiscussionsView()
                 .environment(\.splitVC, splitViewController ?? splitVC)
                 .environment(\.nvc, navigationController ?? nvc)
+                .environment(\.viewController, self)
         )
         self.hostingViewController = hostingViewController
         addChildViewController(hostingViewController, addConstrains: true)

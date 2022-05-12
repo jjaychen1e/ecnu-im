@@ -18,6 +18,7 @@ class HomeViewController: NoNavigationBarViewController {
         let vc = UIHostingController(rootView: HomeView()
             .environment(\.splitVC, splitViewController ?? splitVC)
             .environment(\.nvc, navigationController ?? nvc)
+            .environment(\.viewController, self)
         )
         addChildViewController(vc, addConstrains: true)
     }

@@ -441,8 +441,8 @@ private class DiscussionPostsLoader: ObservableObject {
         var loadMoreState = FlarumPost.FlarumPostLoadMoreState()
         if let response = try? await flarumProvider.request(.posts(discussionID: discussionID,
                                                                    offset: offset,
-                                                                   limit: limit)),
-            let json = try? JSON(data: response.data) {
+                                                                   limit: limit)) {
+            let json = JSON(response.data)
             let linksJSON = json["links"]
             let regex = Regex("page\\[offset\\]=(\\d+)")
             if let prev = linksJSON["prev"].string?.removingPercentEncoding {
@@ -470,8 +470,8 @@ private class DiscussionPostsLoader: ObservableObject {
         var postLists: [FlarumPost] = []
         if let response = try? await flarumProvider.request(.postsNearNumber(discussionID: discussionID,
                                                                              nearNumber: nearNumber,
-                                                                             limit: limit)),
-            let json = try? JSON(data: response.data) {
+                                                                             limit: limit)) {
+            let json = JSON(response.data)
             let posts = FlarumResponse(json: json).data.posts
             postLists.append(contentsOf: posts)
         }

@@ -49,6 +49,7 @@ enum Flarum {
     case register(email: String, username: String, nickname: String, password: String, recaptcha: String)
     case newPost(discussionID: String, content: String)
     case notification(offset: Int, limit: Int)
+    case lastSeenUsers(limit: Int)
 }
 
 extension Flarum: TargetType {
@@ -84,6 +85,8 @@ extension Flarum: TargetType {
             return "api/posts"
         case .notification:
             return "api/notifications"
+        case .lastSeenUsers:
+            return "api/users"
         }
     }
 
@@ -114,6 +117,8 @@ extension Flarum: TargetType {
         case .newPost:
             return .post
         case .notification:
+            return .get
+        case .lastSeenUsers:
             return .get
         }
     }
@@ -200,6 +205,12 @@ extension Flarum: TargetType {
         case let .notification(offset, limit):
             return .requestParameters(parameters: [
                 "page[offset]": max(0, offset),
+                "page[limit]": limit,
+            ], encoding: URLEncoding.default)
+        case let .lastSeenUsers(limit):
+            return .requestParameters(parameters: [
+                "sort": "-lastSeenAt",
+                "page[offset]": 0,
                 "page[limit]": limit,
             ], encoding: URLEncoding.default)
         }

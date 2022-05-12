@@ -18,6 +18,7 @@ class NotificationCenterViewController: NoNavigationBarViewController {
         let vc = UIHostingController(rootView: NotificationCenterView()
             .environment(\.splitVC, splitViewController ?? splitVC)
             .environment(\.nvc, navigationController ?? nvc)
+            .environment(\.viewController, self)
         )
         addChildViewController(vc, addConstrains: true)
     }

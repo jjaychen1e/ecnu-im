@@ -9,6 +9,23 @@ import SnapKit
 import SwiftUI
 import UIKit
 
+extension UIViewController {
+    var tabController: TabController? {
+        if let tabController = self as? TabController {
+            return tabController
+        }
+
+        var vc = self
+        while let parent = vc.parent {
+            if let tabController = parent as? TabController {
+                return tabController
+            }
+            vc = parent
+        }
+        return nil
+    }
+}
+
 class TabController: UIViewController {
     private let tabBarHeight: CGFloat = 49.0
 
@@ -20,6 +37,13 @@ class TabController: UIViewController {
 
     private var tabBarViewController: TabBarViewController!
     private var tabBarHeightConstraint: Constraint?
+
+    private lazy var tabBarItems: [TabItem] = [
+        .init(tab: .posts, icon: "message", name: "帖子", color: .teal, viewController: homeViewController),
+        .init(tab: .notifications, icon: "bell", name: "通知", color: .red, viewController: notificationCenterViewController),
+        .init(tab: .profile, icon: "person", name: "个人资料", color: .blue, viewController: allDiscussionsViewController),
+        .init(tab: .setting, icon: "gearshape", name: "设置", color: .gray, viewController: SettingViewController()),
+    ]
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -43,7 +67,6 @@ class TabController: UIViewController {
 
     private func setTabBar() {
         initTabBarViewModel()
-
         let tabBarVC = TabBarViewController(viewModel: tabBarViewModel)
         tabBarViewController = tabBarVC
         addChildViewController(tabBarVC, addConstrains: false)
@@ -53,26 +76,29 @@ class TabController: UIViewController {
         }
     }
 
+    func select(tab: TabItem.Tab) {
+        if let nextVCIndex = tabBarItems.firstIndex(where: { $0.tab == tab }) {
+            let nextVC = tabBarItems[nextVCIndex].viewController
+            if let currentController = currentController {
+                currentController.safelyRemoveFromParent()
+            }
+            insertChildViewController(nextVC, at: 0, addConstrains: true)
+            nextVC.additionalSafeAreaInsets.bottom = tabBarHeight
+            currentController = nextVC
+
+            tabBarViewModel.selectedIndex = nextVCIndex
+        }
+    }
+
     private func initTabBarViewModel() {
         initViewControllers()
-        let tabBarItems: [TabItem] = [
-            .init(tab: .posts, icon: "message", name: "帖子", color: .teal, viewController: homeViewController),
-            .init(tab: .notifications, icon: "bell", name: "通知", color: .red, viewController: notificationCenterViewController),
-            .init(tab: .profile, icon: "person", name: "个人资料", color: .blue, viewController: allDiscussionsViewController),
-            .init(tab: .setting, icon: "gearshape", name: "设置", color: .gray, viewController: SettingViewController()),
-        ]
         tabBarViewModel = .init(
             totalWidth: view.frame.width,
             tabBarItems: tabBarItems,
             selectedIndex: 0,
-            selectAction: { tab in
-                if let nextVC = tabBarItems.first(where: { $0.tab == tab })?.viewController {
-                    if let currentController = self.currentController {
-                        currentController.safelyRemoveFromParent()
-                    }
-                    self.insertChildViewController(nextVC, at: 0, addConstrains: true)
-                    nextVC.additionalSafeAreaInsets.bottom = self.tabBarHeight
-                    self.currentController = nextVC
+            selectAction: { [weak self] tab in
+                if let self = self {
+                    self.select(tab: tab)
                 }
             }
         )

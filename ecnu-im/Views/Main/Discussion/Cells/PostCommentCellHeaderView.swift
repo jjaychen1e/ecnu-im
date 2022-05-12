@@ -44,16 +44,28 @@ struct PostCommentCellHeaderView: View {
                         .font(.system(size: 14, weight: .light, design: .rounded))
                 }
                 HStack {
-                    if viewModel.post.author?.attributes.isOnline == true {
-                        HStack(spacing: 4) {
-                            Circle()
-                                .fill(Color(rgba: "#7FBA00"))
-                                .frame(width: 8, height: 8)
-                            Text("在线")
-                                .font(.system(size: 12, weight: .regular, design: .rounded))
-                                .foregroundColor(.primary.opacity(0.7))
+                    if let author = viewModel.post.author {
+                        if author.attributes.isOnline {
+                            HStack(spacing: 4) {
+                                Circle()
+                                    .fill(Color(rgba: "#7FBA00"))
+                                    .frame(width: 8, height: 8)
+                                Text("在线")
+                                    .font(.system(size: 12, weight: .regular, design: .rounded))
+                                    .foregroundColor(.primary.opacity(0.7))
+                            }
+                        } else {
+                            HStack(spacing: 4) {
+                                Circle()
+                                    .fill(.gray)
+                                    .frame(width: 8, height: 8)
+                                Text("\(author.lastSeenAtDateDescription)在线")
+                                    .font(.system(size: 12, weight: .regular, design: .rounded))
+                                    .foregroundColor(.primary.opacity(0.7))
+                            }
                         }
                     }
+
                     if let editedDateDescription = viewModel.post.editedDateDescription {
                         Text("重新编辑于 \(editedDateDescription)")
                             .font(.system(size: 12, weight: .regular, design: .rounded))

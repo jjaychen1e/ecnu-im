@@ -61,7 +61,8 @@ class DiscussionHeaderViewController: UIViewController {
         let headerHostingVC = UIHostingController(rootView:
             DiscussionHeaderView(viewModel: viewModel)
                 .environment(\.splitVC, splitViewController ?? splitVC)
-                .environment(\.nvc, navigationController ?? nvc))
+                .environment(\.nvc, navigationController ?? nvc)
+                .environment(\.viewController, self))
         self.headerHostingVC = headerHostingVC
         headerHostingVC.view.backgroundColor = .clear
         addChildViewController(headerHostingVC)

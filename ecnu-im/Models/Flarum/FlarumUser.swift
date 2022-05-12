@@ -24,7 +24,7 @@ struct FlarumUserAttributes: Decodable {
         }
         return nil
     }
-    
+
     var isOnline: Bool {
         if let lastSeenAtDate = lastSeenAtDate {
             // Less than 10 minutes
@@ -61,6 +61,14 @@ extension FlarumUser {
                                                     $0 != "@"
                                                 })
         return avatarView.image ?? UIImage()
+    }
+
+    var lastSeenAtDateDescription: String {
+        if let date = attributes.lastSeenAtDate {
+            return date.localeDescription
+        } else {
+            return "Unknown"
+        }
     }
 }
 

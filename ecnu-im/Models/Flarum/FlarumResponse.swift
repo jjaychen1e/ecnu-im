@@ -226,8 +226,8 @@ struct FlarumResponse {
                                         if let id = json["id"].int,
                                            let reactionAtt = json.decode(FlarumReactionAttributes.self) {
                                             let reaction = FlarumReaction(id: "\(id)", attributes: reactionAtt)
-                                            if let data = try? JSONEncoder().encode(FlarumNotificationAttributes.FlarumNotificationContent.postReacted(reaction: reaction)),
-                                               let json = try? JSON(data: data) {
+                                            if let data = try? JSONEncoder().encode(FlarumNotificationAttributes.FlarumNotificationContent.postReacted(reaction: reaction)) {
+                                                let json = JSON(data)
                                                 attributes["content"] = json
                                             }
                                         }

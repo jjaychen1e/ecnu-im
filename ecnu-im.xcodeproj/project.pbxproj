@@ -117,6 +117,7 @@
 		6379A2AF28201FBF00B31330 /* ContentItemNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6379A2AE28201FBF00B31330 /* ContentItemNode.swift */; };
 		6379A2B12820201200B31330 /* ContentItemParagraphNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6379A2B02820201200B31330 /* ContentItemParagraphNode.swift */; };
 		6379A2B5282020D300B31330 /* ContentItemBlockquoteNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6379A2B4282020D300B31330 /* ContentItemBlockquoteNode.swift */; };
+		6379EFBE282CDA9C000D3F8B /* Introspect+UIViewController+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6379EFBD282CDA9C000D3F8B /* Introspect+UIViewController+Extension.swift */; };
 		638F90912802B4BB002308E0 /* AllDiscussionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 638F90902802B4BB002308E0 /* AllDiscussionsView.swift */; };
 		6391FCD02811B2C8006E086D /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6391FCCF2811B2C8006E086D /* HomeView.swift */; };
 		6391FCD32811BAD3006E086D /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6391FCD22811BAD3006E086D /* HomeViewController.swift */; };
@@ -275,6 +276,7 @@
 		6379A2AE28201FBF00B31330 /* ContentItemNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentItemNode.swift; sourceTree = "<group>"; };
 		6379A2B02820201200B31330 /* ContentItemParagraphNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentItemParagraphNode.swift; sourceTree = "<group>"; };
 		6379A2B4282020D300B31330 /* ContentItemBlockquoteNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentItemBlockquoteNode.swift; sourceTree = "<group>"; };
+		6379EFBD282CDA9C000D3F8B /* Introspect+UIViewController+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Introspect+UIViewController+Extension.swift"; sourceTree = "<group>"; };
 		638F90902802B4BB002308E0 /* AllDiscussionsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AllDiscussionsView.swift; sourceTree = "<group>"; };
 		6391FCCF2811B2C8006E086D /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		6391FCD22811BAD3006E086D /* HomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewController.swift; sourceTree = "<group>"; };
@@ -668,11 +670,12 @@
 			isa = PBXGroup;
 			children = (
 				635FF09527F092B300A0D239 /* GeometryReader+Execute+Extension.swift */,
-				63706E1427F6BA9700BE3A48 /* View+ViewDidLoad+Extension.swift */,
-				63706E1627F6BC9C00BE3A48 /* NavigationViwe+BackGesture+Extension.swift */,
 				636BE18127F8287900283943 /* Introspect+UINavigationViewController+Extension.swift */,
 				636BE18527F84D5C00283943 /* Introspect+UISplitViewController+Extension.swift */,
+				6379EFBD282CDA9C000D3F8B /* Introspect+UIViewController+Extension.swift */,
+				63706E1627F6BC9C00BE3A48 /* NavigationViwe+BackGesture+Extension.swift */,
 				63EA3D5828293FD600C774CB /* UIHostingController+SafeArea.swift */,
+				63706E1427F6BA9700BE3A48 /* View+ViewDidLoad+Extension.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -939,12 +942,12 @@
 		63D2ACE927ECCDC400517A2E = {
 			isa = PBXGroup;
 			children = (
-				636BE17927F800DB00283943 /* swiftgen.yml */,
 				63D2ACF427ECCDC400517A2E /* ecnu-im */,
 				6318B67727F0030800108D49 /* ecnu-imTests */,
-				63D2ACF327ECCDC400517A2E /* Products */,
-				3E08CB1D507B2C824363E6E6 /* Pods */,
 				6D575E513C6C1A868CE42BB1 /* Frameworks */,
+				3E08CB1D507B2C824363E6E6 /* Pods */,
+				63D2ACF327ECCDC400517A2E /* Products */,
+				636BE17927F800DB00283943 /* swiftgen.yml */,
 			);
 			sourceTree = "<group>";
 		};
@@ -1388,6 +1391,7 @@
 				6349B19127EEABD20002E89A /* APIProvider.swift in Sources */,
 				63C607D7281E4FBB0008E2F3 /* SelfSizingTextView.swift in Sources */,
 				634A57572816EB6E0022B27E /* ContentTextStyleStack.swift in Sources */,
+				6379EFBE282CDA9C000D3F8B /* Introspect+UIViewController+Extension.swift in Sources */,
 				636C450D28276F4200EDE6F5 /* ECNUTextView.swift in Sources */,
 				6377517D282289A600BE52D5 /* Pool.swift in Sources */,
 				636BE18227F8287900283943 /* Introspect+UINavigationViewController+Extension.swift in Sources */,

@@ -118,6 +118,7 @@ extension UISplitViewController {
             view
                 .environment(\.splitVC, self)
                 .environment(\.nvc, viewController(for: column) as? UINavigationController)
+                .environment(\.viewController, self)
         )
         setSplitViewRoot(viewController: hostingViewController, column: column, immediatelyShow: immediatelyShow, animated: animated)
     }

@@ -27,6 +27,7 @@ private class FlarumDiscussionPreviewViewModel: ObservableObject {
 }
 
 private class HomeViewViewModel: ObservableObject {
+    @Published var lastSeenUsers: [FlarumUser] = []
     @Published var stickyDiscussions: [FlarumDiscussionPreviewViewModel] = []
     @Published var newestDiscussions: [FlarumDiscussionPreviewViewModel] = []
     @Published var unreadNotifications: (unreadCount: Int, notifications: [FlarumNotification])?
@@ -35,6 +36,8 @@ private class HomeViewViewModel: ObservableObject {
 }
 
 struct HomeView: View {
+    @Environment(\.nvc) var nvc
+    @Environment(\.viewController) var viewController
     @Environment(\.splitVC) var splitVC
     @ObservedObject private var viewModel = HomeViewViewModel()
 
@@ -65,8 +68,8 @@ struct HomeView: View {
             }
 
         let ids = (viewModel.newestDiscussions + viewModel.stickyDiscussions).compactMap { $0.discussion.lastPost?.id }.compactMap { Int($0) }
-        if let response = try? await flarumProvider.request(.postsByIds(ids: ids)),
-           let json = try? JSON(data: response.data) {
+        if let response = try? await flarumProvider.request(.postsByIds(ids: ids)) {
+            let json = JSON(response.data)
             let posts = FlarumResponse(json: json).data.posts
             for post in posts {
                 if let correspondingDiscussionViewModel = (viewModel.newestDiscussions + viewModel.stickyDiscussions).first(where: { $0.discussion.lastPost?.id == post.id }) {
@@ -83,8 +86,8 @@ struct HomeView: View {
 
         for discussion in discussions {
             if let id = Int(discussion.id),
-               let response = try? await flarumProvider.request(.posts(discussionID: id, offset: 0, limit: 15)),
-               let json = try? JSON(data: response.data) {
+               let response = try? await flarumProvider.request(.posts(discussionID: id, offset: 0, limit: 15)) {
+                let json = JSON(response.data)
                 if let correspondingDiscussionViewModel = (viewModel.newestDiscussions + viewModel.stickyDiscussions).first(where: { $0.discussion.id == discussion.id }) {
                     let flarumResponse = FlarumResponse(json: json)
                     let users = flarumResponse.data.posts.compactMap { $0.author }
@@ -98,12 +101,21 @@ struct HomeView: View {
 
     func load() {
         Task {
-            if let response = try? await flarumProvider.request(.allDiscussions(pageOffset: 0, pageItemLimit: 20)),
-               let json = try? JSON(data: response.data) {
+            if let response = try? await flarumProvider.request(.allDiscussions(pageOffset: 0, pageItemLimit: 20)) {
+                let json = JSON(response.data)
                 let newDiscussions = FlarumResponse(json: json).data.discussions
                 await processDiscussions(discussions: newDiscussions)
             }
         }
+
+        Task {
+            if let response = try? await flarumProvider.request(.lastSeenUsers(limit: 20)) {
+                let json = JSON(response.data)
+                let users = FlarumResponse(json: json).data.users.unique { $0.id }
+                viewModel.lastSeenUsers = users
+            }
+        }
+
         Task {
             if let response = try? await flarumProvider.request(.home),
                let string = String(data: response.data, encoding: .utf8) {
@@ -114,8 +126,8 @@ struct HomeView: View {
                     DispatchQueue.main.async {
                         AppGlobalState.shared.unreadNotificationCount = count
                     }
-                    if let response = try? await flarumProvider.request(.notification(offset: 0, limit: count + 15)),
-                       let json = try? JSON(data: response.data) {
+                    if let response = try? await flarumProvider.request(.notification(offset: 0, limit: count + 15)) {
+                        let json = JSON(response.data)
                         let notifications = FlarumResponse(json: json).data.notifications
                             .filter { !$0.attributes.isRead }
                             .sorted { n1, n2 in
@@ -171,6 +183,7 @@ struct HomeView: View {
                 if !viewModel.hideNotification {
                     notification()
                 }
+                lastSeenSection()
                 stickySection()
                 latestSection()
             }
@@ -232,56 +245,62 @@ struct HomeView: View {
             let latestNotificationTypeDescription = notifications.first?.attributes.contentType.description ?? "Unkown"
             let latestNotificationCreatedDateDescription = notifications.first?.createdDateDescription ?? "Unkown"
 
-            HStack {
-                Image(systemName: "bell.badge")
-                    .font(.system(size: 20, weight: .medium, design: .rounded))
-                    .foregroundColor(Color(rgba: "#265A9A"))
-                VStack(alignment: .leading, spacing: 4) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        HStack(spacing: 2) {
-                            Text("共\(count)条新通知")
-                                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                            HStack(spacing: -3) {
-                                ForEach(0 ..< users.count, id: \.self) { index in
-                                    let user = users[index]
-                                    PostAuthorAvatarView(name: user.attributes.displayName, url: user.avatarURL, size: 18)
-                                        .mask(Circle())
-                                        .overlay(Circle().stroke(Color.white, lineWidth: 0.5))
+            Button {
+                viewController?.tabController?.select(tab: .notifications)
+            } label: {
+                HStack {
+                    Image(systemName: "bell.badge")
+                        .font(.system(size: 20, weight: .medium, design: .rounded))
+                        .foregroundColor(Color(rgba: "#265A9A"))
+                    VStack(alignment: .leading, spacing: 4) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack(spacing: 2) {
+                                Text("共\(count)条新通知")
+                                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                HStack(spacing: -3) {
+                                    ForEach(0 ..< users.count, id: \.self) { index in
+                                        let user = users[index]
+                                        PostAuthorAvatarView(name: user.attributes.displayName, url: user.avatarURL, size: 18)
+                                            .mask(Circle())
+                                            .overlay(Circle().stroke(Color.white, lineWidth: 0.5))
+                                    }
                                 }
                             }
+                            HStack {
+                                Text("@\(latestNotificationUserName)\(latestNotificationTypeDescription)了：\(latestNotificationDiscussionTitle)")
+                                    .lineLimit(1)
+                                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                Text(latestNotificationCreatedDateDescription)
+                                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                    .fixedSize(horizontal: true, vertical: true)
+                            }
                         }
-                        HStack {
-                            Text("@\(latestNotificationUserName)\(latestNotificationTypeDescription)了：\(latestNotificationDiscussionTitle)")
-                                .lineLimit(1)
-                                .font(.system(size: 12, weight: .semibold, design: .rounded))
-                            Text(latestNotificationCreatedDateDescription)
-                                .font(.system(size: 12, weight: .semibold, design: .rounded))
-                                .fixedSize(horizontal: true, vertical: true)
+                        .foregroundColor(Color(rgba: "#045FA1"))
+                        Text(viewModel.latestNotificationExcerpt ?? "暂无内容预览")
+                            .font(.system(size: 12, weight: .regular, design: .rounded))
+                            .lineLimit(3)
+                            .foregroundColor(.black)
+                            .multilineTextAlignment(.leading)
+                    }
+                    Button {
+                        withAnimation {
+                            viewModel.hideNotification = true
                         }
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 15, weight: .medium, design: .rounded))
+                            .foregroundColor(Color(rgba: "#265A9A"))
                     }
-                    .foregroundColor(Color(rgba: "#045FA1"))
-                    Text(viewModel.latestNotificationExcerpt ?? "暂无内容预览")
-                        .font(.system(size: 12, weight: .regular, design: .rounded))
-                        .lineLimit(3)
-                        .foregroundColor(.black)
                 }
-                Button {
-                    withAnimation {
-                        viewModel.hideNotification = true
-                    }
-                } label: {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 15, weight: .medium, design: .rounded))
-                        .foregroundColor(Color(rgba: "#265A9A"))
-                }
+                .padding(.vertical, 12)
+                .padding(.horizontal, 8)
+                .background(
+                    Color(rgba: "#C8E0F2")
+                )
+                .mask(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .padding(.horizontal)
             }
-            .padding(.vertical, 12)
-            .padding(.horizontal, 8)
-            .background(
-                Color(rgba: "#C8E0F2")
-            )
-            .mask(RoundedRectangle(cornerRadius: 8, style: .continuous))
-            .padding(.horizontal)
+
         }
     }
 
@@ -313,6 +332,31 @@ struct HomeView: View {
                 .opacity(hasScrolled ? 1 : 0)
         )
         .frame(alignment: .top)
+    }
+
+    @ViewBuilder
+    func lastSeenSection() -> some View {
+        if viewModel.lastSeenUsers.count > 0 {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("最近在线")
+                    .font(.system(size: 34, weight: .bold, design: .rounded))
+                    .foregroundColor(Asset.SpecialColors.sectionColor.swiftUIColor)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.leading)
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: -10) {
+                        ForEach(0 ..< viewModel.lastSeenUsers.count, id: \.self) { index in
+                            let user = viewModel.lastSeenUsers[index]
+                            PostAuthorAvatarView(name: user.attributes.displayName, url: user.avatarURL, size: 50)
+                                .mask(Circle())
+                                .overlay(Circle().stroke(Color.white, lineWidth: 1))
+                        }
+                    }
+                    .padding(.horizontal)
+                }
+            }
+        }
     }
 
     @ViewBuilder
