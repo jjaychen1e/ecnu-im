@@ -88,7 +88,6 @@ struct AllDiscussionsView: View {
             }
 
             AppGlobalState.shared.$tokenPrepared.sink { change in
-                print(change)
                 if let initialLoadMoreTask = initialLoadMoreTask, !initialLoadMoreTask.isCancelled {
                     initialLoadMoreTask.cancel()
                     self.initialLoadMoreTask = nil

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftyJSON
 
 struct FlarumNotificationAttributes: Codable {
     enum FlarumNotificationContent: Codable {
@@ -107,5 +108,32 @@ class FlarumNotification {
         case .none:
             return nil
         }
+    }
+
+    func repliedPost() async -> FlarumPost? {
+        var targetPostNumber: Int?
+        switch attributes.content {
+        case .postLiked, .postReacted, .privateDiscussionCreated:
+            break
+        case let .postMentioned(replyNumber):
+            targetPostNumber = replyNumber
+        case let .privateDiscussionReplied(postNumber):
+            targetPostNumber = postNumber
+        }
+
+        if let targetPostNumber = targetPostNumber,
+           let discussion = relatedDiscussion,
+           let id = Int(discussion.id) {
+            if let response = try? await flarumProvider.request(.postsNearNumber(discussionID: id, nearNumber: targetPostNumber, limit: 4)) {
+                let json = JSON(response.data)
+                let flarumResponse = FlarumResponse(json: json)
+                let post = flarumResponse.data.posts.first { p in
+                    p.attributes?.number == targetPostNumber
+                }
+                return post
+            }
+        }
+        
+        return nil
     }
 }

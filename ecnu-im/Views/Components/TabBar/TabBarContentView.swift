@@ -5,9 +5,10 @@
 //  Created by 陈俊杰 on 2022/4/22.
 //
 
+import Combine
 import SwiftUI
 
-struct TabItem {
+class TabItem {
     enum Tab {
         case posts
         case notifications
@@ -20,6 +21,16 @@ struct TabItem {
     var name: String
     var color: Color
     var viewController: UIViewController
+    var badgeCount: Int = 0
+
+    internal init(tab: TabItem.Tab, icon: String, name: String, color: Color, viewController: UIViewController, badgeCount: Int = 0) {
+        self.tab = tab
+        self.icon = icon
+        self.name = name
+        self.color = color
+        self.viewController = viewController
+        self.badgeCount = badgeCount
+    }
 }
 
 class TabBarViewModel2: ObservableObject {
@@ -40,6 +51,8 @@ struct TabBarContentView: View {
     @State var selectedTab: TabItem.Tab
     @ObservedObject var viewModel: TabBarViewModel2
 
+    @State private var subscriptions: Set<AnyCancellable> = []
+
     init(viewModel: TabBarViewModel2) {
         self.viewModel = viewModel
         selectedTab = viewModel.tabBarItems[viewModel.selectedIndex].tab
@@ -49,6 +62,15 @@ struct TabBarContentView: View {
     var body: some View {
         HStack {
             content(totalWidth: viewModel.totalWidth)
+        }
+        .onLoad {
+            AppGlobalState.shared.$unreadNotificationCount.sink { change in
+                print(change)
+                viewModel.tabBarItems.first { item in
+                    item.name == "通知"
+                }?.badgeCount = change
+                viewModel.objectWillChange.send()
+            }.store(in: &subscriptions)
         }
     }
 
@@ -68,6 +90,22 @@ struct TabBarContentView: View {
                         .symbolVariant(.fill)
                         .font(.system(size: 17, weight: .bold))
                         .frame(width: 44, height: 29)
+                        .overlay(
+                            Group {
+                                if tabItem.badgeCount > 0 {
+                                    Text("\(tabItem.badgeCount)")
+                                        .padding(.all, 4)
+                                        .foregroundColor(.white)
+                                        .font(.system(size: 12))
+                                        .background(
+                                            Circle()
+                                                .foregroundColor(.red)
+                                        )
+                                        .offset(x: 0, y: -3)
+                                }
+                            },
+                            alignment: .topTrailing
+                        )
                     Text(tabItem.name).font(.caption2)
                         .frame(width: 88)
                         .lineLimit(1)

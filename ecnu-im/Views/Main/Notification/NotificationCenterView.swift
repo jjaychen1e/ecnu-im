@@ -43,44 +43,11 @@ private struct NotificationView: View {
         .padding(.all, 8)
         .background(notification.attributes.isRead ? Color.clear : Color.primary.opacity(0.05))
         .onLoad {
-            switch notification.attributes.content {
-            case .postLiked, .postReacted, .privateDiscussionCreated:
-                break
-            case let .postMentioned(replyNumber):
-                if let discussion = relatedDiscussion,
-                   let id = Int(discussion.id) {
-                    Task {
-                        if let response = try? await flarumProvider.request(.postsNearNumber(discussionID: id, nearNumber: replyNumber, limit: 4)) {
-                            let json = JSON(response.data)
-                            let flarumResponse = FlarumResponse(json: json)
-                            let post = flarumResponse.data.posts.first { p in
-                                p.attributes?.number == replyNumber
-                            }
-                            if let post = post {
-                                replyExcerptText = post.excerptText(configuration: .init(textLengthMax: 150,
-                                                                                         textLineMax: 3,
-                                                                                         imageCountMax: 0))
-                            }
-                        }
-                    }
-                }
-            case let .privateDiscussionReplied(postNumber):
-                if let discussion = relatedDiscussion,
-                   let id = Int(discussion.id) {
-                    Task {
-                        if let response = try? await flarumProvider.request(.postsNearNumber(discussionID: id, nearNumber: postNumber, limit: 4)) {
-                            let json = JSON(response.data)
-                            let flarumResponse = FlarumResponse(json: json)
-                            let post = flarumResponse.data.posts.first { p in
-                                p.attributes?.number == postNumber
-                            }
-                            if let post = post {
-                                replyExcerptText = post.excerptText(configuration: .init(textLengthMax: 150,
-                                                                                         textLineMax: 3,
-                                                                                         imageCountMax: 0))
-                            }
-                        }
-                    }
+            Task {
+                if let repliedPost = await notification.repliedPost() {
+                    replyExcerptText = repliedPost.excerptText(configuration: .init(textLengthMax: 150,
+                                                                                    textLineMax: 3,
+                                                                                    imageCountMax: 0))
                 }
             }
         }

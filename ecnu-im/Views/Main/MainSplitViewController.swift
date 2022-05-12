@@ -13,6 +13,7 @@ class AppGlobalState: ObservableObject {
     @AppStorage("account") var account: String = ""
     @AppStorage("userId") var userId: String = ""
     @AppStorage("password") var password: String = ""
+    @Published var unreadNotificationCount = 0
     @Published var tokenPrepared = false
     private var flarumTokenCookie: HTTPCookie?
 
@@ -46,8 +47,8 @@ class AppGlobalState: ObservableObject {
                 HTTPCookiePropertyKey.value: token.token,
             ])!
             flarumProvider.session.sessionConfiguration.httpCookieStorage?.setCookie(flarumTokenCookie)
-            AppGlobalState.shared.userId = "\(token.userId)"
             DispatchQueue.main.async {
+                AppGlobalState.shared.userId = "\(token.userId)"
                 self.tokenPrepared = true
             }
             return true

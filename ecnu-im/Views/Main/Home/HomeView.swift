@@ -29,6 +29,8 @@ private class HomeViewViewModel: ObservableObject {
     @Published var stickyDiscussions: [FlarumDiscussionPreviewViewModel] = []
     @Published var newestDiscussions: [FlarumDiscussionPreviewViewModel] = []
     @Published var unreadNotifications: (unreadCount: Int, notifications: [FlarumNotification])?
+    @Published var latestNotificationExcerpt: String?
+    @Published var hideNotification = false
 }
 
 struct HomeView: View {
@@ -67,18 +69,10 @@ struct HomeView: View {
             let posts = FlarumResponse(json: json).data.posts
             for post in posts {
                 if let correspondingDiscussionViewModel = (viewModel.newestDiscussions + viewModel.stickyDiscussions).first(where: { $0.discussion.lastPost?.id == post.id }) {
-                    if let content = post.attributes?.content,
-                       case let .comment(comment) = content {
-                        let parser = ContentParser(content: comment,
-                                                   configuration: .init(imageOnTapAction: { _, _ in },
-                                                                        imageGridDisplayMode: .narrow),
-                                                   updateLayout: nil)
-                        let postExcerptText = parser.getExcerptContent(configuration:
-                            .init(textLengthMax: 300,
-                                  textLineMax: 4,
-                                  imageCountMax: 0)
-                        ).text
-                        correspondingDiscussionViewModel.postExcerpt = postExcerptText
+                    if let excerpt = post.excerptText(configuration: .init(textLengthMax: 300,
+                                                                           textLineMax: 4,
+                                                                           imageCountMax: 0)) {
+                        correspondingDiscussionViewModel.postExcerpt = excerpt
                     } else {
                         correspondingDiscussionViewModel.postExcerpt = "无法查看预览内容，请检查账号邮箱是否已验证。"
                     }
@@ -98,14 +92,55 @@ struct HomeView: View {
         Task {
             if let response = try? await flarumProvider.request(.home),
                let string = String(data: response.data, encoding: .utf8) {
-                let regex = Regex("\"unreadNotificationCount\": (\\d+),")
+                let regex = Regex("\"unreadNotificationCount\":(\\d+),")
                 if let _str = regex.firstMatch(in: string)?.captures.first,
                    let str = _str,
                    let count = Int(str) {
+                    DispatchQueue.main.async {
+                        AppGlobalState.shared.unreadNotificationCount = count
+                    }
                     if let response = try? await flarumProvider.request(.notification(offset: 0, limit: count + 15)),
                        let json = try? JSON(data: response.data) {
                         let notifications = FlarumResponse(json: json).data.notifications
-                        viewModel.unreadNotifications = (count, notifications)
+                            .filter { !$0.attributes.isRead }
+                            .sorted { n1, n2 in
+                                if let id1 = Int(n1.id), let id2 = Int(n2.id) {
+                                    return id1 > id2
+                                } else {
+                                    #if DEBUG
+                                        fatalError()
+                                    #else
+                                        return false
+                                    #endif
+                                }
+                            }
+                        if count > 0, notifications.count > 0 {
+                            viewModel.unreadNotifications = (count, notifications)
+
+                            switch notifications[0].attributes.contentType {
+                            case .postLiked, .postReacted, .privateDiscussionCreated:
+                                if let excerpt = notifications[0].originalPost?.excerptText(configuration: .init(textLengthMax: 150, textLineMax: 3, imageCountMax: 0)) {
+                                    viewModel.latestNotificationExcerpt = excerpt
+                                } else {
+                                    #if DEBUG
+                                        fatalError()
+                                    #endif
+                                }
+                            case .postMentioned, .privateDiscussionReplied:
+                                if let repliedPost = await notifications[0].repliedPost() {
+                                    if let excerpt = repliedPost.excerptText(configuration: .init(textLengthMax: 150, textLineMax: 3, imageCountMax: 0)) {
+                                        viewModel.latestNotificationExcerpt = excerpt
+                                    }
+                                } else {
+                                    #if DEBUG
+                                        fatalError()
+                                    #endif
+                                }
+                            }
+                        }
+                        #if DEBUG
+                            assert(count == notifications.count)
+                        #endif
                     }
                 }
             }
@@ -118,7 +153,9 @@ struct HomeView: View {
         ScrollView {
             Group {
                 scrollDetector
-                notification()
+                if !viewModel.hideNotification {
+                    notification()
+                }
                 stickySection()
                 latestSection()
             }
@@ -163,10 +200,22 @@ struct HomeView: View {
         if let (count, notifications) = viewModel.unreadNotifications {
             let users = notifications
                 .compactMap { $0.relationships?.fromUser }
-                .unique {
-                    $0.id
-                }
                 .prefix(5)
+
+            let latestNotificationUserName: String = notifications.first?.relationships?.fromUser.attributes.displayName ?? "Unkown"
+            let latestNotificationDiscussionTitle: String = {
+                if let subject = notifications.first?.relationships?.subject {
+                    switch subject {
+                    case let .post(post):
+                        return post.relationships?.discussion?.discussionTitle ?? "Unkown"
+                    case let .discussion(discussion):
+                        return discussion.discussionTitle
+                    }
+                }
+                return "Unkown"
+            }()
+            let latestNotificationTypeDescription = notifications.first?.attributes.contentType.description ?? "Unkown"
+            let latestNotificationCreatedDateDescription = notifications.first?.createdDateDescription ?? "Unkown"
 
             HStack {
                 Image(systemName: "bell.badge")
@@ -187,23 +236,29 @@ struct HomeView: View {
                             }
                         }
                         HStack {
-                            Text("@jjaychen赞了：2018年来华师大的老人回忆上个纪元的生活")
+                            Text("@\(latestNotificationUserName)\(latestNotificationTypeDescription)了：\(latestNotificationDiscussionTitle)")
                                 .lineLimit(1)
                                 .font(.system(size: 12, weight: .semibold, design: .rounded))
-                            Text("3小时前")
+                            Text(latestNotificationCreatedDateDescription)
                                 .font(.system(size: 12, weight: .semibold, design: .rounded))
                                 .fixedSize(horizontal: true, vertical: true)
                         }
                     }
                     .foregroundColor(Color(rgba: "#045FA1"))
-                    Text("我敢打包票，这里很多人根本没有经历过真正的大学生活。我时不时会回忆起遥远的过往：没有口罩，没有健康打卡，没有门禁……就像核战后老人在火炉边给孩子们将着还有电力，网络时候的日子那样，我们这些老人娓娓道来……")
+                    Text(viewModel.latestNotificationExcerpt ?? "暂无内容预览")
                         .font(.system(size: 12, weight: .regular, design: .rounded))
                         .lineLimit(3)
                         .foregroundColor(.black)
                 }
-                Image(systemName: "xmark")
-                    .font(.system(size: 15, weight: .medium, design: .rounded))
-                    .foregroundColor(Color(rgba: "#265A9A"))
+                Button {
+                    withAnimation {
+                        viewModel.hideNotification = true
+                    }
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 15, weight: .medium, design: .rounded))
+                        .foregroundColor(Color(rgba: "#265A9A"))
+                }
             }
             .padding(.vertical, 12)
             .padding(.horizontal, 8)
@@ -218,7 +273,7 @@ struct HomeView: View {
     var header: some View {
         ZStack {
             Text("ecnu.im")
-                .font(.system(.largeTitle, design: .rounded).bold())
+                .font(.system(size: 34, weight: .bold, design: .rounded))
                 .foregroundColor(Color(rgba: "#A61E35"))
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.leading)
@@ -250,7 +305,7 @@ struct HomeView: View {
         if viewModel.stickyDiscussions.count > 0 {
             VStack(alignment: .leading, spacing: 4) {
                 Text("置顶")
-                    .font(.system(.largeTitle, design: .rounded).bold())
+                    .font(.system(size: 34, weight: .bold, design: .rounded))
                     .foregroundColor(Asset.SpecialColors.sectionColor.swiftUIColor)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.leading)
@@ -302,7 +357,7 @@ struct HomeView: View {
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Text("最新动态")
-                        .font(.system(.largeTitle, design: .rounded).bold())
+                        .font(.system(size: 34, weight: .bold, design: .rounded))
                         .padding(.leading)
                     Spacer()
                     Button {} label: {
