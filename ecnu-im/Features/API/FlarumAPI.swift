@@ -37,6 +37,7 @@ enum Flarum {
     case home
     case token(username: String, password: String)
     case allTags
+    case discussionInfo(discussionID: Int)
     case allDiscussions(includes: Set<DiscussionIncludeOption> = DiscussionIncludeOption.homeDiscussionIncludeOptionSet,
                         pageOffset: Int = 0,
                         pageItemLimit: Int = 20)
@@ -63,6 +64,8 @@ extension Flarum: TargetType {
             return "/api/token"
         case .allTags:
             return "/api/tags"
+        case let .discussionInfo(discussionID):
+            return "/api/discussions/\(discussionID)"
         case .allDiscussions:
             return "/api/discussions"
         case .posts:
@@ -91,6 +94,8 @@ extension Flarum: TargetType {
         case .token:
             return .post
         case .allTags:
+            return .get
+        case .discussionInfo:
             return .get
         case .allDiscussions:
             return .get
@@ -125,6 +130,11 @@ extension Flarum: TargetType {
             ], encoding: JSONEncoding.default)
         case .allTags:
             return .requestPlain
+        case .discussionInfo:
+            return .requestParameters(parameters: [
+                "page[offset]": 0,
+                "page[limit]": 1,
+            ], encoding: URLEncoding.default)
         case let .allDiscussions(includes, pageOffset, pageLimit):
             return .requestParameters(parameters: [
                 "include": includes.map { $0.rawValue }.joined(separator: ","),

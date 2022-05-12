@@ -17,34 +17,15 @@ private struct NotificationView: View {
 
     var body: some View {
         let type = notification.attributes.contentType
-        let subject = notification.relationships?.subject
-        let discussion: FlarumDiscussion? = {
-            switch subject {
-            case let .post(post):
-                return post.relationships?.discussion
-            case let .discussion(discussion):
-                return discussion
-            case .none:
-                return nil
-            }
-        }()
-        let post: FlarumPost? = {
-            switch subject {
-            case let .post(post):
-                return post
-            case let .discussion(discussion):
-                return discussion.firstPost
-            case .none:
-                return nil
-            }
-        }()
+        let relatedDiscussion = notification.relatedDiscussion
+        let originalPost = notification.originalPost
         let user = notification.relationships?.fromUser
 
         VStack(alignment: .leading, spacing: 6) {
-            Text(discussion?.discussionTitle ?? "Unkown")
+            Text(relatedDiscussion?.discussionTitle ?? "Unkown")
                 .font(.system(size: 17, weight: .medium, design: .rounded))
 
-            originalPostExcerptView(post: post)
+            originalPostExcerptView(post: originalPost)
 
             HStack {
                 iconView(type: type)
@@ -52,6 +33,8 @@ private struct NotificationView: View {
                 PostAuthorAvatarView(name: user?.attributes.displayName ?? "Unkown", url: user?.avatarURL, size: 30)
                 (Text(user?.attributes.displayName ?? "Unkown") + Text(" \(type.description)了你"))
                     .font(.system(size: 15, weight: .medium, design: .rounded))
+                Text(notification.createdDateDescription)
+                    .font(.system(size: 13, weight: .light, design: .rounded))
             }
 
             repliedPostExcerptView()
@@ -64,7 +47,7 @@ private struct NotificationView: View {
             case .postLiked, .postReacted, .privateDiscussionCreated:
                 break
             case let .postMentioned(replyNumber):
-                if let discussion = discussion,
+                if let discussion = relatedDiscussion,
                    let id = Int(discussion.id) {
                     Task {
                         if let response = try? await flarumProvider.request(.postsNearNumber(discussionID: id, nearNumber: replyNumber, limit: 4)) {
@@ -82,7 +65,7 @@ private struct NotificationView: View {
                     }
                 }
             case let .privateDiscussionReplied(postNumber):
-                if let discussion = discussion,
+                if let discussion = relatedDiscussion,
                    let id = Int(discussion.id) {
                     Task {
                         if let response = try? await flarumProvider.request(.postsNearNumber(discussionID: id, nearNumber: postNumber, limit: 4)) {
@@ -105,7 +88,7 @@ private struct NotificationView: View {
             switch notification.attributes.content {
             case .postLiked, .postReacted:
                 if AppGlobalState.shared.tokenPrepared {
-                    if let post = post,
+                    if let post = originalPost,
                        let discussion = post.relationships?.discussion,
                        let number = post.attributes?.number {
                         splitVC?.setSplitViewRoot(viewController: DiscussionViewController(discussion: discussion, nearNumber: number),
@@ -117,7 +100,7 @@ private struct NotificationView: View {
                 }
             case let .postMentioned(replyNumber):
                 if AppGlobalState.shared.tokenPrepared {
-                    if let post = post,
+                    if let post = originalPost,
                        let discussion = post.relationships?.discussion {
                         splitVC?.setSplitViewRoot(viewController: DiscussionViewController(discussion: discussion, nearNumber: replyNumber),
                                                   column: .secondary,
@@ -128,7 +111,7 @@ private struct NotificationView: View {
                 }
             case let .privateDiscussionReplied(postNumber):
                 if AppGlobalState.shared.tokenPrepared {
-                    if let post = post,
+                    if let post = originalPost,
                        let discussion = post.relationships?.discussion {
                         splitVC?.setSplitViewRoot(viewController: DiscussionViewController(discussion: discussion, nearNumber: postNumber),
                                                   column: .secondary,
@@ -139,7 +122,7 @@ private struct NotificationView: View {
                 }
             case .privateDiscussionCreated:
                 if AppGlobalState.shared.tokenPrepared {
-                    if let post = post,
+                    if let post = originalPost,
                        let discussion = post.relationships?.discussion {
                         splitVC?.setSplitViewRoot(viewController: DiscussionViewController(discussion: discussion, nearOffset: 0),
                                                   column: .secondary,

@@ -7,22 +7,30 @@
 
 import SwiftUI
 
+class DiscussionHeaderViewModel: ObservableObject {
+    @Published var discussion: FlarumDiscussion
+
+    init(discussion: FlarumDiscussion) {
+        self.discussion = discussion
+    }
+}
+
 struct DiscussionHeaderView: View {
     @Environment(\.splitVC) var splitVC
     @Environment(\.nvc) var nvc
-    @State private var discussion: FlarumDiscussion
+    @ObservedObject private var viewModel: DiscussionHeaderViewModel
 
-    init(discussion: FlarumDiscussion) {
-        _discussion = State(initialValue: discussion)
+    init(viewModel: DiscussionHeaderViewModel) {
+        self.viewModel = viewModel
     }
 
     var body: some View {
         VStack {
             Group {
-                if discussion.synthesizedTags.count > 0 {
-                    DiscussionHeaderTagsView(tags: discussion.synthesizedTags)
+                if viewModel.discussion.synthesizedTags.count > 0 {
+                    DiscussionHeaderTagsView(tags: viewModel.discussion.synthesizedTags)
                 }
-                Text(discussion.discussionTitle)
+                Text(viewModel.discussion.discussionTitle)
                     .font(.system(size: 20, weight: .medium, design: .default))
             }
         }
@@ -31,7 +39,7 @@ struct DiscussionHeaderView: View {
         .padding(.top, 8)
         .frame(maxWidth: .infinity)
         .foregroundColor(Asset.DynamicColors.dynamicWhite.swiftUIColor)
-        .background(discussion.synthesizedTags.first?.backgroundColor ?? .init(uiColor: UIColor.gray))
+        .background(viewModel.discussion.synthesizedTags.first?.backgroundColor ?? .init(uiColor: UIColor.gray))
         .overlay(
             Group {
                 if let splitVC = splitVC {

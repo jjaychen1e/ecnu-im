@@ -6,17 +6,35 @@
 //
 
 import SwiftUI
+import SwiftyJSON
 import UIKit
 
 class DiscussionHeaderViewController: UIViewController {
     weak var splitVC: UISplitViewController?
     weak var nvc: UINavigationController?
 
-    var discussion: FlarumDiscussion
+    private var viewModel: DiscussionHeaderViewModel
+
+    private var headerBackgroundView = UIView()
+    private var headerHostingVC: UIViewController?
 
     init(discussion: FlarumDiscussion) {
-        self.discussion = discussion
+        viewModel = .init(discussion: discussion)
         super.init(nibName: nil, bundle: nil)
+
+        if discussion.relationships == nil {
+            Task {
+                if let id = Int(discussion.id),
+                   let response = try? await flarumProvider.request(.discussionInfo(discussionID: id)) {
+                    let json = JSON(response.data)
+                    let flarumResponse = FlarumResponse(json: json)
+                    if let first = flarumResponse.data.discussions.first {
+                        viewModel.discussion = first
+                        self.setUpViews(viewModel: viewModel)
+                    }
+                }
+            }
+        }
     }
 
     @available(*, unavailable)
@@ -26,9 +44,11 @@ class DiscussionHeaderViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        setUpViews(viewModel: viewModel)
+    }
 
-        let headerBackgroundView = UIView()
-        if let cgColor = (discussion.synthesizedTags.first?.backgroundColor ?? .gray).cgColor {
+    private func setUpViews(viewModel: DiscussionHeaderViewModel) {
+        if let cgColor = (viewModel.discussion.synthesizedTags.first?.backgroundColor ?? .gray).cgColor {
             headerBackgroundView.backgroundColor = UIColor(cgColor: cgColor)
         } else {
             headerBackgroundView.backgroundColor = .gray
@@ -39,9 +59,10 @@ class DiscussionHeaderViewController: UIViewController {
         }
 
         let headerHostingVC = UIHostingController(rootView:
-            DiscussionHeaderView(discussion: discussion)
+            DiscussionHeaderView(viewModel: viewModel)
                 .environment(\.splitVC, splitViewController ?? splitVC)
                 .environment(\.nvc, navigationController ?? nvc))
+        self.headerHostingVC = headerHostingVC
         headerHostingVC.view.backgroundColor = .clear
         addChildViewController(headerHostingVC)
         headerHostingVC.view.snp.makeConstraints { make in

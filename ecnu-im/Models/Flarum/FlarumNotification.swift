@@ -43,6 +43,14 @@ struct FlarumNotificationAttributes: Codable {
     var content: FlarumNotificationContent
     var createdAt: String
     var isRead: Bool
+
+    var createdDate: Date? {
+        // date format, example: 2022-03-23T13:37:49+00:00
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+        let dateString = createdAt.prefix(25)
+        return dateFormatter.date(from: String(dateString))
+    }
 }
 
 struct FlarumNotificationRelationships {
@@ -70,4 +78,34 @@ class FlarumNotification {
     var id: String
     var attributes: FlarumNotificationAttributes
     var relationships: FlarumNotificationRelationships?
+
+    var createdDateDescription: String {
+        if let date = attributes.createdDate {
+            return date.localeDescription
+        } else {
+            return "Unknown"
+        }
+    }
+
+    var relatedDiscussion: FlarumDiscussion? {
+        switch relationships?.subject {
+        case let .post(post):
+            return post.relationships?.discussion
+        case let .discussion(discussion):
+            return discussion
+        case .none:
+            return nil
+        }
+    }
+
+    var originalPost: FlarumPost? {
+        switch relationships?.subject {
+        case let .post(post):
+            return post
+        case let .discussion(discussion):
+            return discussion.firstPost
+        case .none:
+            return nil
+        }
+    }
 }
