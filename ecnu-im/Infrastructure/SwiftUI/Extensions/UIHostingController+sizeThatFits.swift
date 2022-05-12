@@ -7,6 +7,14 @@
 
 import SwiftUI
 
+/// http://defagos.github.io/understanding_swiftui_layout_behaviors/
+extension View {
+    func adaptiveSizeThatFits(in size: CGSize, for horizontalSizeClass: UIUserInterfaceSizeClass) -> CGSize {
+        let hostController = UIHostingController(rootView: environment(\.horizontalSizeClass, UserInterfaceSizeClass(horizontalSizeClass)))
+        return hostController.sizeThatFits(in: size)
+    }
+}
+
 /// https://gist.github.com/b8591340/97a8fb48822ac83e9e1cbbc746b258ef
 extension UIHostingController {
     public convenience init(rootView: Content, ignoreSafeArea: Bool) {

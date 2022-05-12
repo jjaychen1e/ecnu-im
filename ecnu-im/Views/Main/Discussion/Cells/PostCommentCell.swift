@@ -87,12 +87,13 @@ final class PostCommentCell: UITableViewCell {
             let targetSize = CGSize(width: availableWidth,
                                     height: .greatestFiniteMagnitude)
 
-            let headerHeight = headerViewHostingVC.sizeThatFits(in: targetSize).height
+            let headerHeight = headerViewHostingVC.rootView.adaptiveSizeThatFits(in: targetSize, for: traitCollection.horizontalSizeClass).height
             let heightContent = postContentItemsUIView.sizeThatFits(targetSize).height
-            let footerHeight = footerViewHostingVC.sizeThatFits(in: targetSize).height
+            let footerHeight = footerViewHostingVC.rootView.adaptiveSizeThatFits(in: targetSize, for: traitCollection.horizontalSizeClass).height
             let heightVerticalSpacing = 2 * contentVerticalSpacing
 
             let totalHeight = headerHeight + heightContent + footerHeight + heightVerticalSpacing + margin.top + margin.bottom
+            print("Cell \(post!.attributes!.number!):\(CGSize(width: size.width, height: totalHeight))")
             return CGSize(width: size.width, height: totalHeight)
         }
         return .zero
