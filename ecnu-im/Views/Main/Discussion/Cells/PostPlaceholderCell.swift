@@ -40,7 +40,7 @@ final class PostPlaceholderCell: UITableViewCell {
 
     func configure() {
         if hostingVC == nil {
-            let hostingVC = UIHostingController(rootView: DiscussionViewPostCellPlaceholder())
+            let hostingVC = UIHostingController(rootView: DiscussionViewPostCellPlaceholder(), ignoreSafeArea: true)
             self.hostingVC = hostingVC
             contentView.addSubview(hostingVC.view)
         }
