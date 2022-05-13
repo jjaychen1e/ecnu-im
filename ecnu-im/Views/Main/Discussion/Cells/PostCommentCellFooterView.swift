@@ -52,6 +52,8 @@ struct PostCommentCellFooterView: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @ObservedObject private var viewModel: PostCommentCellFooterViewModel
 
+    @State private var likedActionNetworkTask: Task<Void, Never>?
+
     init(post: FlarumPost, replyAction: @escaping () -> Void) {
         viewModel = .init(post: post, replyAction: replyAction)
     }
@@ -61,9 +63,23 @@ struct PostCommentCellFooterView: View {
     }
 
     private func likeButtonAction() {
-        let currentLiked = viewModel.animatableLiked
-        Task {
-            if let response = try? await flarumProvider.request(.postLikeAction(id: Int(viewModel.post.id) ?? -1, like: !currentLiked.liked)) {
+        likedActionNetworkTask?.cancel()
+        likedActionNetworkTask = nil
+
+        let currentLiked = viewModel.animatableLiked.liked
+
+        if currentLiked {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                viewModel.likedUsers.removeAll { $0.id == AppGlobalState.shared.userId }
+            }
+        }
+        viewModel.animatableLiked = .animated(!currentLiked)
+
+        likedActionNetworkTask = Task {
+            if let response = try? await flarumProvider.request(.postLikeAction(id: Int(viewModel.post.id) ?? -1, like: !currentLiked)) {
+                guard !Task.isCancelled else {
+                    return
+                }
                 let json = JSON(response.data)
                 let flarumResponse = FlarumResponse(json: json)
                 if let posts = flarumResponse.data.posts.first,
@@ -81,13 +97,6 @@ struct PostCommentCellFooterView: View {
             }
             viewModel.animatableLiked = .animated(false)
         }
-
-        if !viewModel.animatableLiked.liked {
-            withAnimation(.easeInOut(duration: 0.2)) {
-                viewModel.likedUsers.removeAll { $0.id == AppGlobalState.shared.userId }
-            }
-        }
-        viewModel.animatableLiked = .animated(!viewModel.animatableLiked.liked)
     }
 
     var replyHint: some View {
@@ -128,7 +137,7 @@ struct PostCommentCellFooterView: View {
                 Group {
                     TwitterLikeButton(action: {
                         likeButtonAction()
-                    }, liked: $viewModel.animatableLiked)
+                    }, animatableLiked: $viewModel.animatableLiked)
                 }
             }
 

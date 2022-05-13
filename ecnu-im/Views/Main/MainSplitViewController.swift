@@ -31,8 +31,10 @@ class AppGlobalState: ObservableObject {
     func logout() {
         clearCookieStorage()
         AppGlobalState.shared.tokenPrepared = false
+        AppGlobalState.shared.unreadNotificationCount = 0
         AppGlobalState.shared.isLogged = false
         AppGlobalState.shared.account = ""
+        AppGlobalState.shared.userId = ""
         AppGlobalState.shared.password = ""
     }
 

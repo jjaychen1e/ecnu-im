@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import PinLayout
 
 struct TwitterLikeButton: View {
     private static let AnimationPropCircleSize: (CGFloat, CGFloat) = (0.0, 1.3)
@@ -33,11 +34,11 @@ struct TwitterLikeButton: View {
 
     @Binding var liked: AnimatableLiked
 
-    init(action: @escaping () -> Void, liked: Binding<AnimatableLiked>) {
+    init(action: @escaping () -> Void, animatableLiked: Binding<AnimatableLiked>) {
         self.action = action
-        _liked = liked
+        _liked = animatableLiked
 
-        if liked.wrappedValue.liked {
+        if animatableLiked.wrappedValue.liked {
             circleSize = Self.AnimationPropCircleSize.1
             circleInnerBorder = Self.AnimationPropCircleInnerBorder.1
             circleHue = Self.AnimationPropCircleHue.1
@@ -53,6 +54,62 @@ struct TwitterLikeButton: View {
             splashTransparency = Self.AnimationPropSplashTransparency.0
             scaleHeart = Self.AnimationPropScaleHeart.0
             iconColor = Self.AnimationPropIconColor.0
+        }
+    }
+
+    private func updateWithoutAnimation(_ liked: Bool) {
+        if liked {
+            circleSize = Self.AnimationPropCircleSize.1
+            circleInnerBorder = Self.AnimationPropCircleInnerBorder.1
+            circleHue = Self.AnimationPropCircleHue.1
+            splash = Self.AnimationPropSplash.1
+            splashTransparency = Self.AnimationPropSplashTransparency.1
+            scaleHeart = Self.AnimationPropScaleHeart.1
+            iconColor = Self.AnimationPropIconColor.1
+        } else {
+            circleSize = Self.AnimationPropCircleSize.0
+            circleInnerBorder = Self.AnimationPropCircleInnerBorder.0
+            circleHue = Self.AnimationPropCircleHue.0
+            splash = Self.AnimationPropSplash.0
+            splashTransparency = Self.AnimationPropSplashTransparency.0
+            scaleHeart = Self.AnimationPropScaleHeart.0
+            iconColor = Self.AnimationPropIconColor.0
+        }
+    }
+
+    private func updateWithAnimation(_ liked: Bool) {
+        if liked {
+            withAnimation(.easeInOut(duration: 0.5)) {
+                circleSize = Self.AnimationPropCircleSize.1
+                circleHue = Self.AnimationPropCircleHue.1
+            }
+            withAnimation(.easeInOut(duration: 0.5).delay(0.1)) {
+                circleInnerBorder = Self.AnimationPropCircleInnerBorder.1
+            }
+            withAnimation(.interpolatingSpring(stiffness: 170, damping: 15).delay(0.25)) {
+                scaleHeart = Self.AnimationPropScaleHeart.1
+            }
+            splash = Self.AnimationPropSplash.1
+            splashTransparency = Self.AnimationPropSplashTransparency.1
+            withAnimation(.easeIn) {
+                iconColor = Self.AnimationPropIconColor.1
+            }
+        } else {
+            withAnimation(.easeInOut(duration: 0.5)) {
+                circleSize = Self.AnimationPropCircleSize.0
+                circleHue = Self.AnimationPropCircleHue.0
+            }
+            withAnimation(.easeInOut(duration: 0.5).delay(0.1)) {
+                circleInnerBorder = Self.AnimationPropCircleInnerBorder.0
+            }
+            withAnimation(.interpolatingSpring(stiffness: 170, damping: 15).delay(0.25)) {
+                scaleHeart = Self.AnimationPropScaleHeart.0
+            }
+            splash = Self.AnimationPropSplash.0
+            splashTransparency = Self.AnimationPropSplashTransparency.0
+            withAnimation(.easeIn) {
+                iconColor = Self.AnimationPropIconColor.0
+            }
         }
     }
 
@@ -100,39 +157,9 @@ struct TwitterLikeButton: View {
         .buttonStyle(.plain)
         .onChange(of: liked) { newValue in
             if newValue.animated {
-                if newValue.liked {
-                    withAnimation(.easeInOut(duration: 0.5)) {
-                        circleSize = Self.AnimationPropCircleSize.1
-                        circleHue = Self.AnimationPropCircleHue.1
-                    }
-                    withAnimation(.easeInOut(duration: 0.5).delay(0.1)) {
-                        circleInnerBorder = Self.AnimationPropCircleInnerBorder.1
-                    }
-                    withAnimation(.interpolatingSpring(stiffness: 170, damping: 15).delay(0.25)) {
-                        scaleHeart = Self.AnimationPropScaleHeart.1
-                    }
-                    splash = Self.AnimationPropSplash.1
-                    splashTransparency = Self.AnimationPropSplashTransparency.1
-                    withAnimation(.easeIn) {
-                        iconColor = Self.AnimationPropIconColor.1
-                    }
-                } else {
-                    withAnimation(.easeInOut(duration: 0.5)) {
-                        circleSize = Self.AnimationPropCircleSize.0
-                        circleHue = Self.AnimationPropCircleHue.0
-                    }
-                    withAnimation(.easeInOut(duration: 0.5).delay(0.1)) {
-                        circleInnerBorder = Self.AnimationPropCircleInnerBorder.0
-                    }
-                    withAnimation(.interpolatingSpring(stiffness: 170, damping: 15).delay(0.25)) {
-                        scaleHeart = Self.AnimationPropScaleHeart.0
-                    }
-                    splash = Self.AnimationPropSplash.0
-                    splashTransparency = Self.AnimationPropSplashTransparency.0
-                    withAnimation(.easeIn) {
-                        iconColor = Self.AnimationPropIconColor.0
-                    }
-                }
+                updateWithAnimation(newValue.liked)
+            } else {
+                updateWithoutAnimation(newValue.liked)
             }
         }
     }
