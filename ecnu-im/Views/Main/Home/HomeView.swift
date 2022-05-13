@@ -8,6 +8,7 @@
 import Combine
 import Regex
 import SwiftUI
+import SwiftUIPullToRefresh
 import SwiftyJSON
 
 struct ScrollPreferenceKey: PreferenceKey {
@@ -33,6 +34,15 @@ private class HomeViewViewModel: ObservableObject {
     @Published var unreadNotifications: (unreadCount: Int, notifications: [FlarumNotification])?
     @Published var latestNotificationExcerpt: String?
     @Published var hideNotification = false
+
+    func reset() {
+        lastSeenUsers = []
+        stickyDiscussions = []
+        newestDiscussions = []
+        unreadNotifications = nil
+        latestNotificationExcerpt = nil
+        hideNotification = false
+    }
 }
 
 struct HomeView: View {
@@ -42,30 +52,34 @@ struct HomeView: View {
     @ObservedObject private var viewModel = HomeViewViewModel()
 
     @State private var subscriptions: Set<AnyCancellable> = []
+    @State private var loadTasks: [Task<Void, Never>] = []
+
     @State var hasScrolled = false
 
     private func processDiscussions(discussions: [FlarumDiscussion]) async {
-        viewModel.stickyDiscussions = discussions.filter {
-            if let attributes = $0.attributes {
-                return (attributes.lastReadPostNumber ?? 0 < attributes.lastPostNumber ?? 0) && (attributes.isSticky ?? false || attributes.isStickiest ?? false)
-            } else {
-                return false
+        withAnimation {
+            viewModel.stickyDiscussions = discussions.filter {
+                if let attributes = $0.attributes {
+                    return (attributes.lastReadPostNumber ?? 0 < attributes.lastPostNumber ?? 0) && (attributes.isSticky ?? false || attributes.isStickiest ?? false)
+                } else {
+                    return false
+                }
+            }.map {
+                FlarumDiscussionPreviewViewModel(discussion: $0)
             }
-        }.map {
-            FlarumDiscussionPreviewViewModel(discussion: $0)
-        }
 
-        viewModel.newestDiscussions = discussions.filter {
-            !viewModel.stickyDiscussions.map { $0.discussion }.contains($0)
-        }.map {
-            FlarumDiscussionPreviewViewModel(discussion: $0)
-        }
-
-        (viewModel.newestDiscussions + viewModel.stickyDiscussions)
-            .compactMap { $0 }
-            .forEach {
-                $0.postExcerpt = AppGlobalState.shared.tokenPrepared ? "帖子预览内容加载中..." : "登录以查看内容预览"
+            viewModel.newestDiscussions = discussions.filter {
+                !viewModel.stickyDiscussions.map { $0.discussion }.contains($0)
+            }.map {
+                FlarumDiscussionPreviewViewModel(discussion: $0)
             }
+
+            (viewModel.newestDiscussions + viewModel.stickyDiscussions)
+                .compactMap { $0 }
+                .forEach {
+                    $0.postExcerpt = AppGlobalState.shared.tokenPrepared ? "帖子预览内容加载中..." : "登录以查看内容预览"
+                }
+        }
 
         let ids = (viewModel.newestDiscussions + viewModel.stickyDiscussions).compactMap { $0.discussion.lastPost?.id }.compactMap { Int($0) }
         if let response = try? await flarumProvider.request(.postsByIds(ids: ids)) {
@@ -73,12 +87,14 @@ struct HomeView: View {
             let posts = FlarumResponse(json: json).data.posts
             for post in posts {
                 if let correspondingDiscussionViewModel = (viewModel.newestDiscussions + viewModel.stickyDiscussions).first(where: { $0.discussion.lastPost?.id == post.id }) {
-                    if let excerpt = post.excerptText(configuration: .init(textLengthMax: 300,
-                                                                           textLineMax: 4,
-                                                                           imageCountMax: 0)) {
-                        correspondingDiscussionViewModel.postExcerpt = excerpt
-                    } else {
-                        correspondingDiscussionViewModel.postExcerpt = AppGlobalState.shared.tokenPrepared ? "无法查看预览内容，请检查账号邮箱是否已验证。" : "登录以查看内容预览"
+                    withAnimation {
+                        if let excerpt = post.excerptText(configuration: .init(textLengthMax: 300,
+                                                                               textLineMax: 4,
+                                                                               imageCountMax: 0)) {
+                            correspondingDiscussionViewModel.postExcerpt = excerpt
+                        } else {
+                            correspondingDiscussionViewModel.postExcerpt = AppGlobalState.shared.tokenPrepared ? "无法查看预览内容，请检查账号邮箱是否已验证。" : "登录以查看内容预览"
+                        }
                     }
                 }
             }
@@ -100,86 +116,122 @@ struct HomeView: View {
     }
 
     func load() {
-        Task {
-            if let response = try? await flarumProvider.request(.allDiscussions(pageOffset: 0, pageItemLimit: 20)) {
-                let json = JSON(response.data)
-                let newDiscussions = FlarumResponse(json: json).data.discussions
-                await processDiscussions(discussions: newDiscussions)
-            }
+        for task in loadTasks {
+            task.cancel()
+        }
+        loadTasks = []
+
+        withAnimation {
+            viewModel.reset()
         }
 
-        Task {
-            if let response = try? await flarumProvider.request(.lastSeenUsers(limit: 20)) {
-                let json = JSON(response.data)
-                let users = FlarumResponse(json: json).data.users.unique { $0.id }
-                viewModel.lastSeenUsers = users
+        loadTasks.append(
+            Task {
+                if let response = try? await flarumProvider.request(.allDiscussions(pageOffset: 0, pageItemLimit: 20)) {
+                    guard !Task.isCancelled else { return }
+
+                    let json = JSON(response.data)
+                    let newDiscussions = FlarumResponse(json: json).data.discussions
+                    await processDiscussions(discussions: newDiscussions)
+                }
             }
-        }
+        )
 
-        Task {
-            if let response = try? await flarumProvider.request(.home),
-               let string = String(data: response.data, encoding: .utf8) {
-                let regex = Regex("\"unreadNotificationCount\":(\\d+),")
-                if let _str = regex.firstMatch(in: string)?.captures.first,
-                   let str = _str,
-                   let count = Int(str) {
-                    DispatchQueue.main.async {
-                        AppGlobalState.shared.unreadNotificationCount = count
-                    }
-                    if let response = try? await flarumProvider.request(.notification(offset: 0, limit: count + 15)) {
-                        let json = JSON(response.data)
-                        let notifications = FlarumResponse(json: json).data.notifications
-                            .filter { !$0.attributes.isRead }
-                            .sorted { n1, n2 in
-                                if let id1 = Int(n1.id), let id2 = Int(n2.id) {
-                                    return id1 > id2
-                                } else {
-                                    #if DEBUG
-                                        fatalError()
-                                    #else
-                                        return false
-                                    #endif
-                                }
-                            }
-                        if count > 0, notifications.count > 0 {
-                            viewModel.unreadNotifications = (count, notifications)
+        loadTasks.append(
+            Task {
+                if let response = try? await flarumProvider.request(.lastSeenUsers(limit: 20)) {
+                    guard !Task.isCancelled else { return }
 
-                            switch notifications[0].attributes.contentType {
-                            case .postLiked, .postReacted, .privateDiscussionCreated:
-                                if let excerpt = notifications[0].originalPost?.excerptText(configuration: .init(textLengthMax: 150, textLineMax: 3, imageCountMax: 0)) {
-                                    viewModel.latestNotificationExcerpt = excerpt
-                                } else {
-                                    #if DEBUG
-                                        fatalError()
-                                    #endif
-                                }
-                            case .postMentioned, .privateDiscussionReplied:
-                                if let repliedPost = await notifications[0].repliedPost() {
-                                    if let excerpt = repliedPost.excerptText(configuration: .init(textLengthMax: 150, textLineMax: 3, imageCountMax: 0)) {
-                                        viewModel.latestNotificationExcerpt = excerpt
-                                    }
-                                } else {
-                                    #if DEBUG
-                                        fatalError()
-                                    #endif
-                                }
-                            }
-                        }
-                        #if DEBUG
-//                            assert(count == notifications.count)
-                        #endif
+                    let json = JSON(response.data)
+                    let users = FlarumResponse(json: json).data.users.unique { $0.id }
+                    withAnimation {
+                        viewModel.lastSeenUsers = users
                     }
                 }
             }
-        }
+        )
+
+        loadTasks.append(
+            Task {
+                if let response = try? await flarumProvider.request(.home),
+                   let string = String(data: response.data, encoding: .utf8) {
+                    guard !Task.isCancelled else { return }
+
+                    let regex = Regex("\"unreadNotificationCount\":(\\d+),")
+                    if let _str = regex.firstMatch(in: string)?.captures.first,
+                       let str = _str,
+                       let count = Int(str) {
+                        DispatchQueue.main.async {
+                            AppGlobalState.shared.unreadNotificationCount = count
+                        }
+                        if let response = try? await flarumProvider.request(.notification(offset: 0, limit: count + 15)) {
+                            let json = JSON(response.data)
+                            let notifications = FlarumResponse(json: json).data.notifications
+                                .filter { !$0.attributes.isRead }
+                                .sorted { n1, n2 in
+                                    if let id1 = Int(n1.id), let id2 = Int(n2.id) {
+                                        return id1 > id2
+                                    } else {
+                                        #if DEBUG
+                                            fatalError()
+                                        #else
+                                            return false
+                                        #endif
+                                    }
+                                }
+                            if count > 0, notifications.count > 0 {
+                                withAnimation {
+                                    viewModel.unreadNotifications = (count, notifications)
+                                }
+
+                                switch notifications[0].attributes.contentType {
+                                case .postLiked, .postReacted, .privateDiscussionCreated:
+                                    if let excerpt = notifications[0].originalPost?.excerptText(configuration: .init(textLengthMax: 150, textLineMax: 3, imageCountMax: 0)) {
+                                        withAnimation {
+                                            viewModel.latestNotificationExcerpt = excerpt
+                                        }
+                                    } else {
+                                        #if DEBUG
+                                            fatalError()
+                                        #endif
+                                    }
+                                case .postMentioned, .privateDiscussionReplied:
+                                    if let repliedPost = await notifications[0].repliedPost() {
+                                        if let excerpt = repliedPost.excerptText(configuration: .init(textLengthMax: 150, textLineMax: 3, imageCountMax: 0)) {
+                                            withAnimation {
+                                                viewModel.latestNotificationExcerpt = excerpt
+                                            }
+                                        }
+                                    } else {
+                                        #if DEBUG
+                                            fatalError()
+                                        #endif
+                                    }
+                                }
+                            }
+                            #if DEBUG
+//                            assert(count == notifications.count)
+                            #endif
+                        }
+                    }
+                }
+            }
+        )
     }
 
-    @State var contentItems: [Any] = []
-
     var body: some View {
-        ScrollView {
-            Group {
-                scrollDetector
+        RefreshableScrollView(loadingViewBackgroundColor: .clear,
+                              action: {
+                                  await load()
+                              }, progress: { state in
+                                  RefreshActivityIndicator(isAnimating: state == .loading) {
+                                      $0.hidesWhenStopped = false
+                                  }
+                                  .opacity(state == .waiting ? 0 : 1)
+                                  .animation(.default, value: state)
+                              }) {
+            scrollDetector
+            LazyVStack {
                 if !viewModel.hideNotification {
                     notification()
                 }
@@ -378,8 +430,8 @@ struct HomeView: View {
                                 if AppGlobalState.shared.tokenPrepared {
                                     let lastReadPostNumber = viewModel.discussion.attributes?.lastReadPostNumber ?? 0
                                     splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: lastReadPostNumber + 1),
-                                                              column: .secondary,
-                                                              toRoot: true)
+                                                  column: .secondary,
+                                                  toRoot: true)
                                 } else {
                                     splitVC?.presentSignView()
                                 }
@@ -436,8 +488,8 @@ struct HomeView: View {
                                 if AppGlobalState.shared.tokenPrepared {
                                     let lastReadPostNumber = viewModel.discussion.attributes?.lastReadPostNumber ?? 0
                                     splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: lastReadPostNumber + 1),
-                                                              column: .secondary,
-                                                              toRoot: true)
+                                                  column: .secondary,
+                                                  toRoot: true)
                                 } else {
                                     splitVC?.presentSignView()
                                 }
@@ -609,6 +661,7 @@ struct HomePostCardViewLarge: View {
                         }
                     }
                 }
+                .frame(height: 18)
             }
             .padding(.horizontal, 12)
             .padding(.top, 12)

@@ -157,6 +157,8 @@ struct NotificationCenterView: View {
     @State private var notifications: [FlarumNotification] = []
     @State private var subscriptions: Set<AnyCancellable> = []
 
+    @State var hasScrolled = false
+
     var body: some View {
         Group {
             if notifications.count > 0 {
@@ -165,9 +167,18 @@ struct NotificationCenterView: View {
                         let notification = notifications[index]
                         NotificationView(notification: notification)
                             .listRowInsets(EdgeInsets())
+                            .background(
+                                Group {
+                                    if index == 0 {
+                                        scrollDetector
+                                    }
+                                },
+                                alignment: .topLeading
+                            )
                     }
                 }
                 .listStyle(.plain)
+                .coordinateSpace(name: "scroll")
             } else {
                 Color.clear
             }
@@ -191,6 +202,22 @@ struct NotificationCenterView: View {
                 self.notifications = flarumResponse.data.notifications
             }
         }
+    }
+
+    var scrollDetector: some View {
+        GeometryReader { proxy in
+            Color.clear.preference(key: ScrollPreferenceKey.self, value: proxy.frame(in: .named("scroll")).minY)
+        }
+        .onPreferenceChange(ScrollPreferenceKey.self) { value in
+            withAnimation(.easeInOut(duration: 0.3)) {
+                if value < 70 {
+                    hasScrolled = true
+                } else {
+                    hasScrolled = false
+                }
+            }
+        }
+        .frame(height: 0)
     }
 
     var header: some View {
@@ -220,7 +247,7 @@ struct NotificationCenterView: View {
             Color.clear
                 .background(.ultraThinMaterial)
                 .blur(radius: 10)
-//                .opacity(hasScrolled ? 1 : 0)
+                .opacity(hasScrolled ? 1 : 0)
         )
         .frame(alignment: .top)
     }

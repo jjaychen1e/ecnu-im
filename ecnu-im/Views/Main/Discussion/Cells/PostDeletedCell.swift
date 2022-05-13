@@ -9,25 +9,28 @@ import UIKit
 
 final class PostDeletedCell: UITableViewCell {
     static let identifier = "PostDeletedCell"
+    
+    private var label: UILabel!
     func configure() {}
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
 
         contentView.backgroundColor = DiscussionViewController.backgroundColor
+        
+        let label = UILabel()
+        self.label = label
+        label.text = "该楼层已被删除"
+        label.textColor = Asset.DynamicColors.dynamicBlack.color.withAlphaComponent(0.5)
+        label.textAlignment = .center
+        contentView.addSubview(label)
+        label.snp.makeConstraints { make in
+            make.edges.equalToSuperview().inset(8)
+        }
     }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        frame = .init(origin: .zero, size: .init(width: bounds.width, height: 0.01))
-    }
-
-    override func sizeThatFits(_ size: CGSize) -> CGSize {
-        CGSize(width: size.width, height: 0.01)
     }
 }

@@ -28,9 +28,9 @@ final class PostCommentCell: UITableViewCell {
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        
+
         contentView.backgroundColor = DiscussionViewController.backgroundColor
-        
+
         headerViewHostingVC.view.backgroundColor = .clear
         contentView.addSubview(headerViewHostingVC.view)
 
@@ -95,6 +95,7 @@ final class PostCommentCell: UITableViewCell {
             let heightVerticalSpacing = 2 * contentVerticalSpacing
 
             let totalHeight = headerHeight + heightContent + footerHeight + heightVerticalSpacing + margin.top + margin.bottom
+//            print("Cell \(post!.attributes!.number!) \(Unmanaged.passUnretained(self).toOpaque()) - \(CGSize(width: size.width, height: totalHeight))")
             return CGSize(width: size.width, height: totalHeight)
         }
         return .zero

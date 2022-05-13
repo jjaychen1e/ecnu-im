@@ -89,15 +89,11 @@ class ContentItemSingleImageUIView: UIView & ContentBlockUIView {
             return _imageSize
         }
 
-        if let size = imageView.image?.size {
+        if let size = ImageSizeStorage.shared.size(for: url) {
             _imageSize = size
             return size
-        } else {
-            if let size = ImageSizeStorage.shared.size(for: url) {
-                _imageSize = size
-                return size
-            }
         }
+
         return nil
     }
 

@@ -40,20 +40,25 @@ class AppGlobalState: ObservableObject {
 
     @discardableResult
     func login(account: String, password: String) async -> Bool {
-        if let result = try? await flarumProvider.request(.token(username: account, password: password)),
-           let token = try? result.map(Token.self) {
-            let flarumTokenCookie = HTTPCookie(properties: [
-                HTTPCookiePropertyKey.domain: "ecnu.im",
-                HTTPCookiePropertyKey.path: "/",
-                HTTPCookiePropertyKey.name: "flarum_remember",
-                HTTPCookiePropertyKey.value: token.token,
-            ])!
-            flarumProvider.session.sessionConfiguration.httpCookieStorage?.setCookie(flarumTokenCookie)
-            DispatchQueue.main.async {
-                AppGlobalState.shared.userId = "\(token.userId)"
-                self.tokenPrepared = true
+        if let result = try? await flarumProvider.request(.token(username: account, password: password)) {
+            if let token = try? result.map(Token.self) {
+                let flarumTokenCookie = HTTPCookie(properties: [
+                    HTTPCookiePropertyKey.domain: "ecnu.im",
+                    HTTPCookiePropertyKey.path: "/",
+                    HTTPCookiePropertyKey.name: "flarum_remember",
+                    HTTPCookiePropertyKey.value: token.token,
+                ])!
+                flarumProvider.session.sessionConfiguration.httpCookieStorage?.setCookie(flarumTokenCookie)
+                DispatchQueue.main.async {
+                    AppGlobalState.shared.userId = "\(token.userId)"
+                    self.tokenPrepared = true
+                }
+                return true
+            } else {
+                #if DEBUG
+                    print(String(data: result.data, encoding: .utf8) ?? "failed")
+                #endif
             }
-            return true
         }
         return false
     }
@@ -64,7 +69,7 @@ class AppGlobalState: ObservableObject {
             if !loginResult {
                 // Maybe password has been modified
                 await MainSplitViewController.rootSplitVC.presentSignView()
-                isLogged = false
+                logout()
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     Toast.default(icon: .emoji("🤔"), title: "登录失败", subtitle: "密码可能被修改，请重新登录").show()
                 }

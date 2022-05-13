@@ -153,7 +153,7 @@ struct TwitterLikeButton: View {
             }
             .foregroundColor(iconColor)
         }
-        .offset(x: 2.5, y: 2.5)
+        .offset(x: 1.5, y: 1.5)
         .buttonStyle(.plain)
         .onChange(of: liked) { newValue in
             if newValue.animated {
