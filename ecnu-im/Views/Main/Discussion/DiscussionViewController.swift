@@ -333,6 +333,9 @@ extension DiscussionViewController {
                     rangeRight = max(rangeRight, nextSectionRange.0 - 1)
                 }
             }
+            if offset == 0 {
+                rangeLeft = 0
+            }
 
             var modified: [IndexPath] = []
             let range = rangeLeft ... rangeRight
