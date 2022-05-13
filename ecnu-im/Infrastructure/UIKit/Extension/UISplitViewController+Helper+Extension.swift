@@ -45,12 +45,20 @@ extension UISplitViewController {
                 }
             }
 
-            var animated = animated
-            if toRoot {
-                animated = false
+            if toRoot, nvc === secondaryNVC {
+                if traitCollection.horizontalSizeClass == .compact {
+                    nvc.viewControllers = [viewController]
+                    return
+                } else if let first = nvc.viewControllers.first {
+                    nvc.viewControllers = [first, viewController]
+                    return
+                }
             }
 
-            if nvc === secondaryNVC, nvc.viewControllers.count == 1 {
+            var animated = animated
+            if nvc === secondaryNVC,
+               traitCollection.horizontalSizeClass == .regular,
+               nvc.viewControllers.count == 1 {
                 animated = false
             }
 

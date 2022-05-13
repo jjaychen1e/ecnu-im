@@ -77,8 +77,8 @@ class ContentItemLinkPreview: UIView & ContentBlockUIView {
 //        print("\(Unmanaged.passUnretained(self).toOpaque()), layoutSubviews: \(size)")
         if oldCurrentSize != currentSize {
 //            print("\(Unmanaged.passUnretained(self).toOpaque()), updateLayout1: \(currentSize!), \(oldCurrentSize)")
-            updateLayout?()
             setNeedsLayout()
+            updateLayout?()
 //            print("\(Unmanaged.passUnretained(self).toOpaque()), updateLayout2: \(currentSize!), \(oldCurrentSize)")
         }
     }

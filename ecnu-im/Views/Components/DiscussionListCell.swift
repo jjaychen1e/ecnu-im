@@ -51,8 +51,8 @@ struct DiscussionListCell: View {
                     if AppGlobalState.shared.tokenPrepared {
                         let near = (discussion.attributes?.commentCount ?? 1) - 1
                         splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearOffset: near),
-                                                  column: .secondary,
-                                                  animated: true)
+                                      column: .secondary,
+                                      toRoot: true)
                     } else {
                         splitVC?.presentSignView()
                     }
@@ -69,8 +69,8 @@ struct DiscussionListCell: View {
                 Button {
                     if AppGlobalState.shared.tokenPrepared {
                         splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearOffset: 0),
-                                                  column: .secondary,
-                                                  animated: true)
+                                      column: .secondary,
+                                      toRoot: true)
                     } else {
                         splitVC?.presentSignView()
                     }
@@ -91,8 +91,8 @@ struct DiscussionListCell: View {
                 if splitVC.traitCollection.horizontalSizeClass != .compact {
                     if index == 0 {
                         splitVC.push(viewController: DiscussionViewController(discussion: discussion, nearOffset: 0),
-                                                 column: .secondary,
-                                                 animated: true)
+                                     column: .secondary,
+                                     toRoot: true)
                     }
                 }
             }

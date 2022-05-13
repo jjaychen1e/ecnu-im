@@ -379,7 +379,7 @@ struct HomeView: View {
                                     let lastReadPostNumber = viewModel.discussion.attributes?.lastReadPostNumber ?? 0
                                     splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: lastReadPostNumber + 1),
                                                               column: .secondary,
-                                                              animated: true)
+                                                              toRoot: true)
                                 } else {
                                     splitVC?.presentSignView()
                                 }
@@ -437,7 +437,7 @@ struct HomeView: View {
                                     let lastReadPostNumber = viewModel.discussion.attributes?.lastReadPostNumber ?? 0
                                     splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: lastReadPostNumber + 1),
                                                               column: .secondary,
-                                                              animated: true)
+                                                              toRoot: true)
                                 } else {
                                     splitVC?.presentSignView()
                                 }

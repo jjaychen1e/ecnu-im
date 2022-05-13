@@ -84,14 +84,12 @@ class MainSplitViewController: UIViewController {
 
     private lazy var primaryNavigationViewController: UINavigationController = {
         let nvc = UINavigationController()
-        print("primaryNavigationViewController: \(Unmanaged.passUnretained(nvc).toOpaque())")
         return nvc
     }()
 
     private lazy var secondaryNavigationViewController: UINavigationController = {
         let nvc = UINavigationController()
         nvc.viewControllers = [emptyViewController]
-        print("secondaryNavigationViewController: \(Unmanaged.passUnretained(nvc).toOpaque())")
         return nvc
     }()
 

@@ -60,8 +60,8 @@ private struct NotificationView: View {
                        let discussion = post.relationships?.discussion,
                        let number = post.attributes?.number {
                         splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearNumber: number),
-                                                  column: .secondary,
-                                                  animated: true)
+                                      column: .secondary,
+                                      toRoot: true)
                     }
                 } else {
                     splitVC?.presentSignView()
@@ -71,8 +71,8 @@ private struct NotificationView: View {
                     if let post = originalPost,
                        let discussion = post.relationships?.discussion {
                         splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearNumber: replyNumber),
-                                                  column: .secondary,
-                                                  animated: true)
+                                      column: .secondary,
+                                      toRoot: true)
                     }
                 } else {
                     splitVC?.presentSignView()
@@ -82,8 +82,8 @@ private struct NotificationView: View {
                     if let post = originalPost,
                        let discussion = post.relationships?.discussion {
                         splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearNumber: postNumber),
-                                                  column: .secondary,
-                                                  animated: true)
+                                      column: .secondary,
+                                      toRoot: true)
                     }
                 } else {
                     splitVC?.presentSignView()
@@ -93,8 +93,8 @@ private struct NotificationView: View {
                     if let post = originalPost,
                        let discussion = post.relationships?.discussion {
                         splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearOffset: 0),
-                                                  column: .secondary,
-                                                  animated: true)
+                                      column: .secondary,
+                                      toRoot: true)
                     }
                 } else {
                     splitVC?.presentSignView()

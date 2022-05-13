@@ -62,10 +62,12 @@ class ContentItemSingleImageUIView: UIView & ContentBlockUIView {
         imageView.kf.indicatorType = .activity
         imageSize()
         imageView.kf.setImage(with: url, placeholder: url.hashedColor.image(), options: [.transition(.fade(0.2))]) { [weak self] result in
-            if self?._imageSize == nil {
-                updateLayout?()
-                if case let .success(value) = result {
-                    ImageSizeStorage.shared.store(size: value.image.size, url: url)
+            if let self = self {
+                if self._imageSize == nil {
+                    if case let .success(value) = result {
+                        ImageSizeStorage.shared.store(size: value.image.size, url: url)
+                    }
+                    updateLayout?()
                 }
             }
         }
