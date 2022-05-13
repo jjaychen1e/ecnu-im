@@ -31,13 +31,13 @@ struct TwitterLikeButton: View {
 
     @State var action: () -> Void
 
-    @Binding var liked: Bool
+    @Binding var liked: AnimatableLiked
 
-    init(action: @escaping () -> Void, liked: Binding<Bool>) {
+    init(action: @escaping () -> Void, liked: Binding<AnimatableLiked>) {
         self.action = action
         _liked = liked
 
-        if liked.wrappedValue {
+        if liked.wrappedValue.liked {
             circleSize = Self.AnimationPropCircleSize.1
             circleInnerBorder = Self.AnimationPropCircleInnerBorder.1
             circleHue = Self.AnimationPropCircleHue.1
@@ -68,13 +68,10 @@ struct TwitterLikeButton: View {
 
                         Circle()
                             .strokeBorder(lineWidth: CGFloat(circleInnerBorder))
-                            .animation(Animation.easeInOut(duration: 0.5).delay(0.1), value: circleInnerBorder)
                             .frame(width: 25, height: 25, alignment: .center)
                             .foregroundColor(Color(.systemPink))
                             .hueRotation(Angle(degrees: Double(circleHue)))
                             .scaleEffect(CGFloat(circleSize))
-                            .animation(Animation.easeInOut(duration: 0.5), value: circleHue)
-                            .animation(Animation.easeInOut(duration: 0.5), value: circleSize)
 
 //                        Image("splash")
 //                            .opacity(Double(splashTransparency))
@@ -96,32 +93,45 @@ struct TwitterLikeButton: View {
                 Image(systemName: "heart.fill")
                     .font(.system(size: 20))
                     .scaleEffect(CGFloat(scaleHeart))
-                    .animation(Animation.interpolatingSpring(stiffness: 170, damping: 15).delay(0.25), value: scaleHeart)
             }
             .foregroundColor(iconColor)
         }
         .offset(x: 2.5, y: 2.5)
         .buttonStyle(.plain)
         .onChange(of: liked) { newValue in
-            if newValue {
-                circleSize = Self.AnimationPropCircleSize.1
-                circleInnerBorder = Self.AnimationPropCircleInnerBorder.1
-                circleHue = Self.AnimationPropCircleHue.1
-                splash = Self.AnimationPropSplash.1
-                splashTransparency = Self.AnimationPropSplashTransparency.1
-                scaleHeart = Self.AnimationPropScaleHeart.1
-                withAnimation(.easeIn) {
-                    iconColor = Self.AnimationPropIconColor.1
-                }
-            } else {
-                circleSize = Self.AnimationPropCircleSize.0
-                circleInnerBorder = Self.AnimationPropCircleInnerBorder.0
-                circleHue = Self.AnimationPropCircleHue.0
-                splash = Self.AnimationPropSplash.0
-                splashTransparency = Self.AnimationPropSplashTransparency.0
-                scaleHeart = Self.AnimationPropScaleHeart.0
-                withAnimation(.easeIn) {
-                    iconColor = Self.AnimationPropIconColor.0
+            if newValue.animated {
+                if newValue.liked {
+                    withAnimation(.easeInOut(duration: 0.5)) {
+                        circleSize = Self.AnimationPropCircleSize.1
+                        circleHue = Self.AnimationPropCircleHue.1
+                    }
+                    withAnimation(.easeInOut(duration: 0.5).delay(0.1)) {
+                        circleInnerBorder = Self.AnimationPropCircleInnerBorder.1
+                    }
+                    withAnimation(.interpolatingSpring(stiffness: 170, damping: 15).delay(0.25)) {
+                        scaleHeart = Self.AnimationPropScaleHeart.1
+                    }
+                    splash = Self.AnimationPropSplash.1
+                    splashTransparency = Self.AnimationPropSplashTransparency.1
+                    withAnimation(.easeIn) {
+                        iconColor = Self.AnimationPropIconColor.1
+                    }
+                } else {
+                    withAnimation(.easeInOut(duration: 0.5)) {
+                        circleSize = Self.AnimationPropCircleSize.0
+                        circleHue = Self.AnimationPropCircleHue.0
+                    }
+                    withAnimation(.easeInOut(duration: 0.5).delay(0.1)) {
+                        circleInnerBorder = Self.AnimationPropCircleInnerBorder.0
+                    }
+                    withAnimation(.interpolatingSpring(stiffness: 170, damping: 15).delay(0.25)) {
+                        scaleHeart = Self.AnimationPropScaleHeart.0
+                    }
+                    splash = Self.AnimationPropSplash.0
+                    splashTransparency = Self.AnimationPropSplashTransparency.0
+                    withAnimation(.easeIn) {
+                        iconColor = Self.AnimationPropIconColor.0
+                    }
                 }
             }
         }

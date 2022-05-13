@@ -8,9 +8,23 @@
 import SwiftUI
 import SwiftyJSON
 
+struct AnimatableLiked: Equatable {
+    var liked: Bool
+    var animated: Bool
+
+    init(_ liked: Bool, _ animated: Bool = false) {
+        self.liked = liked
+        self.animated = animated
+    }
+
+    static func animated(_ liked: Bool) -> AnimatableLiked {
+        AnimatableLiked(liked, true)
+    }
+}
+
 class PostCommentCellFooterViewModel: ObservableObject {
     @Published var post: FlarumPost
-    @Published var liked: Bool
+    @Published var animatableLiked: AnimatableLiked
     @Published var likedUsers: [FlarumUser]
     @Published var repliedPosts: [FlarumPost]
     @Published var replyAction: () -> Void
@@ -19,7 +33,7 @@ class PostCommentCellFooterViewModel: ObservableObject {
         self.post = post
         let likesUsers = post.relationships?.likes ?? []
         likedUsers = likesUsers
-        liked = AppGlobalState.shared.userId != "" && likesUsers.contains { $0.id == AppGlobalState.shared.userId }
+        animatableLiked = AnimatableLiked(AppGlobalState.shared.userId != "" && likesUsers.contains { $0.id == AppGlobalState.shared.userId })
         repliedPosts = post.relationships?.mentionedBy ?? []
         self.replyAction = replyAction
     }
@@ -28,7 +42,7 @@ class PostCommentCellFooterViewModel: ObservableObject {
         self.post = post
         let likesUsers = post.relationships?.likes ?? []
         likedUsers = likesUsers
-        liked = AppGlobalState.shared.userId != "" && likesUsers.contains { $0.id == AppGlobalState.shared.userId }
+        animatableLiked = AnimatableLiked(AppGlobalState.shared.userId != "" && likesUsers.contains { $0.id == AppGlobalState.shared.userId })
         repliedPosts = post.relationships?.mentionedBy ?? []
         self.replyAction = replyAction
     }
@@ -47,9 +61,9 @@ struct PostCommentCellFooterView: View {
     }
 
     private func likeButtonAction() {
-        let currentLiked = viewModel.liked
+        let currentLiked = viewModel.animatableLiked
         Task {
-            if let response = try? await flarumProvider.request(.postLikeAction(id: Int(viewModel.post.id) ?? -1, like: !currentLiked)) {
+            if let response = try? await flarumProvider.request(.postLikeAction(id: Int(viewModel.post.id) ?? -1, like: !currentLiked.liked)) {
                 let json = JSON(response.data)
                 let flarumResponse = FlarumResponse(json: json)
                 if let posts = flarumResponse.data.posts.first,
@@ -57,23 +71,23 @@ struct PostCommentCellFooterView: View {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         viewModel.likedUsers.removeAll { $0.id == AppGlobalState.shared.userId }
                         viewModel.likedUsers.append(user)
-                        viewModel.liked = true
                     }
+                    viewModel.animatableLiked = .animated(true)
                     return
                 }
             }
             withAnimation(.easeInOut(duration: 0.2)) {
-                viewModel.liked = false
                 viewModel.likedUsers.removeAll { $0.id == AppGlobalState.shared.userId }
             }
+            viewModel.animatableLiked = .animated(false)
         }
 
-        withAnimation(.easeInOut(duration: 0.2)) {
-            viewModel.liked.toggle()
-            if !viewModel.liked {
+        if !viewModel.animatableLiked.liked {
+            withAnimation(.easeInOut(duration: 0.2)) {
                 viewModel.likedUsers.removeAll { $0.id == AppGlobalState.shared.userId }
             }
         }
+        viewModel.animatableLiked = .animated(!viewModel.animatableLiked.liked)
     }
 
     var replyHint: some View {
@@ -114,7 +128,7 @@ struct PostCommentCellFooterView: View {
                 Group {
                     TwitterLikeButton(action: {
                         likeButtonAction()
-                    }, liked: $viewModel.liked)
+                    }, liked: $viewModel.animatableLiked)
                 }
             }
 
