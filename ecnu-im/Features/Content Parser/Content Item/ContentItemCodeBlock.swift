@@ -46,6 +46,7 @@ class ContentItemCodeBlockUIView: UIView & ContentBlockUIView {
     override func layoutSubviews() {
         super.layoutSubviews()
         let size = textView.sizeThatFits(bounds.size)
+        textView.backgroundColor = .clear
         textView.frame = .init(origin: .zero, size: size)
         invalidateIntrinsicContentSize()
     }

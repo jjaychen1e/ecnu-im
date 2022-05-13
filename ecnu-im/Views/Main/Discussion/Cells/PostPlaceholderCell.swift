@@ -38,9 +38,21 @@ final class PostPlaceholderCell: UITableViewCell {
     static let identifier = "PostPlaceholderCell"
     private var hostingVC: UIHostingController<DiscussionViewPostCellPlaceholder>?
 
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+
+        contentView.backgroundColor = DiscussionViewController.backgroundColor
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     func configure() {
         if hostingVC == nil {
             let hostingVC = UIHostingController(rootView: DiscussionViewPostCellPlaceholder(), ignoreSafeArea: true)
+            hostingVC.view.backgroundColor = .clear
             self.hostingVC = hostingVC
             contentView.addSubview(hostingVC.view)
         }

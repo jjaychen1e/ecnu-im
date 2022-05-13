@@ -33,6 +33,7 @@ class ContentItemParagraphUIView: UIView & ContentBlockUIView {
     init(attributedText: NSAttributedString) {
         self.attributedText = attributedText
         super.init(frame: .zero)
+        textView.backgroundColor = .clear
         textView.attributedText = attributedText
         textView.textContainerInset = .zero
         addSubview(textView)

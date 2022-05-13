@@ -50,9 +50,9 @@ struct DiscussionListCell: View {
                 Button {
                     if AppGlobalState.shared.tokenPrepared {
                         let near = (discussion.attributes?.commentCount ?? 1) - 1
-                        splitVC?.setSplitViewRoot(viewController: DiscussionViewController(discussion: discussion, nearOffset: near),
+                        splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearOffset: near),
                                                   column: .secondary,
-                                                  immediatelyShow: true)
+                                                  animated: true)
                     } else {
                         splitVC?.presentSignView()
                     }
@@ -68,9 +68,9 @@ struct DiscussionListCell: View {
                 && discussion.firstPost != discussion.lastPost {
                 Button {
                     if AppGlobalState.shared.tokenPrepared {
-                        splitVC?.setSplitViewRoot(viewController: DiscussionViewController(discussion: discussion, nearOffset: 0),
+                        splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearOffset: 0),
                                                   column: .secondary,
-                                                  immediatelyShow: true)
+                                                  animated: true)
                     } else {
                         splitVC?.presentSignView()
                     }
@@ -90,9 +90,9 @@ struct DiscussionListCell: View {
             if let splitVC = splitVC {
                 if splitVC.traitCollection.horizontalSizeClass != .compact {
                     if index == 0 {
-                        splitVC.setSplitViewRoot(viewController: DiscussionViewController(discussion: discussion, nearOffset: 0),
+                        splitVC.push(viewController: DiscussionViewController(discussion: discussion, nearOffset: 0),
                                                  column: .secondary,
-                                                 immediatelyShow: true)
+                                                 animated: true)
                     }
                 }
             }

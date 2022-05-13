@@ -112,21 +112,9 @@ struct PostCommentCellFooterView: View {
         HStack(spacing: 12) {
             if viewModel.post.attributes?.canLike == true {
                 Group {
-                    if viewModel.liked {
-                        Button {
-                            likeButtonAction()
-                        } label: {
-                            Image(systemName: "heart.fill")
-                                .font(.system(size: 20, weight: .regular, design: .rounded))
-                        }
-                    } else {
-                        Button {
-                            likeButtonAction()
-                        } label: {
-                            Image(systemName: "heart")
-                                .font(.system(size: 20, weight: .regular, design: .rounded))
-                        }
-                    }
+                    TwitterLikeButton(action: {
+                        likeButtonAction()
+                    }, liked: $viewModel.liked)
                 }
             }
 

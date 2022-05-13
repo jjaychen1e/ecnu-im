@@ -42,15 +42,10 @@ struct DiscussionHeaderView: View {
         .background(viewModel.discussion.synthesizedTags.first?.backgroundColor ?? .init(uiColor: UIColor.gray))
         .overlay(
             Group {
-                if let splitVC = splitVC {
+                if let splitVC = splitVC,
+                   let nvc = nvc {
                     Button(action: {
-                        if let nvc = nvc {
-                            if nvc.viewControllers.count == 1 {
-                                splitVC.show(.primary)
-                            } else {
-                                nvc.popViewController(animated: true)
-                            }
-                        }
+                        splitVC.pop(from: nvc, animated: true)
                     }, label: {
                         Image(systemName: "arrow.backward.circle.fill")
                             .font(.system(size: 30, weight: .medium))

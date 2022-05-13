@@ -242,34 +242,34 @@ class SettingViewController: UIViewController {
         modelObjects = [
             HeaderItem(title: "讨论", rowItems: [
                 RowItem(type: .navigation(action: {
-                    self.splitViewController?.setSplitViewRoot(viewController: self.allDiscussionViewController,
+                    self.splitViewController?.push(viewController: self.allDiscussionViewController,
                                                                column: .secondary,
-                                                               immediatelyShow: true)
+                                                               animated: true)
                 }),
                 icon: .system(name: "text.bubble"),
                 label: "最新话题"),
             ]),
             HeaderItem(title: "通知中心", rowItems: [
                 RowItem(type: .navigation(action: {
-                    self.splitViewController?.setSplitViewRoot(viewController: UIHostingController(rootView: Text("未读通知")),
+                    self.splitViewController?.push(viewController: UIHostingController(rootView: Text("未读通知")),
                                                                column: .secondary,
-                                                               immediatelyShow: true)
+                                                               animated: true)
                 }),
                 icon: .system(name: "bell.badge"),
                 label: "未读通知"),
                 RowItem(type: .navigation(action: {
-                    self.splitViewController?.setSplitViewRoot(viewController: UIHostingController(rootView: Text("所有通知")),
+                    self.splitViewController?.push(viewController: UIHostingController(rootView: Text("所有通知")),
                                                                column: .secondary,
-                                                               immediatelyShow: true)
+                                                               animated: true)
 
                 }),
                 icon: .system(name: "bell"),
                 label: "所有通知"),
             ]),
             HeaderItem(title: "账户", rowItems: [
-                RowItem(type: .navigation(action: { self.splitViewController?.setSplitViewRoot(viewController: UIHostingController(rootView: Text("个人资料")),
+                RowItem(type: .navigation(action: { self.splitViewController?.push(viewController: UIHostingController(rootView: Text("个人资料")),
                                                                                                column: .secondary,
-                                                                                               immediatelyShow: true) }),
+                                                                                               animated: true) }),
                 icon: .system(name: "person.crop.circle"),
                 label: "个人资料"),
                 RowItem(type: .action(textColor: .systemRed,

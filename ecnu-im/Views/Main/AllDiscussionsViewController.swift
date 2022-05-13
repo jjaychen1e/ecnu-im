@@ -11,7 +11,7 @@ import SwiftUI
 import UIKit
 
 class AllDiscussionsViewController: UIViewController {
-    private var hostingViewController: Any!
+    private var hostingViewController: UIViewController!
     weak var splitVC: UISplitViewController?
     weak var nvc: UINavigationController?
 

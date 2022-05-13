@@ -300,7 +300,6 @@ struct HomeView: View {
                 .mask(RoundedRectangle(cornerRadius: 8, style: .continuous))
                 .padding(.horizontal)
             }
-
         }
     }
 
@@ -378,9 +377,9 @@ struct HomeView: View {
                             Button {
                                 if AppGlobalState.shared.tokenPrepared {
                                     let lastReadPostNumber = viewModel.discussion.attributes?.lastReadPostNumber ?? 0
-                                    splitVC?.setSplitViewRoot(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: lastReadPostNumber + 1),
+                                    splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: lastReadPostNumber + 1),
                                                               column: .secondary,
-                                                              immediatelyShow: true)
+                                                              animated: true)
                                 } else {
                                     splitVC?.presentSignView()
                                 }
@@ -436,9 +435,9 @@ struct HomeView: View {
                             Button {
                                 if AppGlobalState.shared.tokenPrepared {
                                     let lastReadPostNumber = viewModel.discussion.attributes?.lastReadPostNumber ?? 0
-                                    splitVC?.setSplitViewRoot(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: lastReadPostNumber + 1),
+                                    splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: lastReadPostNumber + 1),
                                                               column: .secondary,
-                                                              immediatelyShow: true)
+                                                              animated: true)
                                 } else {
                                     splitVC?.presentSignView()
                                 }

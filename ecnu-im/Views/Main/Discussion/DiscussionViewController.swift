@@ -18,8 +18,14 @@ private enum Post: Hashable {
     case placeholder(Int)
 }
 
-class DiscussionViewController: NoNavigationBarViewController, UITableViewDelegate, UITableViewDataSource {
+class DiscussionViewController: NoNavigationBarViewController, NoOverlayViewController, UITableViewDelegate, UITableViewDataSource {
     static let margin = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
+    static let backgroundColor = UIColor(dynamicProvider: { trait in
+        if trait.userInterfaceStyle == .dark {
+            return UIColor("#1C1C1E")
+        }
+        return .white
+    })
 
     private var discussion: FlarumDiscussion
 
@@ -73,6 +79,14 @@ class DiscussionViewController: NoNavigationBarViewController, UITableViewDelega
         fatalError("init(coder:) has not been implemented")
     }
 
+    func shouldPushTo(nvc: UINavigationController?) -> Bool {
+        if let top = nvc?.topViewController,
+           let another = top as? DiscussionViewController {
+            return discussion != another.discussion
+        }
+        return true
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         Task {
@@ -94,6 +108,7 @@ class DiscussionViewController: NoNavigationBarViewController, UITableViewDelega
         // UI - UICollectionView
         let tableView = UITableView(frame: .zero)
         self.tableView = tableView
+        tableView.backgroundColor = Self.backgroundColor
         tableView.separatorInset = .zero
         tableView.allowsSelection = false
         tableView.estimatedRowHeight = 40

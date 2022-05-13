@@ -41,6 +41,7 @@ internal enum Asset {
     internal static let dynamicBlack = ColorAsset(name: "dynamicBlack")
     internal static let dynamicWhite = ColorAsset(name: "dynamicWhite")
   }
+  internal static let emptyChatDark = ImageAsset(name: "emptyChatDark")
   internal enum Icons {
     internal static let darkTheme = ImageAsset(name: "DarkTheme")
   }

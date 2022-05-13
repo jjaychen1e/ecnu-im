@@ -79,13 +79,19 @@ class MainSplitViewController: UIViewController {
     static var rootSplitVC: UISplitViewController!
 
     private var mainSplitViewController: UISplitViewController!
+
+    private lazy var emptyViewController: DiscussionEmptyViewController = .init()
+
     private lazy var primaryNavigationViewController: UINavigationController = {
         let nvc = UINavigationController()
+        print("primaryNavigationViewController: \(Unmanaged.passUnretained(nvc).toOpaque())")
         return nvc
     }()
 
     private lazy var secondaryNavigationViewController: UINavigationController = {
         let nvc = UINavigationController()
+        nvc.viewControllers = [emptyViewController]
+        print("secondaryNavigationViewController: \(Unmanaged.passUnretained(nvc).toOpaque())")
         return nvc
     }()
 
@@ -98,15 +104,35 @@ class MainSplitViewController: UIViewController {
 
         mainSplitViewController = UISplitViewController(style: .doubleColumn)
         addChildViewController(mainSplitViewController, addConstrains: true)
-        mainSplitViewController.setSplitViewRoot(viewController: primaryNavigationViewController, column: .primary)
-//        mainSplitViewController.setSplitViewRoot(viewController: sidebarViewController, column: .primary)
-        mainSplitViewController.setSplitViewRoot(viewController: primaryViewController, column: .primary)
+        primaryNavigationViewController.viewControllers = [primaryViewController]
+        mainSplitViewController.setViewController(primaryNavigationViewController, for: .primary)
         mainSplitViewController.maximumPrimaryColumnWidth = 450
         mainSplitViewController.preferredPrimaryColumnWidthFraction = 0.5
-        mainSplitViewController.setSplitViewRoot(viewController: secondaryNavigationViewController, column: .secondary)
+        mainSplitViewController.setViewController(secondaryNavigationViewController, for: .secondary)
         mainSplitViewController.preferredDisplayMode = .twoDisplaceSecondary
         mainSplitViewController.show(.primary)
         Self.rootSplitVC = mainSplitViewController
+    }
+
+    // TODO: init will not trigger this!
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        if traitCollection.horizontalSizeClass == .compact {
+            secondaryNavigationViewController.viewControllers = secondaryNavigationViewController.viewControllers.filter {
+                !($0 is DiscussionEmptyViewController)
+            }
+            if secondaryNavigationViewController.viewControllers.count == 0,
+               primaryNavigationViewController.topViewController === secondaryNavigationViewController {
+                primaryNavigationViewController.viewControllers = primaryNavigationViewController.viewControllers.dropLast()
+            }
+        } else if traitCollection.horizontalSizeClass == .regular {
+            if let first = secondaryNavigationViewController.viewControllers.first,
+               first is DiscussionEmptyViewController {
+                return
+            } else {
+                secondaryNavigationViewController.viewControllers = [emptyViewController] + secondaryNavigationViewController.viewControllers
+            }
+        }
     }
 }
 
