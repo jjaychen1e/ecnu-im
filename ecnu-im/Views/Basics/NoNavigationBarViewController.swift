@@ -11,7 +11,6 @@ class NoNavigationBarViewController: UIViewController {
     private weak var navigationBarTimer: Timer?
     override func viewDidLoad() {
         super.viewDidLoad()
-
         // UISplitViewController will show UINavigationBar in many cases. It will be displayed
         // even we hide it in `viewDidLoad`. And when present another VC, it will be displayed, too.
         navigationBarTimer = Timer.scheduledTimer(withTimeInterval: 0.01, repeats: true) { [weak self] _ in

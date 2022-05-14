@@ -13,7 +13,12 @@ struct FlarumUserAttributes: Decodable {
     var displayName: String
     var avatarUrl: String?
     var lastSeenAt: String?
+    var joinTime: String?
     var slug: String
+    var bio: String?
+    var likesReceived: Int?
+    var commentCount: Int?
+    var discussionCount: Int?
 
     var lastSeenAtDate: Date? {
         // date format, example: 2022-03-23T13:37:49+00:00
@@ -24,15 +29,15 @@ struct FlarumUserAttributes: Decodable {
         }
         return nil
     }
-
-    var isOnline: Bool {
-        if let lastSeenAtDate = lastSeenAtDate {
-            // Less than 10 minutes
-            if lastSeenAtDate.timeIntervalSinceNow > -600 {
-                return true
-            }
+    
+    var joinDate: Date? {
+        // date format, example: 2022-03-23T13:37:49+00:00
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+        if let dateString = joinTime?.prefix(25) {
+            return dateFormatter.date(from: String(dateString))
         }
-        return false
+        return nil
     }
 }
 
@@ -69,6 +74,36 @@ extension FlarumUser {
         } else {
             return "Unknown"
         }
+    }
+    
+    var joinDateDescription: String {
+        if let date = attributes.joinDate {
+            return date.localeDescription
+        } else {
+            return "Unknown"
+        }
+    }
+    
+    var isOnline: Bool {
+        if let lastSeenAtDate = attributes.lastSeenAtDate {
+            // Less than 10 minutes
+            if lastSeenAtDate.timeIntervalSinceNow > -600 {
+                return true
+            }
+        }
+        return false
+    }
+    
+    var likesReceived: Int {
+        attributes.likesReceived ?? 0
+    }
+    
+    var commentCount: Int {
+        attributes.commentCount ?? 0
+    }
+    
+    var discussionCount: Int {
+        attributes.discussionCount ?? 0
     }
 }
 

@@ -153,7 +153,7 @@ class DiscussionViewController: NoNavigationBarViewController, NoOverlayViewCont
         switch post {
         case let .comment(post):
             let cell = tableView.dequeueReusableCell(withIdentifier: PostCommentCell.identifier, for: indexPath) as! PostCommentCell
-            cell.configure(post: post) {
+            cell.configure(post: post, viewController: self) {
                 DispatchQueue.main.async {
                     UIView.performWithoutAnimation {
                         tableView.reconfigureRows(at: [indexPath])
@@ -488,9 +488,8 @@ private class DiscussionPostsLoader: ObservableObject {
         var postLists: [FlarumPost] = []
         if let response = try? await flarumProvider.request(.postsNearNumber(discussionID: discussionID,
                                                                              nearNumber: nearNumber,
-                                                                             limit: limit)) {
-            let json = JSON(response.data)
-            let posts = FlarumResponse(json: json).data.posts
+                                                                             limit: limit)).flarumResponse() {
+            let posts = response.data.posts
             postLists.append(contentsOf: posts)
         }
         print("finish loading near number: \(nearNumber)")

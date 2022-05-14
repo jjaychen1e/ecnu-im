@@ -16,19 +16,17 @@ class DiscussionHeaderViewController: UIViewController {
     private var viewModel: DiscussionHeaderViewModel
 
     private var headerBackgroundView = UIView()
-    private var headerHostingVC: UIViewController?
+    private var headerHostingVC: UIHostingController<EnvironmentWrapperView<DiscussionHeaderView>>!
 
     init(discussion: FlarumDiscussion) {
         viewModel = .init(discussion: discussion)
         super.init(nibName: nil, bundle: nil)
 
-        if discussion.relationships == nil {
+        if discussion.relationships?.tags == nil {
             Task {
                 if let id = Int(discussion.id),
-                   let response = try? await flarumProvider.request(.discussionInfo(discussionID: id)) {
-                    let json = JSON(response.data)
-                    let flarumResponse = FlarumResponse(json: json)
-                    if let first = flarumResponse.data.discussions.first {
+                   let response = try? await flarumProvider.request(.discussionInfo(discussionID: id)).flarumResponse() {
+                    if let first = response.data.discussions.first {
                         viewModel.discussion = first
                         self.setUpViews(viewModel: viewModel)
                     }
@@ -58,11 +56,12 @@ class DiscussionHeaderViewController: UIViewController {
             make.edges.equalToSuperview()
         }
 
-        let headerHostingVC = UIHostingController(rootView:
-            DiscussionHeaderView(viewModel: viewModel)
-                .environment(\.splitVC, splitViewController ?? splitVC)
-                .environment(\.nvc, navigationController ?? nvc)
-                .environment(\.viewController, self))
+        let headerHostingVC = UIHostingController(rootView: EnvironmentWrapperView(
+            DiscussionHeaderView(viewModel: viewModel),
+            splitVC: splitViewController ?? splitVC,
+            nvc: navigationController ?? nvc,
+            vc: self
+        ), ignoreSafeArea: true)
         self.headerHostingVC = headerHostingVC
         headerHostingVC.view.backgroundColor = .clear
         addChildViewController(headerHostingVC)

@@ -123,13 +123,12 @@ extension AllDiscussionsView {
             discussionList.removeAll()
         }
 
-        if let response = try? await flarumProvider.request(.allDiscussions(pageOffset: pageOffset, pageItemLimit: pageItemLimit)) {
-            let json = JSON(response.data)
+        if let response = try? await flarumProvider.request(.allDiscussions(pageOffset: pageOffset, pageItemLimit: pageItemLimit)).flarumResponse() {
             guard !Task.isCancelled else {
                 print("cancelled")
                 return
             }
-            let newDiscussions = FlarumResponse(json: json).data.discussions
+            let newDiscussions = response.data.discussions
             discussionList.append(contentsOf: newDiscussions)
             pageOffset += pageItemLimit
         }

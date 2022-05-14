@@ -76,13 +76,11 @@ struct PostCommentCellFooterView: View {
         viewModel.animatableLiked = .animated(!currentLiked)
 
         likedActionNetworkTask = Task {
-            if let response = try? await flarumProvider.request(.postLikeAction(id: Int(viewModel.post.id) ?? -1, like: !currentLiked)) {
+            if let response = try? await flarumProvider.request(.postLikeAction(id: Int(viewModel.post.id) ?? -1, like: !currentLiked)).flarumResponse() {
                 guard !Task.isCancelled else {
                     return
                 }
-                let json = JSON(response.data)
-                let flarumResponse = FlarumResponse(json: json)
-                if let posts = flarumResponse.data.posts.first,
+                if let posts = response.data.posts.first,
                    let user = posts.relationships?.likes?.first(where: { $0.id == AppGlobalState.shared.userId }) {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         viewModel.likedUsers.removeAll { $0.id == AppGlobalState.shared.userId }

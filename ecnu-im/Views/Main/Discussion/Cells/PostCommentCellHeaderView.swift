@@ -20,6 +20,7 @@ class PostCommentCellHeaderViewModel: ObservableObject {
 }
 
 struct PostCommentCellHeaderView: View {
+    @EnvironmentObject var uiKitEnvironment: UIKitEnvironment
     @ObservedObject private var viewModel: PostCommentCellHeaderViewModel
 
     init(post: FlarumPost) {
@@ -33,6 +34,22 @@ struct PostCommentCellHeaderView: View {
     var body: some View {
         HStack(alignment: .top, spacing: 6) {
             PostAuthorAvatarView(name: viewModel.post.authorName, url: viewModel.post.authorAvatarURL, size: 40)
+                .onTapGesture {
+                    if let id = viewModel.post.author?.id {
+                        if let vc = uiKitEnvironment.vc {
+                            if vc.presentingViewController != nil {
+                                vc.present(ProfileCenterViewController(userId: id),
+                                           animated: true)
+                            } else {
+                                UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: id), animated: true)
+                            }
+                        } else {
+                            #if DEBUG
+                                fatalError()
+                            #endif
+                        }
+                    }
+                }
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 4) {
                     Text(viewModel.post.authorName)
@@ -45,7 +62,7 @@ struct PostCommentCellHeaderView: View {
                 }
                 HStack {
                     if let author = viewModel.post.author {
-                        if author.attributes.isOnline {
+                        if author.isOnline {
                             HStack(spacing: 4) {
                                 Circle()
                                     .fill(Color(rgba: "#7FBA00"))

@@ -12,14 +12,17 @@ class NotificationCenterViewController: NoNavigationBarViewController {
     weak var splitVC: UISplitViewController?
     weak var nvc: UINavigationController?
 
+    private var hostingVC: UIHostingController<EnvironmentWrapperView<NotificationCenterView>>!
+
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        let vc = UIHostingController(rootView: NotificationCenterView()
-            .environment(\.splitVC, splitViewController ?? splitVC)
-            .environment(\.nvc, navigationController ?? nvc)
-            .environment(\.viewController, self)
-        )
+        let vc = UIHostingController(rootView: EnvironmentWrapperView(
+            NotificationCenterView(),
+            splitVC: splitViewController ?? splitVC,
+            nvc: navigationController ?? nvc,
+            vc: self
+        ))
+        hostingVC = vc
         addChildViewController(vc, addConstrains: true)
     }
 }

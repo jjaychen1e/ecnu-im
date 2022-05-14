@@ -18,8 +18,8 @@ struct MiniEditor: View {
 
     @State var hide: () -> Void
 
-    @Environment(\.nvc) var nvc
-
+    @EnvironmentObject var uiKitEnvironment: UIKitEnvironment
+    
     var body: some View {
         Rectangle()
             .fill(ThemeManager.shared.theme.backgroundColor2)
@@ -124,7 +124,7 @@ struct MiniEditor: View {
                                     .opacity(0.3)
 
                                     Button {
-                                        if let nvc = nvc {
+                                        if let nvc = uiKitEnvironment.nvc {
                                             nvc.present(UIHostingController(rootView: EditorView(model: model)), animated: true)
                                         }
                                     } label: {

@@ -16,8 +16,7 @@ class DiscussionHeaderViewModel: ObservableObject {
 }
 
 struct DiscussionHeaderView: View {
-    @Environment(\.splitVC) var splitVC
-    @Environment(\.nvc) var nvc
+    @EnvironmentObject var uiKitEnvironment: UIKitEnvironment
     @ObservedObject private var viewModel: DiscussionHeaderViewModel
 
     init(viewModel: DiscussionHeaderViewModel) {
@@ -32,18 +31,19 @@ struct DiscussionHeaderView: View {
                 }
                 Text(viewModel.discussion.discussionTitle)
                     .font(.system(size: 20, weight: .medium, design: .default))
+                    .padding(.horizontal, viewModel.discussion.synthesizedTags.count == 0 ? 30 : 0)
             }
         }
         .padding(.horizontal)
         .padding(.bottom, 4)
         .padding(.top, 8)
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, minHeight: 50, alignment: .bottom)
         .foregroundColor(Asset.DynamicColors.dynamicWhite.swiftUIColor)
         .background(viewModel.discussion.synthesizedTags.first?.backgroundColor ?? .init(uiColor: UIColor.gray))
         .overlay(
             Group {
-                if let splitVC = splitVC,
-                   let nvc = nvc {
+                if let splitVC = uiKitEnvironment.splitVC,
+                   let nvc = uiKitEnvironment.nvc {
                     Button(action: {
                         splitVC.pop(from: nvc, animated: true)
                     }, label: {

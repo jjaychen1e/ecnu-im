@@ -12,12 +12,58 @@ import SwiftUI
 import SwiftyJSON
 import UIKit
 
+private struct PostCommentCellHeaderViewWrapper: View {
+    private var view: PostCommentCellHeaderView
+    private let environmentView: EnvironmentWrapperView<PostCommentCellHeaderView>
+
+    init(_ view: PostCommentCellHeaderView, splitVC: UISplitViewController?, nvc: UINavigationController?, vc: UIViewController?) {
+        self.view = view
+        environmentView = EnvironmentWrapperView(view, splitVC: splitVC, nvc: nvc, vc: vc)
+    }
+
+    var body: some View {
+        environmentView
+    }
+
+    func update(post: FlarumPost) {
+        view.update(post: post)
+    }
+
+    func update(vc: UIViewController?) {
+        environmentView.update(splitVC: vc?.splitViewController, nvc: vc?.navigationController, vc: vc)
+    }
+}
+
+private struct PostCommentCellFooterViewWrapper: View {
+    private var view: PostCommentCellFooterView
+
+    private let environmentView: EnvironmentWrapperView<PostCommentCellFooterView>
+
+    init(_ view: PostCommentCellFooterView, splitVC: UISplitViewController?, nvc: UINavigationController?, vc: UIViewController?) {
+        self.view = view
+        environmentView = EnvironmentWrapperView(view, splitVC: splitVC, nvc: nvc, vc: vc)
+    }
+
+    var body: some View {
+        environmentView
+    }
+
+    func update(post: FlarumPost, replyAction: @escaping () -> Void) {
+        view.update(post: post, replyAction: replyAction)
+    }
+
+    func update(vc: UIViewController?) {
+        environmentView.update(splitVC: vc?.splitViewController, nvc: vc?.navigationController, vc: vc)
+    }
+}
+
 final class PostCommentCell: UITableViewCell {
     static let identifier = "PostCommentCell"
+
     private var post: FlarumPost?
     private var postContentItemsUIView: PostContentItemsUIView?
-    private var headerViewHostingVC = UIHostingController(rootView: PostCommentCellHeaderView(post: .init(id: "")), ignoreSafeArea: true)
-    private var footerViewHostingVC = UIHostingController(rootView: PostCommentCellFooterView(post: .init(id: ""), replyAction: {}), ignoreSafeArea: true)
+    private var headerViewHostingVC: UIHostingController<PostCommentCellHeaderViewWrapper>!
+    private var footerViewHostingVC: UIHostingController<PostCommentCellFooterViewWrapper>!
 
     private let avatarViewSize: CGFloat = 40.0
     private let avatarContentMargin: CGFloat = 8.0
@@ -31,9 +77,29 @@ final class PostCommentCell: UITableViewCell {
 
         contentView.backgroundColor = DiscussionViewController.backgroundColor
 
+        headerViewHostingVC = UIHostingController(
+            rootView:
+            PostCommentCellHeaderViewWrapper(
+                PostCommentCellHeaderView(post: .init(id: "")),
+                splitVC: nil,
+                nvc: nil,
+                vc: nil
+            ),
+            ignoreSafeArea: true
+        )
         headerViewHostingVC.view.backgroundColor = .clear
         contentView.addSubview(headerViewHostingVC.view)
 
+        footerViewHostingVC = UIHostingController(
+            rootView:
+            PostCommentCellFooterViewWrapper(
+                PostCommentCellFooterView(post: .init(id: ""), replyAction: {}),
+                splitVC: nil,
+                nvc: nil,
+                vc: nil
+            ),
+            ignoreSafeArea: true
+        )
         footerViewHostingVC.view.backgroundColor = .clear
         contentView.addSubview(footerViewHostingVC.view)
     }
@@ -43,7 +109,7 @@ final class PostCommentCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func configure(post: FlarumPost, updateLayout: (() -> Void)?) {
+    func configure(post: FlarumPost, viewController: UIViewController, updateLayout: (() -> Void)?) {
         if post != self.post {
             self.post = post
             postContentItemsUIView?.removeFromSuperview()
@@ -64,7 +130,9 @@ final class PostCommentCell: UITableViewCell {
             }
 
             headerViewHostingVC.rootView.update(post: post)
+            headerViewHostingVC.rootView.update(vc: viewController)
             footerViewHostingVC.rootView.update(post: post, replyAction: {})
+            footerViewHostingVC.rootView.update(vc: viewController)
         }
     }
 

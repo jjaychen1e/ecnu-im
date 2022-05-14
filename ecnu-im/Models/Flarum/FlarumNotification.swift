@@ -124,10 +124,8 @@ class FlarumNotification {
         if let targetPostNumber = targetPostNumber,
            let discussion = relatedDiscussion,
            let id = Int(discussion.id) {
-            if let response = try? await flarumProvider.request(.postsNearNumber(discussionID: id, nearNumber: targetPostNumber, limit: 4)) {
-                let json = JSON(response.data)
-                let flarumResponse = FlarumResponse(json: json)
-                let post = flarumResponse.data.posts.first { p in
+            if let response = try? await flarumProvider.request(.postsNearNumber(discussionID: id, nearNumber: targetPostNumber, limit: 4)).flarumResponse() {
+                let post = response.data.posts.first { p in
                     p.attributes?.number == targetPostNumber
                 }
                 return post

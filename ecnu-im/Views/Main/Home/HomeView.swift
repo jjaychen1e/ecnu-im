@@ -46,9 +46,7 @@ private class HomeViewViewModel: ObservableObject {
 }
 
 struct HomeView: View {
-    @Environment(\.nvc) var nvc
-    @Environment(\.viewController) var viewController
-    @Environment(\.splitVC) var splitVC
+    @EnvironmentObject var uiKitEnvironment: UIKitEnvironment
     @ObservedObject private var viewModel = HomeViewViewModel()
 
     @State private var subscriptions: Set<AnyCancellable> = []
@@ -82,9 +80,8 @@ struct HomeView: View {
         }
 
         let ids = (viewModel.newestDiscussions + viewModel.stickyDiscussions).compactMap { $0.discussion.lastPost?.id }.compactMap { Int($0) }
-        if let response = try? await flarumProvider.request(.postsByIds(ids: ids)) {
-            let json = JSON(response.data)
-            let posts = FlarumResponse(json: json).data.posts
+        if let response = try? await flarumProvider.request(.postsByIds(ids: ids)).flarumResponse() {
+            let posts = response.data.posts
             for post in posts {
                 if let correspondingDiscussionViewModel = (viewModel.newestDiscussions + viewModel.stickyDiscussions).first(where: { $0.discussion.lastPost?.id == post.id }) {
                     withAnimation {
@@ -102,11 +99,9 @@ struct HomeView: View {
 
         for discussion in discussions {
             if let id = Int(discussion.id),
-               let response = try? await flarumProvider.request(.posts(discussionID: id, offset: 0, limit: 15)) {
-                let json = JSON(response.data)
+               let response = try? await flarumProvider.request(.posts(discussionID: id, offset: 0, limit: 15)).flarumResponse() {
                 if let correspondingDiscussionViewModel = (viewModel.newestDiscussions + viewModel.stickyDiscussions).first(where: { $0.discussion.id == discussion.id }) {
-                    let flarumResponse = FlarumResponse(json: json)
-                    let users = flarumResponse.data.posts.compactMap { $0.author }
+                    let users = response.data.posts.compactMap { $0.author }
                     withAnimation {
                         correspondingDiscussionViewModel.relatedUsers = Array(users.unique { $0.id }.prefix(5))
                     }
@@ -127,11 +122,10 @@ struct HomeView: View {
 
         loadTasks.append(
             Task {
-                if let response = try? await flarumProvider.request(.allDiscussions(pageOffset: 0, pageItemLimit: 20)) {
+                if let response = try? await flarumProvider.request(.allDiscussions(pageOffset: 0, pageItemLimit: 20)).flarumResponse() {
                     guard !Task.isCancelled else { return }
 
-                    let json = JSON(response.data)
-                    let newDiscussions = FlarumResponse(json: json).data.discussions
+                    let newDiscussions = response.data.discussions
                     await processDiscussions(discussions: newDiscussions)
                 }
             }
@@ -139,11 +133,10 @@ struct HomeView: View {
 
         loadTasks.append(
             Task {
-                if let response = try? await flarumProvider.request(.lastSeenUsers(limit: 20)) {
+                if let response = try? await flarumProvider.request(.lastSeenUsers(limit: 20)).flarumResponse() {
                     guard !Task.isCancelled else { return }
 
-                    let json = JSON(response.data)
-                    let users = FlarumResponse(json: json).data.users.unique { $0.id }
+                    let users = response.data.users.unique { $0.id }
                     withAnimation {
                         viewModel.lastSeenUsers = users
                     }
@@ -164,9 +157,8 @@ struct HomeView: View {
                         DispatchQueue.main.async {
                             AppGlobalState.shared.unreadNotificationCount = count
                         }
-                        if let response = try? await flarumProvider.request(.notification(offset: 0, limit: count + 15)) {
-                            let json = JSON(response.data)
-                            let notifications = FlarumResponse(json: json).data.notifications
+                        if let response = try? await flarumProvider.request(.notification(offset: 0, limit: count + 15)).flarumResponse() {
+                            let notifications = response.data.notifications
                                 .filter { !$0.attributes.isRead }
                                 .sorted { n1, n2 in
                                     if let id1 = Int(n1.id), let id2 = Int(n2.id) {
@@ -298,7 +290,7 @@ struct HomeView: View {
             let latestNotificationCreatedDateDescription = notifications.first?.createdDateDescription ?? "Unkown"
 
             Button {
-                viewController?.tabController?.select(tab: .notifications)
+                uiKitEnvironment.vc?.tabController?.select(tab: .notifications)
             } label: {
                 HStack {
                     Image(systemName: "bell.badge")
@@ -429,11 +421,11 @@ struct HomeView: View {
                             Button {
                                 if AppGlobalState.shared.tokenPrepared {
                                     let lastReadPostNumber = viewModel.discussion.attributes?.lastReadPostNumber ?? 0
-                                    splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: lastReadPostNumber + 1),
+                                    uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: lastReadPostNumber + 1),
                                                   column: .secondary,
                                                   toRoot: true)
                                 } else {
-                                    splitVC?.presentSignView()
+                                    uiKitEnvironment.splitVC?.presentSignView()
                                 }
                             } label: {
                                 HomePostCardView(viewModel: viewModel)
@@ -487,11 +479,11 @@ struct HomeView: View {
                             Button {
                                 if AppGlobalState.shared.tokenPrepared {
                                     let lastReadPostNumber = viewModel.discussion.attributes?.lastReadPostNumber ?? 0
-                                    splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: lastReadPostNumber + 1),
+                                    uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: lastReadPostNumber + 1),
                                                   column: .secondary,
                                                   toRoot: true)
                                 } else {
-                                    splitVC?.presentSignView()
+                                    uiKitEnvironment.splitVC?.presentSignView()
                                 }
                             } label: {
                                 HomePostCardViewLarge(viewModel: viewModel)

@@ -13,9 +13,9 @@ private struct NotificationView: View {
     @State var notification: FlarumNotification
     @State var replyExcerptText: String?
 
+    @EnvironmentObject var uiKitEnvironment: UIKitEnvironment
     @Environment(\.colorScheme) var colorScheme
-    @Environment(\.splitVC) var splitVC
-
+    
     var body: some View {
         let type = notification.attributes.contentType
         let relatedDiscussion = notification.relatedDiscussion
@@ -24,7 +24,8 @@ private struct NotificationView: View {
 
         VStack(alignment: .leading, spacing: 6) {
             Text(relatedDiscussion?.discussionTitle ?? "Unkown")
-                .font(.system(size: 17, weight: .medium, design: .rounded))
+                .font(.system(size: 17, weight: .bold, design: .rounded))
+                .foregroundColor(.init(rgba: "#566A89"))
 
             originalPostExcerptView(post: originalPost)
 
@@ -42,7 +43,7 @@ private struct NotificationView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.all, 8)
-        .background(notification.attributes.isRead ? Color.clear : colorScheme == .light ? Color(rgba: "#e4ebf6") : Color(rgba: "#e4ebf6").opacity(0.2))
+        .background(notification.attributes.isRead ? Color.clear.opacity(0.0001) : colorScheme == .light ? Color(rgba: "#e4ebf6") : Color(rgba: "#e4ebf6").opacity(0.2))
         .onLoad {
             Task {
                 if let repliedPost = await notification.repliedPost() {
@@ -59,45 +60,45 @@ private struct NotificationView: View {
                     if let post = originalPost,
                        let discussion = post.relationships?.discussion,
                        let number = post.attributes?.number {
-                        splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearNumber: number),
+                        uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearNumber: number),
                                       column: .secondary,
                                       toRoot: true)
                     }
                 } else {
-                    splitVC?.presentSignView()
+                    uiKitEnvironment.splitVC?.presentSignView()
                 }
             case let .postMentioned(replyNumber):
                 if AppGlobalState.shared.tokenPrepared {
                     if let post = originalPost,
                        let discussion = post.relationships?.discussion {
-                        splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearNumber: replyNumber),
+                        uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearNumber: replyNumber),
                                       column: .secondary,
                                       toRoot: true)
                     }
                 } else {
-                    splitVC?.presentSignView()
+                    uiKitEnvironment.splitVC?.presentSignView()
                 }
             case let .privateDiscussionReplied(postNumber):
                 if AppGlobalState.shared.tokenPrepared {
                     if let post = originalPost,
                        let discussion = post.relationships?.discussion {
-                        splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearNumber: postNumber),
+                        uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearNumber: postNumber),
                                       column: .secondary,
                                       toRoot: true)
                     }
                 } else {
-                    splitVC?.presentSignView()
+                    uiKitEnvironment.splitVC?.presentSignView()
                 }
             case .privateDiscussionCreated:
                 if AppGlobalState.shared.tokenPrepared {
                     if let post = originalPost,
                        let discussion = post.relationships?.discussion {
-                        splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearOffset: 0),
+                        uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearOffset: 0),
                                       column: .secondary,
                                       toRoot: true)
                     }
                 } else {
-                    splitVC?.presentSignView()
+                    uiKitEnvironment.splitVC?.presentSignView()
                 }
             }
         }
@@ -196,10 +197,8 @@ struct NotificationCenterView: View {
 
     func load() {
         Task {
-            if let response = try? await flarumProvider.request(.notification(offset: 0, limit: 30)) {
-                let json = JSON(response.data)
-                let flarumResponse = FlarumResponse(json: json)
-                self.notifications = flarumResponse.data.notifications
+            if let response = try? await flarumProvider.request(.notification(offset: 0, limit: 30)).flarumResponse() {
+                self.notifications = response.data.notifications
             }
         }
     }

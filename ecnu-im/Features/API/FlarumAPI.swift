@@ -24,6 +24,10 @@ enum DiscussionIncludeOption: String, RawRepresentable {
     static let homeDiscussionIncludeOptionSet: Set<Self> = {
         [.user, .lastPostedUser, .firstPost, .lastPost, .tags, .tagsParent, .recipientUsers, .recipientGroups]
     }()
+
+    static let profileDiscussionIncludeOptionSet: Set<Self> = {
+        [.user, .lastPostedUser, .lastPost, .tags, .tagsParent]
+    }()
 }
 
 enum DiscussionSortOption: String, RawRepresentable {
@@ -41,15 +45,19 @@ enum Flarum {
     case allDiscussions(includes: Set<DiscussionIncludeOption> = DiscussionIncludeOption.homeDiscussionIncludeOptionSet,
                         pageOffset: Int = 0,
                         pageItemLimit: Int = 20)
+    case discussionByUserAccount(includes: Set<DiscussionIncludeOption> = DiscussionIncludeOption.profileDiscussionIncludeOptionSet,
+                                 account: String, offset: Int, limit: Int, sort: DiscussionSortOption = .newest)
     case posts(discussionID: Int, offset: Int, limit: Int)
     case postsNearNumber(discussionID: Int, nearNumber: Int, limit: Int)
     case postsById(id: Int)
     case postsByIds(ids: [Int])
+    case postsByUserAccount(account: String, offset: Int, limit: Int, sort: DiscussionSortOption = .newest)
     case postLikeAction(id: Int, like: Bool)
     case register(email: String, username: String, nickname: String, password: String, recaptcha: String)
     case newPost(discussionID: String, content: String)
     case notification(offset: Int, limit: Int)
     case lastSeenUsers(limit: Int)
+    case user(id: Int)
 }
 
 extension Flarum: TargetType {
@@ -69,6 +77,8 @@ extension Flarum: TargetType {
             return "/api/discussions/\(discussionID)"
         case .allDiscussions:
             return "/api/discussions"
+        case .discussionByUserAccount:
+            return "/api/discussions"
         case .posts:
             return "/api/posts"
         case .postsNearNumber:
@@ -76,6 +86,8 @@ extension Flarum: TargetType {
         case .postsById:
             return "/api/posts"
         case .postsByIds:
+            return "/api/posts"
+        case .postsByUserAccount:
             return "/api/posts"
         case let .postLikeAction(id, _):
             return "/api/posts/\(id)"
@@ -87,6 +99,8 @@ extension Flarum: TargetType {
             return "api/notifications"
         case .lastSeenUsers:
             return "api/users"
+        case let .user(id):
+            return "api/users/\(id)"
         }
     }
 
@@ -102,6 +116,8 @@ extension Flarum: TargetType {
             return .get
         case .allDiscussions:
             return .get
+        case .discussionByUserAccount:
+            return .get
         case .posts:
             return .get
         case .postsNearNumber:
@@ -109,6 +125,8 @@ extension Flarum: TargetType {
         case .postsById:
             return .get
         case .postsByIds:
+            return .get
+        case .postsByUserAccount:
             return .get
         case .postLikeAction:
             return .patch
@@ -119,6 +137,8 @@ extension Flarum: TargetType {
         case .notification:
             return .get
         case .lastSeenUsers:
+            return .get
+        case .user:
             return .get
         }
     }
@@ -146,6 +166,14 @@ extension Flarum: TargetType {
                 "page[offset]": pageOffset,
                 "page[limit]": pageLimit,
             ], encoding: URLEncoding.default)
+        case let .discussionByUserAccount(includes, account, offset, limit, sort):
+            return .requestParameters(parameters: [
+                "include": includes.map { $0.rawValue }.joined(separator: ","),
+                "filter[author]": account,
+                "page[offset]": offset,
+                "page[limit]": limit,
+                "sort": sort.rawValue,
+            ], encoding: URLEncoding.default)
         case let .posts(discussionID, offset, limit):
             return .requestParameters(parameters: [
                 "filter[discussion]": discussionID,
@@ -165,6 +193,13 @@ extension Flarum: TargetType {
         case let .postsByIds(ids):
             return .requestParameters(parameters: [
                 "filter[id]": ids.map { String($0) }.joined(separator: ","),
+            ], encoding: URLEncoding.default)
+        case let .postsByUserAccount(account, offset, limit, sort):
+            return .requestParameters(parameters: [
+                "filter[author]": account,
+                "page[offset]": offset,
+                "page[limit]": limit,
+                "sort": sort.rawValue,
             ], encoding: URLEncoding.default)
         case let .postLikeAction(id, like):
             return .requestParameters(parameters: [
@@ -213,6 +248,8 @@ extension Flarum: TargetType {
                 "page[offset]": 0,
                 "page[limit]": limit,
             ], encoding: URLEncoding.default)
+        case .user:
+            return .requestPlain
         }
     }
 

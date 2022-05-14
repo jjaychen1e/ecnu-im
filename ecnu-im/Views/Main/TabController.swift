@@ -5,6 +5,7 @@
 //  Created by 陈俊杰 on 2022/4/21.
 //
 
+import Combine
 import SnapKit
 import SwiftUI
 import UIKit
@@ -33,6 +34,7 @@ class TabController: UIViewController {
     private var allDiscussionsViewController = AllDiscussionsViewController()
     private var homeViewController = HomeViewController()
     private var notificationCenterViewController = NotificationCenterViewController()
+    private var myProfileViewController = MyProfileCenterViewController()
     private var tabBarViewModel: TabBarViewModel!
 
     private var tabBarViewController: TabBarViewController!
@@ -41,7 +43,7 @@ class TabController: UIViewController {
     private lazy var tabBarItems: [TabItem] = [
         .init(tab: .posts, icon: "message", name: "帖子", color: .teal, viewController: homeViewController),
         .init(tab: .notifications, icon: "bell", name: "通知", color: .red, viewController: notificationCenterViewController),
-        .init(tab: .profile, icon: "person", name: "个人资料", color: .blue, viewController: allDiscussionsViewController),
+        .init(tab: .profile, icon: "person", name: "个人资料", color: .blue, viewController: myProfileViewController),
         .init(tab: .setting, icon: "gearshape", name: "设置", color: .gray, viewController: SettingViewController()),
     ]
 
@@ -113,5 +115,8 @@ class TabController: UIViewController {
 
         notificationCenterViewController.splitVC = splitViewController
         notificationCenterViewController.nvc = navigationController
+
+        myProfileViewController.splitVC = splitViewController
+        myProfileViewController.nvc = navigationController
     }
 }

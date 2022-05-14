@@ -40,7 +40,7 @@ struct DiscussionListCellPlaceholder: View {
 }
 
 struct DiscussionListCell: View {
-    @Environment(\.splitVC) var splitVC
+    @EnvironmentObject var uiKitEnvironment: UIKitEnvironment
     @State var discussion: FlarumDiscussion
     @State var index: Int
 
@@ -50,11 +50,11 @@ struct DiscussionListCell: View {
                 Button {
                     if AppGlobalState.shared.tokenPrepared {
                         let near = (discussion.attributes?.commentCount ?? 1) - 1
-                        splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearOffset: near),
+                        uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearOffset: near),
                                       column: .secondary,
                                       toRoot: true)
                     } else {
-                        splitVC?.presentSignView()
+                        uiKitEnvironment.splitVC?.presentSignView()
                     }
                 } label: {
                     LastPostCell(discussion: discussion)
@@ -68,11 +68,11 @@ struct DiscussionListCell: View {
                 && discussion.firstPost != discussion.lastPost {
                 Button {
                     if AppGlobalState.shared.tokenPrepared {
-                        splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearOffset: 0),
+                        uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearOffset: 0),
                                       column: .secondary,
                                       toRoot: true)
                     } else {
-                        splitVC?.presentSignView()
+                        uiKitEnvironment.splitVC?.presentSignView()
                     }
                 } label: {
                     FirstPostCell(discussion: discussion)
@@ -87,7 +87,7 @@ struct DiscussionListCell: View {
         }
         .padding(.vertical, 4)
         .onLoad {
-            if let splitVC = splitVC {
+            if let splitVC = uiKitEnvironment.splitVC {
                 if splitVC.traitCollection.horizontalSizeClass != .compact {
                     if index == 0 {
                         splitVC.push(viewController: DiscussionViewController(discussion: discussion, nearOffset: 0),

@@ -65,10 +65,8 @@ extension FlarumTag {
     }
 
     private static func fetchTagsInfo() async -> [FlarumTag] {
-        if let response = try? await flarumProvider.request(.allTags) {
-            let data = response.data
-            let json = JSON(data)
-            return FlarumResponse(json: json).data.tags
+        if let response = try? await flarumProvider.request(.allTags).flarumResponse() {
+            return response.data.tags
         }
         return []
     }

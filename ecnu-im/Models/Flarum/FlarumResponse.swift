@@ -315,3 +315,10 @@ enum FlarumData {
     case postReaction(FlarumPostReaction)
     case notification(FlarumNotification)
 }
+
+extension Response {
+    func flarumResponse() -> FlarumResponse {
+        let json = JSON(data)
+        return FlarumResponse(json: json)
+    }
+}
