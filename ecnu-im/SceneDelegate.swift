@@ -19,8 +19,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 //        let rootViewController = UIHostingController(rootView: EditorView())
         window.rootViewController = rootViewController
         
-        ImageBrowser.shared.presentingViewController = rootViewController
-
         self.window = window
         window.makeKeyAndVisible()
     }

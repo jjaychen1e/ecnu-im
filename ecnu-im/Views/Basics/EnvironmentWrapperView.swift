@@ -39,7 +39,7 @@ class UIKitEnvironment: ObservableObject {
 struct EnvironmentWrapperView<Content: View>: View {
     @ObservedObject var uiKitEnvironment: UIKitEnvironment
 
-    private var view: Content
+    var view: Content
 
     init(_ content: Content, splitVC: UISplitViewController?, nvc: UINavigationController?, vc: UIViewController?) {
         view = content

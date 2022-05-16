@@ -11,7 +11,6 @@ import UIKit
 class ImageBrowser {
     private var imageURLs: [URL] = []
     private var startedIndex: Int = 0
-    var presentingViewController: UIViewController?
 
     static let shared = ImageBrowser()
 
@@ -22,6 +21,6 @@ class ImageBrowser {
         let controller = LightboxController(images: images, startIndex: startedIndex)
         controller.dynamicBackground = true
         controller.modalPresentationStyle = .fullScreen
-        presentingViewController?.present(controller, animated: true)
+        UIApplication.shared.topController()?.present(controller, animated: true)
     }
 }

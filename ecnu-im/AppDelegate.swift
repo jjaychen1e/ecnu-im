@@ -15,6 +15,7 @@ var isHorizontalCompact: Bool { UITraitCollection.current.horizontalSizeClass ==
 class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        UITextView.appearance().backgroundColor = .clear
         return true
     }
 

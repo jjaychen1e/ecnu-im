@@ -28,6 +28,7 @@ class DiscussionHeaderViewController: UIViewController {
                    let response = try? await flarumProvider.request(.discussionInfo(discussionID: id)).flarumResponse() {
                     if let first = response.data.discussions.first {
                         viewModel.discussion = first
+                        self.headerHostingVC.safelyRemoveFromParent()
                         self.setUpViews(viewModel: viewModel)
                     }
                 }

@@ -32,6 +32,7 @@ private class HomeViewViewModel: ObservableObject {
     @Published var stickyDiscussions: [FlarumDiscussionPreviewViewModel] = []
     @Published var newestDiscussions: [FlarumDiscussionPreviewViewModel] = []
     @Published var unreadNotifications: (unreadCount: Int, notifications: [FlarumNotification])?
+    @Published var latestNotificationTitle: String?
     @Published var latestNotificationExcerpt: String?
     @Published var hideNotification = false
 
@@ -176,6 +177,63 @@ struct HomeView: View {
                                     viewModel.unreadNotifications = (count, notifications)
                                 }
 
+                                if let latestNotification = notifications.first {
+                                    switch latestNotification.attributes.contentType {
+                                    case .postLiked, .postMentioned, .postReacted, .privateDiscussionReplied, .privateDiscussionCreated:
+                                        let latestNotificationUserName: String = notifications.first?.relationships?.fromUser?.attributes.displayName ?? "Unkown"
+                                        let latestNotificationDiscussionTitle: String = {
+                                            if let subject = notifications.first?.relationships?.subject {
+                                                switch subject {
+                                                case let .post(post):
+                                                    return post.relationships?.discussion?.discussionTitle ?? "Unkown"
+                                                case let .discussion(discussion):
+                                                    return discussion.discussionTitle
+                                                case .userBadge:
+                                                    break
+                                                }
+                                            }
+                                            return "Unkown"
+                                        }()
+                                        let latestNotificationTypeDescription = notifications.first?.attributes.contentType.actionDescription ?? "Unkown"
+                                        viewModel.latestNotificationTitle = "@\(latestNotificationUserName)\(latestNotificationTypeDescription)了：\(latestNotificationDiscussionTitle)"
+                                    case .badgeReceived:
+                                        if let subject = notifications[0].relationships?.subject {
+                                            if case let .userBadge(userBadgeId) = subject {
+                                                if let userBadge = FlarumBadgeStorage.shared.userBadge(for: userBadgeId),
+                                                   let badge = userBadge.relationships?.badge {
+                                                    withAnimation {
+                                                        viewModel.latestNotificationTitle = "你获得了一个新徽章: \(badge.description)！"
+                                                    }
+                                                } else {
+                                                    // We need to fetch from user's api
+                                                    Task {
+                                                        if let id = AppGlobalState.shared.userIdInt {
+                                                            if let response = try? await flarumProvider.request(.user(id: id)).flarumResponse() {
+                                                                let userBadges = response.included.userBadges
+                                                                FlarumBadgeStorage.shared.store(userBadges: userBadges)
+                                                                if let userBadge = FlarumBadgeStorage.shared.userBadge(for: userBadgeId),
+                                                                   let badge = userBadge.relationships?.badge {
+                                                                    withAnimation {
+                                                                        viewModel.latestNotificationTitle = "你获得了一个新徽章: \(badge.description)！"
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            } else {
+                                                #if DEBUG
+                                                    fatalError()
+                                                #endif
+                                            }
+                                        } else {
+                                            #if DEBUG
+                                                fatalError()
+                                            #endif
+                                        }
+                                    }
+                                }
+
                                 switch notifications[0].attributes.contentType {
                                 case .postLiked, .postReacted, .privateDiscussionCreated:
                                     if let excerpt = notifications[0].originalPost?.excerptText(configuration: .init(textLengthMax: 150, textLineMax: 3, imageCountMax: 0)) {
@@ -199,6 +257,8 @@ struct HomeView: View {
                                             fatalError()
                                         #endif
                                     }
+                                case .badgeReceived:
+                                    break
                                 }
                             }
                             #if DEBUG
@@ -274,19 +334,6 @@ struct HomeView: View {
                 .compactMap { $0.relationships?.fromUser }
                 .prefix(5)
 
-            let latestNotificationUserName: String = notifications.first?.relationships?.fromUser.attributes.displayName ?? "Unkown"
-            let latestNotificationDiscussionTitle: String = {
-                if let subject = notifications.first?.relationships?.subject {
-                    switch subject {
-                    case let .post(post):
-                        return post.relationships?.discussion?.discussionTitle ?? "Unkown"
-                    case let .discussion(discussion):
-                        return discussion.discussionTitle
-                    }
-                }
-                return "Unkown"
-            }()
-            let latestNotificationTypeDescription = notifications.first?.attributes.contentType.description ?? "Unkown"
             let latestNotificationCreatedDateDescription = notifications.first?.createdDateDescription ?? "Unkown"
 
             Button {
@@ -311,7 +358,7 @@ struct HomeView: View {
                                 }
                             }
                             HStack {
-                                Text("@\(latestNotificationUserName)\(latestNotificationTypeDescription)了：\(latestNotificationDiscussionTitle)")
+                                Text(viewModel.latestNotificationTitle ?? "暂无通知标题")
                                     .lineLimit(1)
                                     .font(.system(size: 12, weight: .semibold, design: .rounded))
                                 Text(latestNotificationCreatedDateDescription)
@@ -320,12 +367,17 @@ struct HomeView: View {
                             }
                         }
                         .foregroundColor(Color(rgba: "#045FA1"))
-                        Text(viewModel.latestNotificationExcerpt ?? "暂无内容预览")
-                            .font(.system(size: 12, weight: .regular, design: .rounded))
-                            .lineLimit(3)
-                            .foregroundColor(.black)
-                            .multilineTextAlignment(.leading)
+                        if notifications.first?.attributes.contentType != .badgeReceived {
+                            Text(viewModel.latestNotificationExcerpt ?? "暂无内容预览")
+                                .animation(nil)
+                                .font(.system(size: 12, weight: .regular, design: .rounded))
+                                .lineLimit(3)
+                                .foregroundColor(.black)
+                                .multilineTextAlignment(.leading)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
                     }
+                    Spacer(minLength: 0)
                     Button {
                         withAnimation {
                             viewModel.hideNotification = true
@@ -336,6 +388,7 @@ struct HomeView: View {
                             .foregroundColor(Color(rgba: "#265A9A"))
                     }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.vertical, 12)
                 .padding(.horizontal, 8)
                 .background(
@@ -394,6 +447,9 @@ struct HomeView: View {
                             PostAuthorAvatarView(name: user.attributes.displayName, url: user.avatarURL, size: 50)
                                 .mask(Circle())
                                 .overlay(Circle().stroke(Color.white, lineWidth: 1))
+                                .onTapGesture {
+                                    UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: user.id), animated: true)
+                                }
                         }
                     }
                     .padding(.horizontal)
@@ -422,8 +478,8 @@ struct HomeView: View {
                                 if AppGlobalState.shared.tokenPrepared {
                                     let lastReadPostNumber = viewModel.discussion.attributes?.lastReadPostNumber ?? 0
                                     uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: lastReadPostNumber + 1),
-                                                  column: .secondary,
-                                                  toRoot: true)
+                                                                   column: .secondary,
+                                                                   toRoot: true)
                                 } else {
                                     uiKitEnvironment.splitVC?.presentSignView()
                                 }
@@ -480,8 +536,8 @@ struct HomeView: View {
                                 if AppGlobalState.shared.tokenPrepared {
                                     let lastReadPostNumber = viewModel.discussion.attributes?.lastReadPostNumber ?? 0
                                     uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: lastReadPostNumber + 1),
-                                                  column: .secondary,
-                                                  toRoot: true)
+                                                                   column: .secondary,
+                                                                   toRoot: true)
                                 } else {
                                     uiKitEnvironment.splitVC?.presentSignView()
                                 }
@@ -542,6 +598,7 @@ private struct HomePostCardView: View {
                     }
                 }
                 Text(viewModel.postExcerpt)
+                    .animation(nil)
                     .multilineTextAlignment(.leading)
                     .lineLimit(Int.max)
                     .truncationMode(.tail)
@@ -620,6 +677,7 @@ struct HomePostCardViewLarge: View {
                     }
                 }
                 Text(viewModel.postExcerpt)
+                    .animation(nil)
                     .multilineTextAlignment(.leading)
                     .lineLimit(4)
                     .truncationMode(.tail)

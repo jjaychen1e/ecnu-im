@@ -10,12 +10,11 @@ import UIKit
 public struct Avatar {
     public let image: UIImage?
     public var initials: String = "?"
-    
+
     public init(image: UIImage? = nil, initials: String = "?") {
         self.image = image
         self.initials = initials
     }
-    
 }
 
 /// The implementation detail assumes that the `AvatarView` is
@@ -23,82 +22,80 @@ public struct Avatar {
 class AvatarView: UIImageView {
     struct AvatarViewConfiguration {
         var avatar: Avatar
-        
+
         var placeholderFont: UIFont?
         fileprivate var _defaultPlaceholderFont: UIFont = .preferredFont(forTextStyle: .caption1)
         fileprivate var finalPlaceholderFont: UIFont {
-            get {
-                placeholderFont ?? _defaultPlaceholderFont
-            }
+            placeholderFont ?? _defaultPlaceholderFont
         }
-        
+
         var placeholderTextColor: UIColor = .white
         var fontMinimumScaleFactor: CGFloat = 0.4
         var adjustsFontSizeToFitWidth = true
         var minimumFontSize: CGFloat {
-            get {
-                finalPlaceholderFont.pointSize * fontMinimumScaleFactor
-            }
+            finalPlaceholderFont.pointSize * fontMinimumScaleFactor
         }
-        
+
         init(avatar: Avatar) {
             self.avatar = avatar
         }
     }
-    
+
     // MARK: - Properties
-    
-    var configuration: AvatarViewConfiguration = AvatarViewConfiguration(avatar: Avatar(image: nil)) {
-        didSet {
-            regenerateContent()
-        }
-    }
-    
-    // MARK: - Overridden Properties
-    open override var frame: CGRect {
+
+    var configuration: AvatarViewConfiguration = .init(avatar: Avatar(image: nil)) {
         didSet {
             regenerateContent()
         }
     }
 
-    open override var bounds: CGRect {
+    // MARK: - Overridden Properties
+
+    override open var frame: CGRect {
+        didSet {
+            regenerateContent()
+        }
+    }
+
+    override open var bounds: CGRect {
         didSet {
             regenerateContent()
         }
     }
 
     // MARK: - Initializers
-    public override init(frame: CGRect) {
+
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         prepareView()
     }
-    
-    required public init?(coder aDecoder: NSCoder) {
+
+    public required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         prepareView()
     }
 
-    convenience public init() {
+    public convenience init() {
         self.init(frame: .zero)
         prepareView()
     }
-    
+
     private func regenerateContent() {
         let recommandFont: UIFont = .systemFont(ofSize: frame.width / 2.5)
         if configuration.placeholderFont == nil, configuration._defaultPlaceholderFont != recommandFont
         {
             configuration._defaultPlaceholderFont = recommandFont
         }
-        
+
         layer.cornerRadius = frame.width / 2
-        
+
         if let image = configuration.avatar.image {
             self.image = image
         } else {
             setImageFrom(initials: configuration.avatar.initials)
         }
     }
-    
+
     private func setImageFrom(initials: String) {
         image = getImageFrom(initials: initials)
     }
@@ -106,7 +103,7 @@ class AvatarView: UIImageView {
     private func getImageFrom(initials: String) -> UIImage {
         let width = frame.width
         let height = frame.height
-        if width == 0 || height == 0 {return UIImage()}
+        if width == 0 || height == 0 { return UIImage() }
         var font = configuration.finalPlaceholderFont
 
         UIGraphicsBeginImageContextWithOptions(CGSize(width: width, height: height), false, UIScreen.main.scale)
@@ -118,7 +115,7 @@ class AvatarView: UIImageView {
         let initialsText = NSAttributedString(string: initials, attributes: [.font: font])
         var text = initials
         if configuration.adjustsFontSizeToFitWidth,
-            initialsText.width(considering: textRect.height) > textRect.width {
+           initialsText.width(considering: textRect.height) > textRect.width {
             let (newFontSize, newText) = calculateFontSize(text: initials, font: font, width: textRect.width, height: textRect.height)
             font = configuration.finalPlaceholderFont.withSize(newFontSize)
             text = newText
@@ -133,7 +130,7 @@ class AvatarView: UIImageView {
         context.clip(to: textRect)
         text.draw(in: CGRect(x: textRect.minX, y: textRect.minY + (textRect.height - textTextHeight) / 2, width: textRect.width, height: textTextHeight), withAttributes: textFontAttributes)
         context.restoreGState()
-        guard let renderedImage = UIGraphicsGetImageFromCurrentImageContext() else { assertionFailure("Could not create image from context"); return UIImage()}
+        guard let renderedImage = UIGraphicsGetImageFromCurrentImageContext() else { assertionFailure("Could not create image from context"); return UIImage() }
         return renderedImage
     }
 
@@ -152,10 +149,10 @@ class AvatarView: UIImageView {
         }
         return (font.pointSize, text)
     }
-    
+
     private func calculateMaxLengthString(text: String, count: Int, font: UIFont, width: CGFloat, height: CGFloat) -> String {
         let attributedText = NSAttributedString(string: String(text.prefix(count)), attributes: [.font: font])
-        if attributedText.height(considering: width) < height {
+        if count < text.count, attributedText.height(considering: width) < height {
             return calculateMaxLengthString(text: text, count: count + 1, font: font, width: width, height: height)
         } else {
             return String(text.prefix(max(0, count - 1)))
@@ -171,16 +168,17 @@ class AvatarView: UIImageView {
             return CGRect.zero
         }
         let shortEdge = min(outerViewHeight, outerViewWidth)
-        
+
         let w = shortEdge * cos(CGFloat(30).degreesToRadians)
         let h = shortEdge * sin(CGFloat(30).degreesToRadians)
-        let startX = (outerViewWidth - w)/2
-        let startY = (outerViewHeight - h)/2
+        let startX = (outerViewWidth - w) / 2
+        let startY = (outerViewHeight - h) / 2
         // In case the font exactly fits to the region, put 2 pixel both left and right
-        return CGRect(x: startX+2, y: startY, width: w-4, height: h)
+        return CGRect(x: startX + 2, y: startY, width: w - 4, height: h)
     }
 
     // MARK: - Internal methods
+
     private func prepareView() {
         backgroundColor = .systemGray
         contentMode = .scaleAspectFill
@@ -188,48 +186,36 @@ class AvatarView: UIImageView {
         clipsToBounds = true
         layer.cornerRadius = 0
     }
-
 }
 
-fileprivate extension FloatingPoint {
+private extension FloatingPoint {
     var degreesToRadians: Self { return self * .pi / 180 }
     var radiansToDegrees: Self { return self * 180 / .pi }
 }
 
-fileprivate extension NSAttributedString {
-
+private extension NSAttributedString {
     func width(considering height: CGFloat) -> CGFloat {
-
         let size = self.size(consideringHeight: height)
         return size.width
-        
     }
-    
-    func height(considering width: CGFloat) -> CGFloat {
 
+    func height(considering width: CGFloat) -> CGFloat {
         let size = self.size(consideringWidth: width)
         return size.height
-        
     }
-    
+
     func size(consideringHeight height: CGFloat) -> CGSize {
-        
         let constraintBox = CGSize(width: .greatestFiniteMagnitude, height: height)
-        return self.size(considering: constraintBox)
-        
+        return size(considering: constraintBox)
     }
-    
+
     func size(consideringWidth width: CGFloat) -> CGSize {
-        
         let constraintBox = CGSize(width: width, height: .greatestFiniteMagnitude)
-        return self.size(considering: constraintBox)
-        
+        return size(considering: constraintBox)
     }
-    
+
     func size(considering size: CGSize) -> CGSize {
-        
-        let rect = self.boundingRect(with: size, options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
+        let rect = boundingRect(with: size, options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
         return rect.size
-        
     }
 }

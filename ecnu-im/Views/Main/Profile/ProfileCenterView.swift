@@ -20,6 +20,8 @@ struct ProfileCenterView: View {
     @State private var user: FlarumUser?
     @State private var posts: [FlarumPost] = []
     @State private var discussions: [FlarumDiscussion] = []
+    @State private var userBadges: [FlarumUserBadge] = []
+    @State private var badges: [FlarumBadge] = []
     @State private var selectedCategory = Category.reply
     @State private var userFetchTask: Task<Void, Never>?
 
@@ -43,6 +45,9 @@ struct ProfileCenterView: View {
                     guard !Task.isCancelled else { return }
                     if let user = response.data.users.first {
                         self.user = user
+                        badges = response.included.badges
+                        userBadges = response.included.userBadges
+                        FlarumBadgeStorage.shared.store(userBadges: response.included.userBadges)
                         fetchUserComment(offset: 0)
                         fetchUserDiscussion(offset: 0)
                     }
@@ -99,7 +104,17 @@ struct ProfileCenterView: View {
                                 .buttonStyle(PlainButtonStyle())
                         }
                     case .badge:
-                        Text("Not implemented :(")
+                        EmptyView()
+                        let groupedData = Dictionary(grouping: userBadges.filter { $0.relationships?.badge.relationships?.category != nil },
+                                                     by: { $0.relationships!.badge.relationships!.category })
+                        let categories = Array(groupedData.keys).sorted(by: { $0.id < $1.id })
+                        ForEach(Array(zip(categories.indices, categories)), id: \.1) { index, category in
+                            let userBadges = groupedData[category] ?? []
+                            if userBadges.count > 0 {
+                                ProfileCenterBadgeCategoryView(badgeCategory: category, userBadges: userBadges)
+                                    .buttonStyle(PlainButtonStyle())
+                            }
+                        }
                     }
                 }
                 .listStyle(.plain)
@@ -117,10 +132,42 @@ private struct ProfileCenterViewHeader: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            VStack(spacing: 4) {
-                PostAuthorAvatarView(name: user.attributes.displayName, url: user.avatarURL, size: 80)
-                Text(user.attributes.displayName)
-                    .font(.system(size: 28, weight: .medium, design: .rounded))
+            VStack(spacing: 0) {
+                HStack(spacing: 4) {
+                    HStack(spacing: 2) {
+                        Image(systemName: "message.fill")
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
+                            .foregroundColor(.blue)
+                        Text("\(user.discussionCount)")
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
+                            .foregroundColor(.primary.opacity(0.7))
+                    }
+
+                    HStack(spacing: 2) {
+                        Image(systemName: "arrowshape.turn.up.left.fill")
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
+                            .foregroundColor(.teal)
+                        Text("\(user.commentCount)")
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
+                            .foregroundColor(.primary.opacity(0.7))
+                    }
+
+                    HStack(spacing: 2) {
+                        Image(systemName: "heart.fill")
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
+                            .foregroundColor(.pink)
+                        Text("\(user.likesReceived)")
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
+                            .foregroundColor(.primary.opacity(0.7))
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .trailing)
+
+                VStack(spacing: 4) {
+                    PostAuthorAvatarView(name: user.attributes.displayName, url: user.avatarURL, size: 80)
+                    Text(user.attributes.displayName)
+                        .font(.system(size: 28, weight: .medium, design: .rounded))
+                }
             }
 
             VStack(spacing: 8) {
@@ -175,36 +222,5 @@ private struct ProfileCenterViewHeader: View {
             .pickerStyle(SegmentedPickerStyle())
         }
         .frame(maxWidth: .infinity)
-        .overlay(
-            HStack(spacing: 4) {
-                HStack(spacing: 2) {
-                    Image(systemName: "message.fill")
-                        .font(.system(size: 13, weight: .medium, design: .rounded))
-                        .foregroundColor(.blue)
-                    Text("\(user.discussionCount)")
-                        .font(.system(size: 13, weight: .medium, design: .rounded))
-                        .foregroundColor(.primary.opacity(0.7))
-                }
-
-                HStack(spacing: 2) {
-                    Image(systemName: "arrowshape.turn.up.left.fill")
-                        .font(.system(size: 13, weight: .medium, design: .rounded))
-                        .foregroundColor(.teal)
-                    Text("\(user.commentCount)")
-                        .font(.system(size: 13, weight: .medium, design: .rounded))
-                        .foregroundColor(.primary.opacity(0.7))
-                }
-
-                HStack(spacing: 2) {
-                    Image(systemName: "heart.fill")
-                        .font(.system(size: 13, weight: .medium, design: .rounded))
-                        .foregroundColor(.pink)
-                    Text("\(user.likesReceived)")
-                        .font(.system(size: 13, weight: .medium, design: .rounded))
-                        .foregroundColor(.primary.opacity(0.7))
-                }
-            },
-            alignment: .topTrailing
-        )
     }
 }

@@ -35,9 +35,7 @@ class DiscussionViewController: NoNavigationBarViewController, NoOverlayViewCont
     }
 
     private var initState: InitState
-
     private var loader: DiscussionPostsLoader
-
     private enum LoadMoreState {
         case finished
         case placeholder
@@ -50,7 +48,15 @@ class DiscussionViewController: NoNavigationBarViewController, NoOverlayViewCont
     private var numberRangeRecordMap: [Int: (Int, Int)] = [:] // offset : (minIndex, maxIndex)
     private let limit = 30
 
+    private var headerVC: DiscussionHeaderViewController!
     private var tableView: UITableView!
+    private var toolVC: UIViewController!
+    private var replyVC: UIHostingController<EnvironmentWrapperView<MiniEditor>>!
+
+    private var miniEditorViewModel: MiniEditorViewModel!
+
+    private var lastReplyViewHeight: CGFloat = 0
+    private var keyboardListener: KeyboardAppearListener!
 
     var initialPostsCount: Int {
         let commentCount = discussion.attributes?.commentCount ?? 0
@@ -89,25 +95,149 @@ class DiscussionViewController: NoNavigationBarViewController, NoOverlayViewCont
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = Asset.DynamicColors.dynamicWhite.color
         Task {
-            setTableView()
+            setViewHierarchy()
             await loadData(initState: initState)
         }
     }
 
-    private func setTableView() {
+    private func setViewHierarchy() {
+        setHeaderView()
+        setTableView()
+        setToolView()
+        setReplyView()
+        keyboardListener = KeyboardAppearListener(viewController: self, callback: { [weak self] fromOffsetHeight, toOffsetHeight, duration, curve in
+            if let self = self {
+                if duration > 0 {
+                    UIViewPropertyAnimator(duration: duration, curve: curve) {
+                        self.additionalSafeAreaInsets.bottom = toOffsetHeight - self.view.safeAreaInsets.bottom
+                        self.view.layoutIfNeeded()
+                    }
+                    .startAnimation()
+                } else {
+                    self.additionalSafeAreaInsets.bottom = toOffsetHeight - self.view.safeAreaInsets.bottom
+                    self.view.layoutIfNeeded()
+                }
+            }
+        })
+    }
+
+    private func showReplyViewCallback() {
+        print("Keyboard Callback")
+        UIView.animate(withDuration: 0.2, delay: 0) { [weak self] in
+            if let self = self {
+                self.replyVC.view.snp.remakeConstraints { make in
+                    make.leading.trailing.equalToSuperview()
+                    make.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom)
+                }
+                self.toolVC.view.isHidden = true
+                self.view.layoutIfNeeded()
+            }
+        }
+    }
+
+    private func hideReplyViewCallback() {
+        print("Keyboard Callback hide")
+        UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut) { [weak self] in
+            if let self = self {
+                self.replyVC.view.snp.remakeConstraints { make in
+                    make.leading.trailing.equalToSuperview()
+                    make.top.equalTo(self.view.snp.bottom)
+                }
+                self.toolVC.view.isHidden = false
+                self.view.layoutIfNeeded()
+                let heightOffset = self.tableView.contentInset.bottom
+                self.tableView.contentOffset.y -= heightOffset
+                self.tableView.contentInset.bottom -= 0
+            }
+        }
+    }
+
+    private func didPostCallback(post: FlarumPost) {
+        process(loadedData: [post], completionHandler: {})
+    }
+
+    private func showReplyView(post: FlarumPost?) {
+        miniEditorViewModel.show(post: post)
+    }
+
+    private func hideReplyView() {
+        miniEditorViewModel.hide()
+    }
+
+    private func addReply(post: FlarumPost?) {
+        showReplyView(post: post)
+    }
+
+    private func setReplyView() {
+        miniEditorViewModel = .init(discussion: discussion,
+                                    showCallback: { [weak self] in
+                                        self?.showReplyViewCallback()
+                                    }, hideCallback: { [weak self] in
+                                        self?.hideReplyViewCallback()
+                                    }, didPostCallback: { [weak self] post in
+                                        self?.didPostCallback(post: post)
+                                    })
+        replyVC = UIHostingController(rootView: EnvironmentWrapperView(MiniEditor(discussion: discussion, textFieldVM: miniEditorViewModel),
+                                                                       splitVC: splitViewController,
+                                                                       nvc: navigationController,
+                                                                       vc: self),
+                                      ignoreSafeArea: true)
+        replyVC.view.backgroundColor = .clear
+        addChildViewController(replyVC)
+        replyVC.view.snp.makeConstraints { make in
+            make.leading.trailing.equalToSuperview()
+            make.top.equalTo(view.snp.bottom)
+        }
+    }
+
+    private func setToolView() {
+        struct AddButton: View {
+            @State var action: () -> Void
+
+            var body: some View {
+                Button {
+                    action()
+                } label: {
+                    Image(systemName: "plus.bubble.fill")
+                        .font(.system(size: 28, weight: .regular, design: .rounded))
+                        .foregroundColor(.teal)
+                }
+                .frame(width: 60, height: 60)
+                .background(Asset.DynamicColors.dynamicWhite.swiftUIColor)
+                .clipShape(Circle())
+                .shadow(color: .primary.opacity(0.1), radius: 5, x: 0, y: 2)
+                .overlay(Circle().stroke(Color.primary.opacity(0.1)))
+            }
+        }
+        toolVC = UIHostingController(rootView: AddButton(action: { [weak self] in
+            self?.addReply(post: nil)
+        }))
+        toolVC.view.backgroundColor = .clear
+        addChildViewController(toolVC)
+        toolVC.view.snp.makeConstraints { make in
+            make.trailing.bottom.equalToSuperview().inset(24)
+        }
+    }
+
+    private func setHeaderView() {
         // UI - Header
         let headerVC = DiscussionHeaderViewController(discussion: discussion)
+        self.headerVC = headerVC
         headerVC.splitVC = splitViewController
         headerVC.nvc = navigationController
         addChildViewController(headerVC)
         headerVC.view.snp.makeConstraints { make in
             make.top.leading.trailing.equalToSuperview()
         }
+    }
 
+    private func setTableView() {
         // UI - UICollectionView
         let tableView = UITableView(frame: .zero)
         self.tableView = tableView
+        tableView.showsHorizontalScrollIndicator = false
         tableView.backgroundColor = Self.backgroundColor
         tableView.separatorInset = .zero
         tableView.allowsSelection = false
@@ -159,6 +289,8 @@ class DiscussionViewController: NoNavigationBarViewController, NoOverlayViewCont
                         tableView.reconfigureRows(at: [indexPath])
                     }
                 }
+            } replyPostAction: { [weak self] in
+                self?.addReply(post: post)
             }
             return cell
         case .deleted:
@@ -176,6 +308,10 @@ class DiscussionViewController: NoNavigationBarViewController, NoOverlayViewCont
         if initialized {
             checkAndLoadMoreData(index: indexPath.row)
         }
+    }
+
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        hideReplyView()
     }
 }
 

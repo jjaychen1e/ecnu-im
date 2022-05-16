@@ -13,6 +13,7 @@ struct FlarumNotificationAttributes: Codable {
         case postLiked
         case postMentioned(replyNumber: Int)
         case postReacted(reaction: FlarumReaction)
+        case badgeReceived
         case privateDiscussionReplied(postNumber: Int)
         case privateDiscussionCreated
     }
@@ -21,10 +22,11 @@ struct FlarumNotificationAttributes: Codable {
         case postLiked
         case postMentioned
         case postReacted
+        case badgeReceived
         case privateDiscussionReplied = "byobuPrivateDiscussionReplied"
         case privateDiscussionCreated = "byobuPrivateDiscussionCreated"
 
-        var description: String {
+        var actionDescription: String {
             switch self {
             case .postLiked:
                 return "喜欢"
@@ -32,6 +34,8 @@ struct FlarumNotificationAttributes: Codable {
                 return "回复"
             case .postReacted:
                 return "戳"
+            case .badgeReceived:
+                return ""
             case .privateDiscussionReplied:
                 return "在私密主题中回复"
             case .privateDiscussionCreated:
@@ -58,14 +62,16 @@ struct FlarumNotificationRelationships {
     enum Subject {
         case post(post: FlarumPost)
         case discussion(discussion: FlarumDiscussion)
+        case userBadge(userBadgeId: Int)
     }
 
     enum SubjectType: String, RawRepresentable {
         case post = "posts"
         case discussion = "discussions"
+        case userBadge = "userBadges"
     }
 
-    var fromUser: FlarumUser
+    var fromUser: FlarumUser?
     var subject: Subject
 }
 
@@ -94,7 +100,7 @@ class FlarumNotification {
             return post.relationships?.discussion
         case let .discussion(discussion):
             return discussion
-        case .none:
+        case .userBadge, .none:
             return nil
         }
     }
@@ -105,7 +111,7 @@ class FlarumNotification {
             return post
         case let .discussion(discussion):
             return discussion.firstPost
-        case .none:
+        case .userBadge, .none:
             return nil
         }
     }
@@ -113,7 +119,7 @@ class FlarumNotification {
     func repliedPost() async -> FlarumPost? {
         var targetPostNumber: Int?
         switch attributes.content {
-        case .postLiked, .postReacted, .privateDiscussionCreated:
+        case .postLiked, .postReacted, .privateDiscussionCreated, .badgeReceived:
             break
         case let .postMentioned(replyNumber):
             targetPostNumber = replyNumber

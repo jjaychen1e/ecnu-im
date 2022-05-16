@@ -10,6 +10,7 @@ import Foundation
 import SwiftUI
 import SwiftyJSON
 import UIColorHexSwift
+import SwiftSoup
 
 class TagViewModel {
     var id: String
@@ -21,7 +22,7 @@ class TagViewModel {
 
     init(tag: FlarumTag, child: TagViewModel? = nil) {
         self.child = child
-        
+
         id = tag.id
         name = tag.attributes.name
         var colorProp = tag.attributes.color
@@ -30,11 +31,16 @@ class TagViewModel {
             fontColor = Color(rgba: "#667A99")
         }
         backgroundColor = Color(rgba: colorProp)
-        let iconStr = tag.attributes.icon
-        if iconStr != "" {
+        iconInfo = FontAwesome.parseFromFlarum(str: tag.attributes.icon)
+    }
+}
+
+extension FontAwesome {
+    static func parseFromFlarum(str: String) -> (icon: FontAwesome, style: FontAwesomeStyle)? {
+        if str != "" {
             // e.g, "fas fa-water", "fas fa-exclamation-triangle"
             var faStyle: FontAwesomeStyle = .solid
-            let splitResult = iconStr.split(separator: " ")
+            let splitResult = str.split(separator: " ")
             if splitResult.count == 2 {
                 if splitResult.first == "fas" {
                     faStyle = .solid
@@ -51,14 +57,14 @@ class TagViewModel {
                 if let last = splitResult.last,
                    i.rawValue == last {
                     if i.isSupported(style: faStyle) {
-                        iconInfo = (i, faStyle)
+                        return (i, faStyle)
                     } else {
-                        iconInfo = (i, i.supportedStyles.first!)
+                        return (i, i.supportedStyles.first!)
                     }
-                    break
                 }
             }
         }
+        return nil
     }
 }
 
@@ -66,10 +72,4 @@ extension TagViewModel: Equatable {
     static func == (lhs: TagViewModel, rhs: TagViewModel) -> Bool {
         lhs.id == rhs.id
     }
-}
-
-class TagsViewModel: ObservableObject {
-    @Published var tags: [TagViewModel] = []
-
-    static let shared = TagsViewModel()
 }

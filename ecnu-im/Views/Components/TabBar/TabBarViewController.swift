@@ -31,11 +31,12 @@ class TabBarViewController: UIViewController {
             make.edges.equalToSuperview()
         }
 
-        let tabBarContentVC = UIHostingController(rootView: TabBarContentView(viewModel: viewModel))
+        let tabBarContentVC = UIHostingController(rootView: TabBarContentView(viewModel: viewModel), ignoreSafeArea: true, disableKeyboardNotification: true)
         tabBarContentVC.view.backgroundColor = .clear
         addChildViewController(tabBarContentVC)
         tabBarContentVC.view.snp.makeConstraints { make in
-            make.leading.top.trailing.equalToSuperview()
+            make.top.trailing.equalToSuperview()
+            make.leading.equalTo(view.safeAreaLayoutGuide.snp.leading)
             make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
         }
     }

@@ -109,7 +109,7 @@ final class PostCommentCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func configure(post: FlarumPost, viewController: UIViewController, updateLayout: (() -> Void)?) {
+    func configure(post: FlarumPost, viewController: UIViewController, updateLayout: (() -> Void)?, replyPostAction: @escaping () -> Void) {
         if post != self.post {
             self.post = post
             postContentItemsUIView?.removeFromSuperview()
@@ -131,7 +131,7 @@ final class PostCommentCell: UITableViewCell {
 
             headerViewHostingVC.rootView.update(post: post)
             headerViewHostingVC.rootView.update(vc: viewController)
-            footerViewHostingVC.rootView.update(post: post, replyAction: {})
+            footerViewHostingVC.rootView.update(post: post, replyAction: replyPostAction)
             footerViewHostingVC.rootView.update(vc: viewController)
         }
     }

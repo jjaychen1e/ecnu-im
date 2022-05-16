@@ -22,8 +22,11 @@ class HomeViewController: NoNavigationBarViewController {
             splitVC: splitViewController ?? splitVC,
             nvc: navigationController ?? nvc,
             vc: self
-        ))
+        ), disableKeyboardNotification: true)
         hostingVC = vc
-        addChildViewController(vc, addConstrains: true)
+        addChildViewController(vc, addConstrains: false)
+        vc.view.snp.makeConstraints { make in
+            make.top.leading.trailing.bottom.equalToSuperview()
+        }
     }
 }

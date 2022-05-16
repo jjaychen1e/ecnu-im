@@ -17,15 +17,12 @@ extension View {
 
 /// https://gist.github.com/b8591340/97a8fb48822ac83e9e1cbbc746b258ef
 extension UIHostingController {
-    public convenience init(rootView: Content, ignoreSafeArea: Bool) {
+    public convenience init(rootView: Content, ignoreSafeArea: Bool = false, disableKeyboardNotification: Bool = false) {
         self.init(rootView: rootView)
-
-        if ignoreSafeArea {
-            disableSafeArea()
-        }
+        disable(ignoreSafeArea: ignoreSafeArea, disableKeyboardNotification: disableKeyboardNotification)
     }
 
-    func disableSafeArea() {
+    func disable(ignoreSafeArea: Bool, disableKeyboardNotification: Bool) {
         guard let viewClass = object_getClass(view) else { return }
 
         let viewSubclassName = String(cString: class_getName(viewClass)).appending("_IgnoreSafeArea")
@@ -35,16 +32,20 @@ extension UIHostingController {
             guard let viewClassNameUtf8 = (viewSubclassName as NSString).utf8String else { return }
             guard let viewSubclass = objc_allocateClassPair(viewClass, viewClassNameUtf8, 0) else { return }
 
-            if let method = class_getInstanceMethod(UIView.self, #selector(getter: UIView.safeAreaInsets)) {
-                let safeAreaInsets: @convention(block) (AnyObject) -> UIEdgeInsets = { _ in
-                    .zero
+            if ignoreSafeArea {
+                if let method = class_getInstanceMethod(UIView.self, #selector(getter: UIView.safeAreaInsets)) {
+                    let safeAreaInsets: @convention(block) (AnyObject) -> UIEdgeInsets = { _ in
+                        .zero
+                    }
+                    class_addMethod(viewSubclass, #selector(getter: UIView.safeAreaInsets), imp_implementationWithBlock(safeAreaInsets), method_getTypeEncoding(method))
                 }
-                class_addMethod(viewSubclass, #selector(getter: UIView.safeAreaInsets), imp_implementationWithBlock(safeAreaInsets), method_getTypeEncoding(method))
             }
 
-            if let method2 = class_getInstanceMethod(viewClass, NSSelectorFromString("keyboardWillShowWithNotification:")) {
-                let keyboardWillShow: @convention(block) (AnyObject, AnyObject) -> Void = { _, _ in }
-                class_addMethod(viewSubclass, NSSelectorFromString("keyboardWillShowWithNotification:"), imp_implementationWithBlock(keyboardWillShow), method_getTypeEncoding(method2))
+            if disableKeyboardNotification {
+                if let method2 = class_getInstanceMethod(viewClass, NSSelectorFromString("keyboardWillShowWithNotification:")) {
+                    let keyboardWillShow: @convention(block) (AnyObject, AnyObject) -> Void = { _, _ in }
+                    class_addMethod(viewSubclass, NSSelectorFromString("keyboardWillShowWithNotification:"), imp_implementationWithBlock(keyboardWillShow), method_getTypeEncoding(method2))
+                }
             }
 
             objc_registerClassPair(viewSubclass)

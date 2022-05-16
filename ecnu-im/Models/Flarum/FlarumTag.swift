@@ -38,36 +38,3 @@ class FlarumTag: Codable {
     var attributes: FlarumTagAttributes
     var relationships: FlarumTagRelationships?
 }
-
-extension FlarumTag {
-    static let UserDefaultsKeyAllTags = "AllTags"
-
-    static func initTagInfo(viewModel: TagsViewModel) {
-        Task {
-            let tags = await fetchTagsInfo()
-            let tagsViewModel: [TagViewModel] = tags.map { tag in
-                TagViewModel(tag: tag)
-            }
-            DispatchQueue.main.async {
-                viewModel.tags = tagsViewModel
-            }
-            UserDefaults.standard.setEncodable(tags, forKey: FlarumTag.UserDefaultsKeyAllTags)
-        }
-
-        if let allTags = UserDefaults.standard.object(forKey: FlarumTag.UserDefaultsKeyAllTags, type: [FlarumTag].self) {
-            let tagsViewModel: [TagViewModel] = allTags.map { tag in
-                TagViewModel(tag: tag)
-            }
-            DispatchQueue.main.async {
-                viewModel.tags = tagsViewModel
-            }
-        }
-    }
-
-    private static func fetchTagsInfo() async -> [FlarumTag] {
-        if let response = try? await flarumProvider.request(.allTags).flarumResponse() {
-            return response.data.tags
-        }
-        return []
-    }
-}

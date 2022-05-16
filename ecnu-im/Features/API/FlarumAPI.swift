@@ -58,6 +58,8 @@ enum Flarum {
     case notification(offset: Int, limit: Int)
     case lastSeenUsers(limit: Int)
     case user(id: Int)
+    case allBadgeCategories
+    case allBadges
 }
 
 extension Flarum: TargetType {
@@ -101,6 +103,10 @@ extension Flarum: TargetType {
             return "api/users"
         case let .user(id):
             return "api/users/\(id)"
+        case .allBadgeCategories:
+            return "api/badge_categories"
+        case .allBadges:
+            return "api/badges"
         }
     }
 
@@ -139,6 +145,10 @@ extension Flarum: TargetType {
         case .lastSeenUsers:
             return .get
         case .user:
+            return .get
+        case .allBadgeCategories:
+            return .get
+        case .allBadges:
             return .get
         }
     }
@@ -249,6 +259,10 @@ extension Flarum: TargetType {
                 "page[limit]": limit,
             ], encoding: URLEncoding.default)
         case .user:
+            return .requestPlain
+        case .allBadgeCategories:
+            return .requestPlain
+        case .allBadges:
             return .requestPlain
         }
     }

@@ -74,15 +74,9 @@ class MainSplitViewController: UIViewController {
 
 extension MainSplitViewController {
     func initializeApp() {
-        fetchTags()
         Task {
             await AppGlobalState.shared.tryToLoginWithStoredAccount()
-        }
-    }
-
-    private func fetchTags() {
-        Task {
-            FlarumTag.initTagInfo(viewModel: TagsViewModel.shared)
+            FlarumBadge.initBadgeInfo()
         }
     }
 }
