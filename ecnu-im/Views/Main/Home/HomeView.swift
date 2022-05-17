@@ -37,12 +37,16 @@ private class HomeViewViewModel: ObservableObject {
     @Published var hideNotification = false
 
     func reset() {
-        lastSeenUsers = []
-        stickyDiscussions = []
-        newestDiscussions = []
-        unreadNotifications = nil
-        latestNotificationExcerpt = nil
-        hideNotification = false
+        DispatchQueue.main.async { [weak self] in
+            if let self = self {
+                self.lastSeenUsers = []
+                self.stickyDiscussions = []
+                self.newestDiscussions = []
+                self.unreadNotifications = nil
+                self.latestNotificationExcerpt = nil
+                self.hideNotification = false
+            }
+        }
     }
 }
 
@@ -99,12 +103,23 @@ struct HomeView: View {
         }
 
         for discussion in discussions {
-            if let id = Int(discussion.id),
-               let response = try? await flarumProvider.request(.posts(discussionID: id, offset: 0, limit: 15)).flarumResponse() {
+            Task {
                 if let correspondingDiscussionViewModel = (viewModel.newestDiscussions + viewModel.stickyDiscussions).first(where: { $0.discussion.id == discussion.id }) {
-                    let users = response.data.posts.compactMap { $0.author }
-                    withAnimation {
-                        correspondingDiscussionViewModel.relatedUsers = Array(users.unique { $0.id }.prefix(5))
+                    if let users = DiscussionUserStorage.shared.discussionUsers(for: discussion.id),
+                       users.count >= 5 || users.count == discussion.attributes?.participantCount {
+                        withAnimation {
+                            correspondingDiscussionViewModel.relatedUsers = Array(users)
+                        }
+                    } else {
+                        if let id = Int(discussion.id),
+                           let response = try? await flarumProvider.request(.posts(discussionID: id, offset: 0, limit: 15)).flarumResponse() {
+                            let users = response.data.posts.compactMap { $0.author }
+                            let filteredUsers = Array(users.unique { $0.id }.prefix(5))
+                            DiscussionUserStorage.shared.store(discussionUsers: filteredUsers, id: discussion.id)
+                            withAnimation {
+                                correspondingDiscussionViewModel.relatedUsers = filteredUsers
+                            }
+                        }
                     }
                 }
             }

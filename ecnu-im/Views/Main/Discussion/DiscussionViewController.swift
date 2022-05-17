@@ -276,7 +276,8 @@ class DiscussionViewController: NoNavigationBarViewController, NoOverlayViewCont
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let post = posts[indexPath.row]
+        let postIndex = indexPath.row
+        let post = posts[postIndex]
         switch post {
         case let .comment(post):
             let cell = tableView.dequeueReusableCell(withIdentifier: PostCommentCell.identifier, for: indexPath) as! PostCommentCell
@@ -288,6 +289,41 @@ class DiscussionViewController: NoNavigationBarViewController, NoOverlayViewCont
                 }
             } replyPostAction: { [weak self] in
                 self?.addReply(post: post)
+            } hidePostAction: { [weak self] isHidden in
+                if let self = self {
+                    if let id = Int(post.id) {
+                        Task {
+                            if let response = try? await flarumProvider.request(.hidePost(id: id, isHidden: isHidden)).flarumResponse() {
+                                if let _ = response.data.posts.first {
+                                    tableView.performBatchUpdates {
+                                        tableView.reloadRows(at: [IndexPath(row: postIndex, section: 0)], with: .none)
+                                        if case let .comment(post) = self.posts[postIndex] {
+                                            post.attributes?.isHidden = isHidden
+                                            self.posts[postIndex] = .comment(post)
+                                        } else {
+                                            fatalErrorDebug()
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } deletePostAction: { [weak self] in
+                if let self = self {
+                    if let id = Int(post.id) {
+                        Task {
+                            if let response = try? await flarumProvider.request(.deletePost(id: id)) {
+                                if response.statusCode == 204 {
+                                    tableView.performBatchUpdates {
+                                        tableView.reloadRows(at: [IndexPath(row: postIndex, section: 0)], with: .none)
+                                        self.posts[postIndex] = .deleted(postIndex)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
             return cell
         case .deleted:
@@ -361,7 +397,7 @@ extension DiscussionViewController {
                     if offset < self.posts.count {
                         self.tableView.scrollToRow(at: IndexPath(row: offset, section: 0), at: .top, animated: false)
                     } else {
-                        fatalErrorDebug( "Scroll target out of index!!")
+                        fatalErrorDebug("Scroll target out of index!!")
                     }
                 }
             })
@@ -374,7 +410,7 @@ extension DiscussionViewController {
                             if let number1 = comment1.attributes?.number, let number2 = comment2.attributes?.number {
                                 return abs(nearNumber - number1) < abs(nearNumber - number2)
                             }
-                            fatalErrorDebug( "number is nil...")
+                            fatalErrorDebug("number is nil...")
                             return false
                         } else if case .comment = p1 {
                             return true
@@ -388,7 +424,7 @@ extension DiscussionViewController {
                             self.tableView.scrollToRow(at: IndexPath(row: index, section: 0), at: .top, animated: false)
                         }
                     } else {
-                        fatalErrorDebug( "Can not find nearNumber's row!!")
+                        fatalErrorDebug("Can not find nearNumber's row!!")
                     }
                 }
             })
@@ -407,7 +443,7 @@ extension DiscussionViewController {
         if loadedResult.count > 0 {
             process(nearNumber: nearNumber, loadedData: loadedResult, completionHandler: completionHandler)
         } else {
-            fatalErrorDebug( "First init return empty data!")
+            fatalErrorDebug("First init return empty data!")
         }
     }
 
@@ -500,7 +536,7 @@ extension DiscussionViewController {
                             }
                             posts[actualIndex] = convertFlarumPostToPost(flarumPost: post, index: actualIndex)
                         } else {
-                            fatalErrorDebug( "Out of index!!")
+                            fatalErrorDebug("Out of index!!")
                         }
                     }
                 }

@@ -48,8 +48,11 @@ private struct PostCommentCellFooterViewWrapper: View {
         environmentView
     }
 
-    func update(post: FlarumPost, replyAction: @escaping () -> Void) {
-        view.update(post: post, replyAction: replyAction)
+    func update(post: FlarumPost,
+                replyAction: @escaping () -> Void,
+                hidePostAction: @escaping (Bool) -> Void,
+                deletePostAction: @escaping () -> Void) {
+        view.update(post: post, replyAction: replyAction, hidePostAction: hidePostAction, deletePostAction: deletePostAction)
     }
 
     func update(vc: UIViewController?) {
@@ -93,7 +96,7 @@ final class PostCommentCell: UITableViewCell {
         footerViewHostingVC = UIHostingController(
             rootView:
             PostCommentCellFooterViewWrapper(
-                PostCommentCellFooterView(post: .init(id: ""), replyAction: {}),
+                PostCommentCellFooterView(post: .init(id: ""), replyAction: {}, hidePostAction: { _ in }, deletePostAction: {}),
                 splitVC: nil,
                 nvc: nil,
                 vc: nil
@@ -109,7 +112,12 @@ final class PostCommentCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func configure(post: FlarumPost, viewController: UIViewController, updateLayout: (() -> Void)?, replyPostAction: @escaping () -> Void) {
+    func configure(post: FlarumPost,
+                   viewController: UIViewController,
+                   updateLayout: (() -> Void)?,
+                   replyPostAction: @escaping () -> Void,
+                   hidePostAction: @escaping (Bool) -> Void,
+                   deletePostAction: @escaping () -> Void) {
         if post != self.post {
             self.post = post
             postContentItemsUIView?.removeFromSuperview()
@@ -131,8 +139,14 @@ final class PostCommentCell: UITableViewCell {
 
             headerViewHostingVC.rootView.update(post: post)
             headerViewHostingVC.rootView.update(vc: viewController)
-            footerViewHostingVC.rootView.update(post: post, replyAction: replyPostAction)
+            footerViewHostingVC.rootView.update(post: post, replyAction: replyPostAction, hidePostAction: hidePostAction, deletePostAction: deletePostAction)
             footerViewHostingVC.rootView.update(vc: viewController)
+
+            if post.attributes?.isHidden == true {
+                contentView.alpha = 0.3
+            } else {
+                contentView.alpha = 1.0
+            }
         }
     }
 

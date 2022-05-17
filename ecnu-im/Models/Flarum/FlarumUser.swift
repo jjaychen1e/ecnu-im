@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-struct FlarumUserAttributes: Decodable {
+struct FlarumUserAttributes: Codable {
     var username: String
     var displayName: String
     var avatarUrl: String?
@@ -41,7 +41,7 @@ struct FlarumUserAttributes: Decodable {
     }
 }
 
-class FlarumUser {
+final class FlarumUser {
     init(id: String, attributes: FlarumUserAttributes) {
         self.id = id
         self.attributes = attributes
@@ -49,6 +49,10 @@ class FlarumUser {
 
     var id: String
     var attributes: FlarumUserAttributes
+}
+
+extension FlarumUser: Codable {
+    
 }
 
 extension FlarumUser {

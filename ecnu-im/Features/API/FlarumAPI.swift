@@ -47,7 +47,8 @@ enum Flarum {
                         pageItemLimit: Int = 20)
     case discussionByUserAccount(includes: Set<DiscussionIncludeOption> = DiscussionIncludeOption.profileDiscussionIncludeOptionSet,
                                  account: String, offset: Int, limit: Int, sort: DiscussionSortOption = .newest)
-    case hidePost(id: Int, hidden: Bool)
+    case hidePost(id: Int, isHidden: Bool)
+    case deletePost(id: Int)
     case posts(discussionID: Int, offset: Int, limit: Int)
     case postsNearNumber(discussionID: Int, nearNumber: Int, limit: Int)
     case postsById(id: Int)
@@ -83,6 +84,8 @@ extension Flarum: TargetType {
         case .discussionByUserAccount:
             return "/api/discussions"
         case let .hidePost(id, _):
+            return "/api/posts/\(id)"
+        case let .deletePost(id):
             return "/api/posts/\(id)"
         case .posts:
             return "/api/posts"
@@ -128,7 +131,9 @@ extension Flarum: TargetType {
         case .discussionByUserAccount:
             return .get
         case .hidePost:
-            return .post
+            return .patch
+        case .deletePost:
+            return .delete
         case .posts:
             return .get
         case .postsNearNumber:
@@ -189,16 +194,18 @@ extension Flarum: TargetType {
                 "page[limit]": limit,
                 "sort": sort.rawValue,
             ], encoding: URLEncoding.default)
-        case let .hidePost(id, hidden):
+        case let .hidePost(id, isHidden):
             return .requestParameters(parameters: [
                 "data": [
                     "type": "posts",
                     "attributes": [
-                        "isHidden": hidden,
+                        "isHidden": isHidden,
                     ],
                     "id": id,
                 ],
             ], encoding: JSONEncoding.default)
+        case .deletePost:
+            return .requestPlain
         case let .posts(discussionID, offset, limit):
             return .requestParameters(parameters: [
                 "filter[discussion]": discussionID,
@@ -288,7 +295,7 @@ extension Flarum: TargetType {
                 "Accept-Language": "zh-CN,zh;",
             ]
             switch self {
-            case .register, .newPost, .postLikeAction:
+            case .register, .newPost, .postLikeAction, .hidePost, .deletePost:
                 let regex = Regex("\"csrfToken\":\"(.*?)\"")
                 if let homeResult = try? await flarumProvider.request(.home),
                    let homeContentStr = try? homeResult.mapString(),

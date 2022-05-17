@@ -126,6 +126,10 @@
 		6379A2B12820201200B31330 /* ContentItemParagraphNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6379A2B02820201200B31330 /* ContentItemParagraphNode.swift */; };
 		6379A2B5282020D300B31330 /* ContentItemBlockquoteNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6379A2B4282020D300B31330 /* ContentItemBlockquoteNode.swift */; };
 		6380BBFC2833858B00050AFA /* Debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6380BBFB2833858B00050AFA /* Debug.swift */; };
+		6380BC07283399B600050AFA /* ContentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6380BC01283399B600050AFA /* ContentViewController.swift */; };
+		6380BC09283399B600050AFA /* AlwaysPopoverModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6380BC03283399B600050AFA /* AlwaysPopoverModifier.swift */; };
+		6380BC0F2833ADCF00050AFA /* PopoverMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6380BC0E2833ADCF00050AFA /* PopoverMenu.swift */; };
+		6380BC112833D9EA00050AFA /* PostUserStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6380BC102833D9EA00050AFA /* PostUserStorage.swift */; };
 		638F90912802B4BB002308E0 /* AllDiscussionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 638F90902802B4BB002308E0 /* AllDiscussionsView.swift */; };
 		6391FCD02811B2C8006E086D /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6391FCCF2811B2C8006E086D /* HomeView.swift */; };
 		6391FCD32811BAD3006E086D /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6391FCD22811BAD3006E086D /* HomeViewController.swift */; };
@@ -300,6 +304,10 @@
 		6379A2B02820201200B31330 /* ContentItemParagraphNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentItemParagraphNode.swift; sourceTree = "<group>"; };
 		6379A2B4282020D300B31330 /* ContentItemBlockquoteNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentItemBlockquoteNode.swift; sourceTree = "<group>"; };
 		6380BBFB2833858B00050AFA /* Debug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Debug.swift; sourceTree = "<group>"; };
+		6380BC01283399B600050AFA /* ContentViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentViewController.swift; sourceTree = "<group>"; };
+		6380BC03283399B600050AFA /* AlwaysPopoverModifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlwaysPopoverModifier.swift; sourceTree = "<group>"; };
+		6380BC0E2833ADCF00050AFA /* PopoverMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverMenu.swift; sourceTree = "<group>"; };
+		6380BC102833D9EA00050AFA /* PostUserStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostUserStorage.swift; sourceTree = "<group>"; };
 		638F90902802B4BB002308E0 /* AllDiscussionsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AllDiscussionsView.swift; sourceTree = "<group>"; };
 		6391FCCF2811B2C8006E086D /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		6391FCD22811BAD3006E086D /* HomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewController.swift; sourceTree = "<group>"; };
@@ -717,6 +725,7 @@
 		635FF09327F0929C00A0D239 /* SwiftUI */ = {
 			isa = PBXGroup;
 			children = (
+				6380BC00283399B600050AFA /* Popovers */,
 				635FF09427F092A100A0D239 /* Extensions */,
 			);
 			path = SwiftUI;
@@ -930,11 +939,30 @@
 			path = Debug;
 			sourceTree = "<group>";
 		};
+		6380BC00283399B600050AFA /* Popovers */ = {
+			isa = PBXGroup;
+			children = (
+				6380BC0D2833AD8B00050AFA /* Menu */,
+				6380BC01283399B600050AFA /* ContentViewController.swift */,
+				6380BC03283399B600050AFA /* AlwaysPopoverModifier.swift */,
+			);
+			path = Popovers;
+			sourceTree = "<group>";
+		};
+		6380BC0D2833AD8B00050AFA /* Menu */ = {
+			isa = PBXGroup;
+			children = (
+				6380BC0E2833ADCF00050AFA /* PopoverMenu.swift */,
+			);
+			path = Menu;
+			sourceTree = "<group>";
+		};
 		6391FCD12811BAC2006E086D /* Home */ = {
 			isa = PBXGroup;
 			children = (
 				6391FCCF2811B2C8006E086D /* HomeView.swift */,
 				6391FCD22811BAD3006E086D /* HomeViewController.swift */,
+				6380BC102833D9EA00050AFA /* PostUserStorage.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
@@ -1359,6 +1387,7 @@
 				631BB0352805E4FD007D4138 /* UniversalTypes.swift in Sources */,
 				6365778627F1D897008AD10E /* UserDefaluts+JSON+Extension.swift in Sources */,
 				634A575D2816F0090022B27E /* ContentBlock.swift in Sources */,
+				6380BC0F2833ADCF00050AFA /* PopoverMenu.swift in Sources */,
 				637751CB281D683D00A13241 /* PostDeletedCell.swift in Sources */,
 				6357EB9A282C076B005C0D49 /* Sequence+Functional.swift in Sources */,
 				6329EE70281AAEFC001BE8DD /* ContentItemSingleImage.swift in Sources */,
@@ -1449,6 +1478,7 @@
 				6316117A27EF480F002CD6C4 /* Tag.swift in Sources */,
 				631BB03D2805E4FD007D4138 /* SwiftDown.swift in Sources */,
 				63CBCB20282AB54B0083018D /* PostCommentCellFooterView.swift in Sources */,
+				6380BC07283399B600050AFA /* ContentViewController.swift in Sources */,
 				6310E181282D5B3600E72F0D /* DiscussionEmptyViewController.swift in Sources */,
 				634C470327F9C18E00FC591D /* AllDiscussionsViewController.swift in Sources */,
 				63B740A52802794800376B94 /* OutlineOverlay.swift in Sources */,
@@ -1458,6 +1488,7 @@
 				638F90912802B4BB002308E0 /* AllDiscussionsView.swift in Sources */,
 				631BB0382805E4FD007D4138 /* Extensions.swift in Sources */,
 				63B74093280277A900376B94 /* SignUpView.swift in Sources */,
+				6380BC112833D9EA00050AFA /* PostUserStorage.swift in Sources */,
 				6318B66627EF707400108D49 /* String+Excerpt+Extension.swift in Sources */,
 				63A6CCCF28156A51000075F7 /* DiscussionTagsView.swift in Sources */,
 				6379A2B5282020D300B31330 /* ContentItemBlockquoteNode.swift in Sources */,
@@ -1490,6 +1521,7 @@
 				63C607D7281E4FBB0008E2F3 /* SelfSizingTextView.swift in Sources */,
 				634A57572816EB6E0022B27E /* ContentTextStyleStack.swift in Sources */,
 				636C450D28276F4200EDE6F5 /* ECNUTextView.swift in Sources */,
+				6380BC09283399B600050AFA /* AlwaysPopoverModifier.swift in Sources */,
 				6377517D282289A600BE52D5 /* Pool.swift in Sources */,
 				636BE17527F7FE0C00283943 /* ThemeManager.swift in Sources */,
 			);

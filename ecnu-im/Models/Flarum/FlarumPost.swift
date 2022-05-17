@@ -34,6 +34,7 @@ struct FlarumPostAttributes: Decodable {
         case canEdit
         case canDelete
         case canHide
+        case isHidden
         case canFlag
         case isApproved
         case canLike
@@ -49,6 +50,7 @@ struct FlarumPostAttributes: Decodable {
     var canEdit: Bool?
     var canDelete: Bool?
     var canHide: Bool?
+    var isHidden: Bool?
     var canFlag: Bool?
     var isApproved: Bool?
     var canLike: Bool?

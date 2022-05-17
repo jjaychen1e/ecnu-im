@@ -70,7 +70,9 @@ struct TabBarContentView: View {
                 viewModel.tabBarItems.first { item in
                     item.name == "通知"
                 }?.badgeCount = change
-                viewModel.objectWillChange.send()
+                DispatchQueue.main.async {
+                    viewModel.objectWillChange.send()
+                }
             }.store(in: &subscriptions)
         }
     }

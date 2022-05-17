@@ -21,7 +21,7 @@ final class PostDeletedCell: UITableViewCell {
         let label = UILabel()
         self.label = label
         label.text = "该楼层已被删除"
-        label.textColor = Asset.DynamicColors.dynamicBlack.color.withAlphaComponent(0.5)
+        label.textColor = Asset.DynamicColors.dynamicBlack.color.withAlphaComponent(0.3)
         label.textAlignment = .center
         contentView.addSubview(label)
         label.snp.makeConstraints { make in
