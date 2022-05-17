@@ -98,9 +98,7 @@ private struct NotificationView: View {
                             }
                         }
                     } else {
-                        #if DEBUG
-                            fatalError()
-                        #endif
+                        fatalErrorDebug()
                     }
                 }
             }

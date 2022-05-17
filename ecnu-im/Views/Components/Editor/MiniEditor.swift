@@ -80,6 +80,7 @@ struct MiniEditor: View {
     @ObservedObject private var contentViewModel = EditorContentModel()
     @ObservedObject var viewModel: MiniEditorViewModel
 
+    @State private var sending = false
     @FocusState private var focus: Bool
     @State private var subscriptions: Set<AnyCancellable> = []
 
@@ -268,6 +269,7 @@ struct MiniEditor: View {
                         content = "@\"\(post.authorName)\"#p\(post.id) " + content
                     }
 
+                    sending = true
                     if let response = try? await flarumProvider.request(.newPost(discussionID: discussion.id, content: contentViewModel.text)).flarumResponse() {
                         if let post = response.data.posts.first {
                             self.viewModel.didPostCallback(post)
@@ -276,12 +278,28 @@ struct MiniEditor: View {
                                 title: "发表成功"
                             )
                             toast.show()
+                            contentViewModel.text = ""
+                            viewModel.hide()
+                        } else {
+                            let toast = Toast.default(
+                                icon: .emoji("🤨"),
+                                title: "发表失败，请再试一次"
+                            )
+                            toast.show()
                         }
-                        contentViewModel.text = ""
-                        viewModel.hide()
+                        sending = false
                     }
                 }
             }
+            .disabled(sending)
+            .overlay(
+                Group {
+                    if sending {
+                        ProgressView()
+                    }
+                },
+                alignment: .center
+            )
         }
     }
 }

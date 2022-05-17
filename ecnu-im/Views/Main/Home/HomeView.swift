@@ -165,11 +165,8 @@ struct HomeView: View {
                                     if let id1 = Int(n1.id), let id2 = Int(n2.id) {
                                         return id1 > id2
                                     } else {
-                                        #if DEBUG
-                                            fatalError()
-                                        #else
-                                            return false
-                                        #endif
+                                        fatalErrorDebug()
+                                        return false
                                     }
                                 }
                             if count > 0, notifications.count > 0 {
@@ -222,14 +219,10 @@ struct HomeView: View {
                                                     }
                                                 }
                                             } else {
-                                                #if DEBUG
-                                                    fatalError()
-                                                #endif
+                                                fatalErrorDebug()
                                             }
                                         } else {
-                                            #if DEBUG
-                                                fatalError()
-                                            #endif
+                                            fatalErrorDebug()
                                         }
                                     }
                                 }
@@ -241,9 +234,7 @@ struct HomeView: View {
                                             viewModel.latestNotificationExcerpt = excerpt
                                         }
                                     } else {
-                                        #if DEBUG
-                                            fatalError()
-                                        #endif
+                                        fatalErrorDebug()
                                     }
                                 case .postMentioned, .privateDiscussionReplied:
                                     if let repliedPost = await notifications[0].repliedPost() {
@@ -253,17 +244,13 @@ struct HomeView: View {
                                             }
                                         }
                                     } else {
-                                        #if DEBUG
-                                            fatalError()
-                                        #endif
+                                        fatalErrorDebug()
                                     }
                                 case .badgeReceived:
                                     break
                                 }
                             }
-                            #if DEBUG
-//                            assert(count == notifications.count)
-                            #endif
+//                            assertDebug(count == notifications.count)
                         }
                     }
                 }

@@ -108,15 +108,16 @@ class DiscussionViewController: NoNavigationBarViewController, NoOverlayViewCont
         setToolView()
         setReplyView()
         keyboardListener = KeyboardAppearListener(viewController: self, callback: { [weak self] fromOffsetHeight, toOffsetHeight, duration, curve in
+            print("Animation - Keyboard changed")
             if let self = self {
                 if duration > 0 {
                     UIViewPropertyAnimator(duration: duration, curve: curve) {
-                        self.additionalSafeAreaInsets.bottom = toOffsetHeight - self.view.safeAreaInsets.bottom
+                        self.additionalSafeAreaInsets.bottom = max(0, toOffsetHeight - self.view.safeAreaInsets.bottom)
                         self.view.layoutIfNeeded()
                     }
                     .startAnimation()
                 } else {
-                    self.additionalSafeAreaInsets.bottom = toOffsetHeight - self.view.safeAreaInsets.bottom
+                    self.additionalSafeAreaInsets.bottom = max(0, toOffsetHeight - self.view.safeAreaInsets.bottom)
                     self.view.layoutIfNeeded()
                 }
             }
@@ -124,7 +125,6 @@ class DiscussionViewController: NoNavigationBarViewController, NoOverlayViewCont
     }
 
     private func showReplyViewCallback() {
-        print("Keyboard Callback")
         UIView.animate(withDuration: 0.2, delay: 0) { [weak self] in
             if let self = self {
                 self.replyVC.view.snp.remakeConstraints { make in
@@ -138,7 +138,6 @@ class DiscussionViewController: NoNavigationBarViewController, NoOverlayViewCont
     }
 
     private func hideReplyViewCallback() {
-        print("Keyboard Callback hide")
         UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut) { [weak self] in
             if let self = self {
                 self.replyVC.view.snp.remakeConstraints { make in
@@ -147,9 +146,6 @@ class DiscussionViewController: NoNavigationBarViewController, NoOverlayViewCont
                 }
                 self.toolVC.view.isHidden = false
                 self.view.layoutIfNeeded()
-                let heightOffset = self.tableView.contentInset.bottom
-                self.tableView.contentOffset.y -= heightOffset
-                self.tableView.contentInset.bottom -= 0
             }
         }
     }
@@ -237,6 +233,7 @@ class DiscussionViewController: NoNavigationBarViewController, NoOverlayViewCont
         // UI - UICollectionView
         let tableView = UITableView(frame: .zero)
         self.tableView = tableView
+        tableView.contentInset.bottom = 100
         tableView.showsHorizontalScrollIndicator = false
         tableView.backgroundColor = Self.backgroundColor
         tableView.separatorInset = .zero
@@ -364,9 +361,7 @@ extension DiscussionViewController {
                     if offset < self.posts.count {
                         self.tableView.scrollToRow(at: IndexPath(row: offset, section: 0), at: .top, animated: false)
                     } else {
-                        #if DEBUG
-                            fatalError("Scroll target out of index!!")
-                        #endif
+                        fatalErrorDebug( "Scroll target out of index!!")
                     }
                 }
             })
@@ -379,11 +374,8 @@ extension DiscussionViewController {
                             if let number1 = comment1.attributes?.number, let number2 = comment2.attributes?.number {
                                 return abs(nearNumber - number1) < abs(nearNumber - number2)
                             }
-                            #if DEBUG
-                                fatalError("number is nil...")
-                            #else
-                                return false
-                            #endif
+                            fatalErrorDebug( "number is nil...")
+                            return false
                         } else if case .comment = p1 {
                             return true
                         } else if case .comment = p2 {
@@ -396,9 +388,7 @@ extension DiscussionViewController {
                             self.tableView.scrollToRow(at: IndexPath(row: index, section: 0), at: .top, animated: false)
                         }
                     } else {
-                        #if DEBUG
-                            fatalError("Can not find nearNumber's row!!")
-                        #endif
+                        fatalErrorDebug( "Can not find nearNumber's row!!")
                     }
                 }
             })
@@ -417,9 +407,7 @@ extension DiscussionViewController {
         if loadedResult.count > 0 {
             process(nearNumber: nearNumber, loadedData: loadedResult, completionHandler: completionHandler)
         } else {
-            #if DEBUG
-                fatalError("First init return empty data!")
-            #endif
+            fatalErrorDebug( "First init return empty data!")
         }
     }
 
@@ -437,10 +425,8 @@ extension DiscussionViewController {
 
         if let maxPostNumber = loadedData.max(by: comparator)?.attributes?.number,
            let minPostNumber = loadedData.min(by: comparator)?.attributes?.number {
-            #if DEBUG
-                assert(minPostNumber - 1 >= 0)
-                assert(maxPostNumber - 1 >= 0)
-            #endif
+            assertDebug(minPostNumber - 1 >= 0)
+            assertDebug(maxPostNumber - 1 >= 0)
 
             let minIndex = max(0, minPostNumber - 1)
             let maxIndex = max(0, maxPostNumber - 1)
@@ -497,10 +483,9 @@ extension DiscussionViewController {
                     } else {
                         loadMoreStates[i] = .normal(prev: nil, next: nearNumber + limit)
                     }
+                } else if offset == nil, nearNumber == nil, loadedData.count == 1 {
                 } else {
-                    #if DEBUG
-                        fatalError("This should never happen.")
-                    #endif
+                    fatalErrorDebug()
                 }
             }
 
@@ -515,9 +500,7 @@ extension DiscussionViewController {
                             }
                             posts[actualIndex] = convertFlarumPostToPost(flarumPost: post, index: actualIndex)
                         } else {
-                            #if DEBUG
-                                fatalError("Out of index!!")
-                            #endif
+                            fatalErrorDebug( "Out of index!!")
                         }
                     }
                 }

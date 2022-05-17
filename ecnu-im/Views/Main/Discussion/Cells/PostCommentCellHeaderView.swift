@@ -44,9 +44,7 @@ struct PostCommentCellHeaderView: View {
                                 UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: id), animated: true)
                             }
                         } else {
-                            #if DEBUG
-                                fatalError()
-                            #endif
+                            fatalErrorDebug()
                         }
                     }
                 }

@@ -134,13 +134,13 @@ struct FlarumResponse {
                                         attributes["content"] = JSON(dictionaryLiteral: ("discussionLocked", json))
                                     }
                                 } else {
-                                    #if DEBUG
+                                    debugExecution {
                                         let whitelist = ["discussionSuperStickied", "discussionMerged", "recipientsModified"]
                                         if let contentType = attributes["contentType"].string,
                                            !whitelist.contains(contentType) {
-                                            fatalError("\(contentType) is not in the whitelist.")
+                                            fatalErrorDebug("\(contentType) is not in the whitelist.")
                                         }
-                                    #endif
+                                    }
                                     attributes = attributes.removing(key: "content")
                                     attributes = attributes.removing(key: "contentType")
                                 }
@@ -280,13 +280,13 @@ struct FlarumResponse {
                                         ])
                                     }
                                 } else {
-                                    #if DEBUG
+                                    debugExecution {
                                         let whitelist = [""]
                                         if let contentType = attributes["contentType"].string,
                                            !whitelist.contains(contentType) {
-                                            fatalError("\(contentType) is not in the whitelist.")
+                                            fatalErrorDebug("\(contentType) is not in the whitelist.")
                                         }
-                                    #endif
+                                    }
                                     attributes = attributes.removing(key: "content")
                                     attributes = attributes.removing(key: "contentType")
                                 }
@@ -329,13 +329,13 @@ struct FlarumResponse {
                                         }
                                     }
                                 } else {
-                                    #if DEBUG
+                                    debugExecution {
                                         let whitelist: [String] = []
                                         if let subjectType = dataJSON["relationships"]["subject"]["data"]["type"].string,
                                            !whitelist.contains(subjectType) {
-                                            fatalError("\(subjectType) is not in the whitelist.")
+                                            fatalErrorDebug("\(subjectType) is not in the whitelist.")
                                         }
-                                    #endif
+                                    }
                                 }
                             }
                             responseData.allData.append(.notification(notification))

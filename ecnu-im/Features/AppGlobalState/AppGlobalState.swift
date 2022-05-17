@@ -16,7 +16,7 @@ class AppGlobalState: ObservableObject {
     @Published var unreadNotificationCount = 0
     @Published var tokenPrepared = false
     private var flarumTokenCookie: HTTPCookie?
-    
+
     var userIdInt: Int? {
         if let userIdInt = Int(userId) {
             return userIdInt
@@ -62,9 +62,10 @@ class AppGlobalState: ObservableObject {
                 }
                 return true
             } else {
-                #if DEBUG
+                debugExecution {
                     print(String(data: result.data, encoding: .utf8) ?? "failed")
-                #endif
+                    fatalErrorDebug()
+                }
             }
         }
         return false

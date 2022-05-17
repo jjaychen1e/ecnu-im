@@ -35,9 +35,7 @@ struct ProfileCenterDiscussionView: View {
                                         UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: lastPostUser.id), animated: true)
                                     }
                                 } else {
-                                    #if DEBUG
-                                        fatalError()
-                                    #endif
+                                    fatalErrorDebug()
                                 }
                             }
                         }
@@ -105,14 +103,10 @@ struct ProfileCenterDiscussionView: View {
                                          column: .secondary,
                                          toRoot: true)
                         } else {
-                            #if DEBUG
-                                fatalError()
-                            #endif
+                            fatalErrorDebug()
                         }
                     } else {
-                        #if DEBUG
-                            fatalError()
-                        #endif
+                        fatalErrorDebug()
                     }
                 }
             } else {

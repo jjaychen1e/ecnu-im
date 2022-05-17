@@ -86,14 +86,10 @@ struct ProfileCenterPostView: View {
                                          column: .secondary,
                                          toRoot: true)
                         } else {
-                            #if DEBUG
-                                fatalError()
-                            #endif
+                            fatalErrorDebug()
                         }
                     } else {
-                        #if DEBUG
-                            fatalError()
-                        #endif
+                        fatalErrorDebug()
                     }
                 }
             } else {

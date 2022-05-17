@@ -47,6 +47,7 @@ enum Flarum {
                         pageItemLimit: Int = 20)
     case discussionByUserAccount(includes: Set<DiscussionIncludeOption> = DiscussionIncludeOption.profileDiscussionIncludeOptionSet,
                                  account: String, offset: Int, limit: Int, sort: DiscussionSortOption = .newest)
+    case hidePost(id: Int, hidden: Bool)
     case posts(discussionID: Int, offset: Int, limit: Int)
     case postsNearNumber(discussionID: Int, nearNumber: Int, limit: Int)
     case postsById(id: Int)
@@ -81,6 +82,8 @@ extension Flarum: TargetType {
             return "/api/discussions"
         case .discussionByUserAccount:
             return "/api/discussions"
+        case let .hidePost(id, _):
+            return "/api/posts/\(id)"
         case .posts:
             return "/api/posts"
         case .postsNearNumber:
@@ -124,6 +127,8 @@ extension Flarum: TargetType {
             return .get
         case .discussionByUserAccount:
             return .get
+        case .hidePost:
+            return .post
         case .posts:
             return .get
         case .postsNearNumber:
@@ -184,6 +189,16 @@ extension Flarum: TargetType {
                 "page[limit]": limit,
                 "sort": sort.rawValue,
             ], encoding: URLEncoding.default)
+        case let .hidePost(id, hidden):
+            return .requestParameters(parameters: [
+                "data": [
+                    "type": "posts",
+                    "attributes": [
+                        "isHidden": hidden,
+                    ],
+                    "id": id,
+                ],
+            ], encoding: JSONEncoding.default)
         case let .posts(discussionID, offset, limit):
             return .requestParameters(parameters: [
                 "filter[discussion]": discussionID,
