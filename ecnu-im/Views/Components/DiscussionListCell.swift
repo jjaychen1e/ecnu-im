@@ -54,7 +54,7 @@ struct DiscussionListCell: View {
                                       column: .secondary,
                                       toRoot: true)
                     } else {
-                        uiKitEnvironment.splitVC?.presentSignView()
+                        UIApplication.shared.topController()?.presentSignView()
                     }
                 } label: {
                     LastPostCell(discussion: discussion)
@@ -72,7 +72,7 @@ struct DiscussionListCell: View {
                                       column: .secondary,
                                       toRoot: true)
                     } else {
-                        uiKitEnvironment.splitVC?.presentSignView()
+                        UIApplication.shared.topController()?.presentSignView()
                     }
                 } label: {
                     FirstPostCell(discussion: discussion)

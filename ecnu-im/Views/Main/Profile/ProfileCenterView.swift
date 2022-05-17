@@ -7,7 +7,8 @@
 
 import SwiftUI
 
-private enum Category: String, CaseIterable, Identifiable {
+enum ProfileCategory: String, CaseIterable, Identifiable {
+    static let key = "ProfileCategory"
     case reply
     case discussion
     case badge
@@ -15,38 +16,50 @@ private enum Category: String, CaseIterable, Identifiable {
     var id: String { rawValue }
 }
 
+class ProfileCenterViewModel: ObservableObject {
+    @Published var userId: String
+    @Published var user: FlarumUser?
+    @Published var posts: [FlarumPost] = []
+    @Published var discussions: [FlarumDiscussion] = []
+    @Published var userBadges: [FlarumUserBadge] = []
+    @Published var badges: [FlarumBadge] = []
+    @Published var selectedCategory = ProfileCategory.reply
+    
+    init(userId: String) {
+        self.userId = userId
+    }
+}
+
 struct ProfileCenterView: View {
-    @State private var userId: String
-    @State private var user: FlarumUser?
-    @State private var posts: [FlarumPost] = []
-    @State private var discussions: [FlarumDiscussion] = []
-    @State private var userBadges: [FlarumUserBadge] = []
-    @State private var badges: [FlarumBadge] = []
-    @State private var selectedCategory = Category.reply
+    @ObservedObject private var viewModel: ProfileCenterViewModel
     @State private var userFetchTask: Task<Void, Never>?
 
     let pageLimit: Int = 20
 
     init(userId: String) {
-        self.userId = userId
+        viewModel = .init(userId: userId)
     }
 
     func update(userId: String) {
-        self.userId = userId
+        viewModel.userId = userId
         fetchUser()
+    }
+
+    func update(selectedCategory: ProfileCategory) {
+        viewModel.selectedCategory = selectedCategory
     }
 
     private func fetchUser() {
         userFetchTask?.cancel()
         userFetchTask = nil
         userFetchTask = Task {
-            if let id = Int(userId) {
+            if let id = Int(viewModel.userId) {
                 if let response = try? await flarumProvider.request(.user(id: id)).flarumResponse() {
                     guard !Task.isCancelled else { return }
                     if let user = response.data.users.first {
-                        self.user = user
-                        badges = response.included.badges
-                        userBadges = response.included.userBadges
+                        viewModel.user = user
+                        viewModel.badges = response.included.badges
+                        viewModel.userBadges = response.included.userBadges
                         FlarumBadgeStorage.shared.store(userBadges: response.included.userBadges)
                         fetchUserComment(offset: 0)
                         fetchUserDiscussion(offset: 0)
@@ -58,12 +71,12 @@ struct ProfileCenterView: View {
 
     private func fetchUserComment(offset: Int) {
         Task {
-            if let user = user {
+            if let user = viewModel.user {
                 if let response = try? await flarumProvider.request(.postsByUserAccount(account: user.attributes.username,
                                                                                         offset: offset,
                                                                                         limit: pageLimit,
                                                                                         sort: .newest)).flarumResponse() {
-                    self.posts.append(contentsOf: response.data.posts)
+                    viewModel.posts.append(contentsOf: response.data.posts)
                 }
             }
         }
@@ -71,12 +84,12 @@ struct ProfileCenterView: View {
 
     private func fetchUserDiscussion(offset: Int) {
         Task {
-            if let user = user {
+            if let user = viewModel.user {
                 if let response = try? await flarumProvider.request(.discussionByUserAccount(account: user.attributes.username,
                                                                                              offset: offset,
                                                                                              limit: pageLimit,
                                                                                              sort: .newest)).flarumResponse() {
-                    self.discussions.append(contentsOf: response.data.discussions)
+                    viewModel.discussions.append(contentsOf: response.data.discussions)
                 }
             }
         }
@@ -86,26 +99,26 @@ struct ProfileCenterView: View {
 
     var body: some View {
         Group {
-            if let user = user {
+            if let user = viewModel.user {
                 List {
-                    ProfileCenterViewHeader(user: user, selectedCategory: $selectedCategory)
+                    ProfileCenterViewHeader(user: user, selectedCategory: $viewModel.selectedCategory)
                         .padding(.bottom, 8)
                         .listRowSeparatorTint(.clear) // `listRowSeparator` will cause other row **randomly** lost separator
 
-                    switch selectedCategory {
+                    switch viewModel.selectedCategory {
                     case .reply:
-                        ForEach(Array(zip(posts.indices, posts)), id: \.1) { index, post in
+                        ForEach(Array(zip(viewModel.posts.indices, viewModel.posts)), id: \.1) { index, post in
                             ProfileCenterPostView(user: user, post: post)
                                 .buttonStyle(PlainButtonStyle())
                         }
                     case .discussion:
-                        ForEach(Array(zip(discussions.indices, discussions)), id: \.1) { index, discussion in
+                        ForEach(Array(zip(viewModel.discussions.indices, viewModel.discussions)), id: \.1) { index, discussion in
                             ProfileCenterDiscussionView(user: user, discussion: discussion)
                                 .buttonStyle(PlainButtonStyle())
                         }
                     case .badge:
                         EmptyView()
-                        let groupedData = Dictionary(grouping: userBadges.filter { $0.relationships?.badge.relationships?.category != nil },
+                        let groupedData = Dictionary(grouping: viewModel.userBadges.filter { $0.relationships?.badge.relationships?.category != nil },
                                                      by: { $0.relationships!.badge.relationships!.category })
                         let categories = Array(groupedData.keys).sorted(by: { $0.id < $1.id })
                         ForEach(Array(zip(categories.indices, categories)), id: \.1) { index, category in
@@ -128,7 +141,7 @@ struct ProfileCenterView: View {
 
 private struct ProfileCenterViewHeader: View {
     @State var user: FlarumUser
-    @Binding var selectedCategory: Category
+    @Binding var selectedCategory: ProfileCategory
 
     var body: some View {
         VStack(spacing: 16) {
@@ -213,11 +226,11 @@ private struct ProfileCenterViewHeader: View {
 
             Picker("分类", selection: $selectedCategory) {
                 Text("回复")
-                    .tag(Category.reply)
+                    .tag(ProfileCategory.reply)
                 Text("主题")
-                    .tag(Category.discussion)
+                    .tag(ProfileCategory.discussion)
                 Text("徽章")
-                    .tag(Category.badge)
+                    .tag(ProfileCategory.badge)
             }
             .pickerStyle(SegmentedPickerStyle())
         }

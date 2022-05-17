@@ -152,7 +152,7 @@ extension FlarumBadge {
            let userId = Int(AppGlobalState.shared.userId) {
             Task {
                 if let response = try? await flarumProvider.request(.user(id: userId)).flarumResponse() {
-                    // TODO: BADGE
+                    FlarumBadgeStorage.shared.store(userBadges: response.included.userBadges)
                 }
             }
         }

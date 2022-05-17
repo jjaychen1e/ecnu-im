@@ -32,6 +32,10 @@ private struct ProfileCenterViewWrapper: View {
     func update(userId: String) {
         view.update(userId: userId)
     }
+
+    func update(selectedCategory: ProfileCategory) {
+        view.update(selectedCategory: selectedCategory)
+    }
 }
 
 class ProfileCenterViewController: NoNavigationBarViewController, NoOverlayViewController {
@@ -40,6 +44,8 @@ class ProfileCenterViewController: NoNavigationBarViewController, NoOverlayViewC
 
     fileprivate var userId: String
     fileprivate var hostingVC: UIHostingController<ProfileCenterViewWrapper>!
+
+    private var initSelectedCategory: ProfileCategory?
 
     init(userId: String) {
         self.userId = userId
@@ -68,10 +74,22 @@ class ProfileCenterViewController: NoNavigationBarViewController, NoOverlayViewC
         )
         hostingVC = vc
         addChildViewController(vc, addConstrains: true)
+        if let initSelectedCategory = initSelectedCategory {
+            hostingVC.rootView.update(selectedCategory: initSelectedCategory)
+            self.initSelectedCategory = nil
+        }
+    }
+
+    func selectTab(selectedCategory: ProfileCategory) {
+        if let hostingVC = hostingVC {
+            hostingVC.rootView.update(selectedCategory: selectedCategory)
+        } else {
+            initSelectedCategory = selectedCategory
+        }
     }
 }
 
-class MyProfileCenterViewController: ProfileCenterViewController {
+class MyProfileCenterViewController: ProfileCenterViewController, CanSelectWithInfo {
     private var subscriptions: Set<AnyCancellable> = []
 
     init() {
@@ -86,5 +104,11 @@ class MyProfileCenterViewController: ProfileCenterViewController {
                 self.hostingVC.rootView.update(userId: AppGlobalState.shared.userId)
             }
         }.store(in: &subscriptions)
+    }
+
+    func config(info: [String: Any]) {
+        if let profileCategory = info[ProfileCategory.key] as? ProfileCategory {
+            selectTab(selectedCategory: profileCategory)
+        }
     }
 }

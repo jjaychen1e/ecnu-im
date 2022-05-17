@@ -483,7 +483,7 @@ struct HomeView: View {
                                                                    column: .secondary,
                                                                    toRoot: true)
                                 } else {
-                                    uiKitEnvironment.splitVC?.presentSignView()
+                                    UIApplication.shared.topController()?.presentSignView()
                                 }
                             } label: {
                                 HomePostCardView(viewModel: viewModel)
@@ -541,7 +541,7 @@ struct HomeView: View {
                                                                    column: .secondary,
                                                                    toRoot: true)
                                 } else {
-                                    uiKitEnvironment.splitVC?.presentSignView()
+                                    UIApplication.shared.topController()?.presentSignView()
                                 }
                             } label: {
                                 HomePostCardViewLarge(viewModel: viewModel)
