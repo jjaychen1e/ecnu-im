@@ -139,6 +139,7 @@
 		6391FCD52811BB69006E086D /* NoNavigationBarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6391FCD42811BB69006E086D /* NoNavigationBarViewController.swift */; };
 		63A6CCCF28156A51000075F7 /* DiscussionTagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63A6CCCE28156A51000075F7 /* DiscussionTagsView.swift */; };
 		63A6CCD128157FE0000075F7 /* DiscussionHeaderTagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63A6CCD028157FE0000075F7 /* DiscussionHeaderTagsView.swift */; };
+		63B3C72F28348F450068701F /* FlarumProfileAnswer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B3C72E28348F450068701F /* FlarumProfileAnswer.swift */; };
 		63B74092280277A900376B94 /* SignModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B7408F280277A900376B94 /* SignModalView.swift */; };
 		63B74093280277A900376B94 /* SignUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B74090280277A900376B94 /* SignUpView.swift */; };
 		63B74094280277A900376B94 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B74091280277A900376B94 /* SignInView.swift */; };
@@ -320,6 +321,7 @@
 		6391FCD42811BB69006E086D /* NoNavigationBarViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoNavigationBarViewController.swift; sourceTree = "<group>"; };
 		63A6CCCE28156A51000075F7 /* DiscussionTagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscussionTagsView.swift; sourceTree = "<group>"; };
 		63A6CCD028157FE0000075F7 /* DiscussionHeaderTagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscussionHeaderTagsView.swift; sourceTree = "<group>"; };
+		63B3C72E28348F450068701F /* FlarumProfileAnswer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlarumProfileAnswer.swift; sourceTree = "<group>"; };
 		63B7408F280277A900376B94 /* SignModalView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignModalView.swift; sourceTree = "<group>"; };
 		63B74090280277A900376B94 /* SignUpView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignUpView.swift; sourceTree = "<group>"; };
 		63B74091280277A900376B94 /* SignInView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
@@ -524,6 +526,7 @@
 				63DD1F872832820E00193CFC /* FlarumBadgeCategory.swift */,
 				63DD1F892832828100193CFC /* FlarumBadge.swift */,
 				63DD1F8B2832845A00193CFC /* FlarumUserBadge.swift */,
+				63B3C72E28348F450068701F /* FlarumProfileAnswer.swift */,
 			);
 			path = Flarum;
 			sourceTree = "<group>";
@@ -1465,6 +1468,7 @@
 				635B2A6227EEE79200FF6109 /* FlarumAPI.swift in Sources */,
 				63B7409C2802786700376B94 /* OutlineModifier.swift in Sources */,
 				63DA4FC927F5754300F4FA6E /* ImageBrowser.swift in Sources */,
+				63B3C72F28348F450068701F /* FlarumProfileAnswer.swift in Sources */,
 				63146572282F81CE00484CC9 /* EnvironmentWrapperView.swift in Sources */,
 				63E971FE28118AD0003974B6 /* TabController.swift in Sources */,
 				63B740A12802791700376B94 /* AngularButton.swift in Sources */,

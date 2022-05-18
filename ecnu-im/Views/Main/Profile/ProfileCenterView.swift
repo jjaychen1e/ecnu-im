@@ -5,6 +5,7 @@
 //  Created by 陈俊杰 on 2022/5/13.
 //
 
+import FontAwesome
 import SwiftUI
 
 enum ProfileCategory: String, CaseIterable, Identifiable {
@@ -22,9 +23,8 @@ class ProfileCenterViewModel: ObservableObject {
     @Published var posts: [FlarumPost] = []
     @Published var discussions: [FlarumDiscussion] = []
     @Published var userBadges: [FlarumUserBadge] = []
-    @Published var badges: [FlarumBadge] = []
     @Published var selectedCategory = ProfileCategory.reply
-    
+
     init(userId: String) {
         self.userId = userId
     }
@@ -58,7 +58,6 @@ struct ProfileCenterView: View {
                     guard !Task.isCancelled else { return }
                     if let user = response.data.users.first {
                         viewModel.user = user
-                        viewModel.badges = response.included.badges
                         viewModel.userBadges = response.included.userBadges
                         FlarumBadgeStorage.shared.store(userBadges: response.included.userBadges)
                         fetchUserComment(offset: 0)
@@ -184,11 +183,17 @@ private struct ProfileCenterViewHeader: View {
             }
 
             VStack(spacing: 8) {
-                HStack(spacing: 4) {
-                    Text(fa: .school, faStyle: .solid, size: 13)
-                    Text("校区: 中北")
-                        .font(.system(size: 13, weight: .medium, design: .rounded))
-                        .foregroundColor(.primary.opacity(0.9))
+                if let profileAnswers = user.relationships?.profileAnswers {
+                    HStack(spacing: 4) {
+                        ForEach(Array(zip(profileAnswers.indices, profileAnswers)), id: \.1) { index, profileAnswer in
+                            if let (icon, faStyle) = FontAwesome.parseFromFlarum(str: profileAnswer.attributes.field.icon ?? "") {
+                                Text(fa: icon, faStyle: faStyle, size: 13)
+                                Text("\(profileAnswer.attributes.field.name): \(profileAnswer.attributes.content)")
+                                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                                    .foregroundColor(.primary.opacity(0.9))
+                            }
+                        }
+                    }
                 }
 
                 HStack {

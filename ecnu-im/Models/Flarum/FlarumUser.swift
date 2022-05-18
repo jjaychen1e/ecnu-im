@@ -29,7 +29,7 @@ struct FlarumUserAttributes: Codable {
         }
         return nil
     }
-    
+
     var joinDate: Date? {
         // date format, example: 2022-03-23T13:37:49+00:00
         let dateFormatter = DateFormatter()
@@ -41,19 +41,24 @@ struct FlarumUserAttributes: Codable {
     }
 }
 
+struct FlarumUserRelationships: Codable {
+    var userBadges: [FlarumUserBadge]
+    var profileAnswers: [FlarumProfileAnswer]
+}
+
 final class FlarumUser {
-    init(id: String, attributes: FlarumUserAttributes) {
+    init(id: String, attributes: FlarumUserAttributes, relationships: FlarumUserRelationships? = nil) {
         self.id = id
         self.attributes = attributes
+        self.relationships = relationships
     }
 
     var id: String
     var attributes: FlarumUserAttributes
+    var relationships: FlarumUserRelationships?
 }
 
-extension FlarumUser: Codable {
-    
-}
+extension FlarumUser: Codable {}
 
 extension FlarumUser {
     var avatarURL: URL? {
@@ -79,7 +84,7 @@ extension FlarumUser {
             return "Unknown"
         }
     }
-    
+
     var joinDateDescription: String {
         if let date = attributes.joinDate {
             return date.localeDescription
@@ -87,7 +92,7 @@ extension FlarumUser {
             return "Unknown"
         }
     }
-    
+
     var isOnline: Bool {
         if let lastSeenAtDate = attributes.lastSeenAtDate {
             // Less than 10 minutes
@@ -97,15 +102,15 @@ extension FlarumUser {
         }
         return false
     }
-    
+
     var likesReceived: Int {
         attributes.likesReceived ?? 0
     }
-    
+
     var commentCount: Int {
         attributes.commentCount ?? 0
     }
-    
+
     var discussionCount: Int {
         attributes.discussionCount ?? 0
     }

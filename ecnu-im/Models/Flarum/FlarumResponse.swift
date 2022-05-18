@@ -21,6 +21,7 @@ struct FlarumResponse {
         var badges: [FlarumBadge] = []
         var badgeCategories: [FlarumBadgeCategory] = []
         var userBadges: [FlarumUserBadge] = []
+        var profileAnswers: [FlarumProfileAnswer] = []
     }
 
     var links: FlarumLinks?
@@ -183,8 +184,29 @@ struct FlarumResponse {
                     }
                 case .user:
                     if let id = dataJSON["id"].string {
-                        if let attributes = dataJSON["attributes"].decode(FlarumUserAttributes.self) {
-                            let user = FlarumUser(id: id, attributes: attributes)
+                        var user: FlarumUser?
+                        if !isData, let _user = includedData?.users.first(where: { $0.id == id }) {
+                            user = _user
+                        } else {
+                            if let attributes = dataJSON["attributes"].decode(FlarumUserAttributes.self) {
+                                user = FlarumUser(id: id, attributes: attributes)
+                                if isData, let _user = includedData?.users.first(where: { $0.id == id }) {
+                                    user?.relationships = _user.relationships
+                                }
+                            }
+                        }
+                        if let user = user {
+                            if withRelationship, let includedData = includedData {
+                                var userBadges: [FlarumUserBadge] = []
+                                if let badgeIds = dataJSON["relationships"]["badges"]["data"].array?.compactMap({ $0["id"].string }) {
+                                    userBadges = includedData.userBadges.filter { badgeIds.contains($0.id) }
+                                }
+                                var profileAnswers: [FlarumProfileAnswer] = []
+                                if let profileAnswerIds = dataJSON["relationships"]["masqueradeAnswers"]["data"].array?.compactMap({ $0["id"].string }) {
+                                    profileAnswers = includedData.profileAnswers.filter { profileAnswerIds.contains($0.id) }
+                                }
+                                user.relationships = FlarumUserRelationships(userBadges: userBadges, profileAnswers: profileAnswers)
+                            }
                             responseData.allData.append(.user(user))
                             responseData.users.append(user)
                         }
@@ -419,6 +441,14 @@ struct FlarumResponse {
                             responseData.userBadges.append(userBadge)
                         }
                     }
+                case .profileAnswer:
+                    if let id = dataJSON["id"].string {
+                        if let attributes = dataJSON["attributes"].decode(FlarumProfileAnswerAttributes.self) {
+                            let profileAnswer = FlarumProfileAnswer(id: id, attributes: attributes)
+                            responseData.allData.append(.profileAnswer(profileAnswer))
+                            responseData.profileAnswers.append(profileAnswer)
+                        }
+                    }
                 }
             }
         }
@@ -437,6 +467,7 @@ enum FlarumDataType: String, RawRepresentable {
     case badge = "badges"
     case badgeCategory = "badgeCategories"
     case userBadge = "userBadges"
+    case profileAnswer = "masquerade-answer"
 }
 
 enum FlarumData {
@@ -449,6 +480,7 @@ enum FlarumData {
     case badge(FlarumBadge)
     case badgeCategory(FlarumBadgeCategory)
     case userBadge(FlarumUserBadge)
+    case profileAnswer(FlarumProfileAnswer)
 }
 
 extension Response {
