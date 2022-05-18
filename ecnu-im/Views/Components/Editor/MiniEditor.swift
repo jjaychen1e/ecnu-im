@@ -270,7 +270,7 @@ struct MiniEditor: View {
                     }
 
                     sending = true
-                    if let response = try? await flarumProvider.request(.newPost(discussionID: discussion.id, content: contentViewModel.text)).flarumResponse() {
+                    if let response = try? await flarumProvider.request(.newPost(discussionID: discussion.id, content: content)).flarumResponse() {
                         if let post = response.data.posts.first {
                             self.viewModel.didPostCallback(post)
                             let toast = Toast.default(

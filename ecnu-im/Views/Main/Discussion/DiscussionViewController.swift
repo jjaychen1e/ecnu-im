@@ -289,6 +289,8 @@ class DiscussionViewController: NoNavigationBarViewController, NoOverlayViewCont
                 }
             } replyPostAction: { [weak self] in
                 self?.addReply(post: post)
+            } editAction: { [weak self] in
+                
             } hidePostAction: { [weak self] isHidden in
                 if let self = self {
                     if let id = Int(post.id) {
@@ -304,6 +306,12 @@ class DiscussionViewController: NoNavigationBarViewController, NoOverlayViewCont
                                             fatalErrorDebug()
                                         }
                                     }
+                                } else {
+                                    let toast = Toast.default(
+                                        icon: .emoji("🧐"),
+                                        title: "\(isHidden ? "隐藏" : "取消隐藏")失败，请再试一次？"
+                                    )
+                                    toast.show()
                                 }
                             }
                         }
@@ -319,6 +327,12 @@ class DiscussionViewController: NoNavigationBarViewController, NoOverlayViewCont
                                         tableView.reloadRows(at: [IndexPath(row: postIndex, section: 0)], with: .none)
                                         self.posts[postIndex] = .deleted(postIndex)
                                     }
+                                } else {
+                                    let toast = Toast.default(
+                                        icon: .emoji("😮"),
+                                        title: "删除失败，请再试一次？"
+                                    )
+                                    toast.show()
                                 }
                             }
                         }

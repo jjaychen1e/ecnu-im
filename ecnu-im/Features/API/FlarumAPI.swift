@@ -57,6 +57,7 @@ enum Flarum {
     case postLikeAction(id: Int, like: Bool)
     case register(email: String, username: String, nickname: String, password: String, recaptcha: String)
     case newPost(discussionID: String, content: String)
+    case editPost(postID: Int, content: String)
     case notification(offset: Int, limit: Int)
     case lastSeenUsers(limit: Int)
     case user(id: Int)
@@ -103,6 +104,8 @@ extension Flarum: TargetType {
             return "/register"
         case .newPost:
             return "api/posts"
+        case let .editPost(postID, _):
+            return "api/posts/\(postID)"
         case .notification:
             return "api/notifications"
         case .lastSeenUsers:
@@ -150,6 +153,8 @@ extension Flarum: TargetType {
             return .post
         case .newPost:
             return .post
+        case .editPost:
+            return .patch
         case .notification:
             return .get
         case .lastSeenUsers:
@@ -269,6 +274,17 @@ extension Flarum: TargetType {
                     ],
                 ],
             ], encoding: JSONEncoding.default)
+        case let .editPost(postID, content):
+            return .requestParameters(parameters: [
+                "data": [
+                    "type": "posts",
+                    "id": "\(postID)",
+                    "attributes": [
+                        "content": content,
+                    ],
+                ],
+            ], encoding: JSONEncoding.default)
+
         case let .notification(offset, limit):
             return .requestParameters(parameters: [
                 "page[offset]": max(0, offset),
@@ -295,7 +311,7 @@ extension Flarum: TargetType {
                 "Accept-Language": "zh-CN,zh;",
             ]
             switch self {
-            case .register, .newPost, .postLikeAction, .hidePost, .deletePost:
+            case .register, .newPost, .postLikeAction, .hidePost, .deletePost, .editPost:
                 let regex = Regex("\"csrfToken\":\"(.*?)\"")
                 if let homeResult = try? await flarumProvider.request(.home),
                    let homeContentStr = try? homeResult.mapString(),

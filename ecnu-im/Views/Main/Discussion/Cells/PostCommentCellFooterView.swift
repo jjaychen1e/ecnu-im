@@ -28,11 +28,13 @@ class PostCommentCellFooterViewModel: ObservableObject {
     @Published var likedUsers: [FlarumUser]
     @Published var repliedPosts: [FlarumPost]
     @Published var replyAction: () -> Void
+    @Published var editAction: () -> Void
     @Published var hidePostAction: (Bool) -> Void
     @Published var deletePostAction: () -> Void
 
     init(post: FlarumPost,
          replyAction: @escaping () -> Void,
+         editAction: @escaping () -> Void,
          hidePostAction: @escaping (Bool) -> Void,
          deletePostAction: @escaping () -> Void) {
         self.post = post
@@ -41,12 +43,14 @@ class PostCommentCellFooterViewModel: ObservableObject {
         animatableLiked = AnimatableLiked(AppGlobalState.shared.userId != "" && likesUsers.contains { $0.id == AppGlobalState.shared.userId })
         repliedPosts = post.relationships?.mentionedBy ?? []
         self.replyAction = replyAction
+        self.editAction = editAction
         self.hidePostAction = hidePostAction
         self.deletePostAction = deletePostAction
     }
 
     func update(post: FlarumPost,
                 replyAction: @escaping () -> Void,
+                editAction: @escaping () -> Void,
                 hidePostAction: @escaping (Bool) -> Void,
                 deletePostAction: @escaping () -> Void) {
         self.post = post
@@ -55,6 +59,7 @@ class PostCommentCellFooterViewModel: ObservableObject {
         animatableLiked = AnimatableLiked(AppGlobalState.shared.userId != "" && likesUsers.contains { $0.id == AppGlobalState.shared.userId })
         repliedPosts = post.relationships?.mentionedBy ?? []
         self.replyAction = replyAction
+        self.editAction = editAction
         self.hidePostAction = hidePostAction
         self.deletePostAction = deletePostAction
     }
@@ -69,16 +74,18 @@ struct PostCommentCellFooterView: View {
 
     init(post: FlarumPost,
          replyAction: @escaping () -> Void,
+         editAction: @escaping () -> Void,
          hidePostAction: @escaping (Bool) -> Void,
          deletePostAction: @escaping () -> Void) {
-        viewModel = .init(post: post, replyAction: replyAction, hidePostAction: hidePostAction, deletePostAction: deletePostAction)
+        viewModel = .init(post: post, replyAction: replyAction, editAction: editAction, hidePostAction: hidePostAction, deletePostAction: deletePostAction)
     }
 
     func update(post: FlarumPost,
                 replyAction: @escaping () -> Void,
+                editAction: @escaping () -> Void,
                 hidePostAction: @escaping (Bool) -> Void,
                 deletePostAction: @escaping () -> Void) {
-        viewModel.update(post: post, replyAction: replyAction, hidePostAction: hidePostAction, deletePostAction: deletePostAction)
+        viewModel.update(post: post, replyAction: replyAction, editAction: editAction, hidePostAction: hidePostAction, deletePostAction: deletePostAction)
     }
 
     private func likeButtonAction() {
@@ -168,22 +175,42 @@ struct PostCommentCellFooterView: View {
             PopoverMenu {
                 PopoverMenuItem(title: "App 问题反馈", systemImage: "exclamationmark.bubble", action: {})
                 PopoverMenuItem(title: "举报", systemImage: "exclamationmark.circle", action: {})
-                if viewModel.post.attributes?.isHidden == true {
-                    PopoverMenuItem(title: "取消隐藏", systemImage: "eye", action: {
-                        let alertController = UIAlertController(title: "注意", message: "你确定要取消隐藏该贴吗？", preferredStyle: .alert)
-                        alertController.addAction(UIAlertAction(title: "确定", style: .destructive, handler: { action in
-                            viewModel.hidePostAction(false)
-                        }))
-                        alertController.addAction(UIAlertAction(title: "取消", style: .cancel, handler: { action in
-
-                        }))
-                        UIApplication.shared.topController()?.present(alertController, animated: true)
+                if viewModel.post.attributes?.canEdit == true {
+                    PopoverMenuItem(title: "编辑", systemImage: "pencil", action: {
+                        viewModel.editAction()
                     })
-                } else {
-                    PopoverMenuItem(title: "隐藏", systemImage: "eye.slash", action: {
-                        let alertController = UIAlertController(title: "注意", message: "你确定要隐藏该贴吗？", preferredStyle: .alert)
+                }
+                if viewModel.post.attributes?.canHide == true {
+                    if viewModel.post.attributes?.isHidden == true {
+                        PopoverMenuItem(title: "取消隐藏", systemImage: "eye", action: {
+                            let alertController = UIAlertController(title: "注意", message: "你确定要取消隐藏该贴吗？", preferredStyle: .alert)
+                            alertController.addAction(UIAlertAction(title: "确定", style: .destructive, handler: { action in
+                                viewModel.hidePostAction(false)
+                            }))
+                            alertController.addAction(UIAlertAction(title: "取消", style: .cancel, handler: { action in
+
+                            }))
+                            UIApplication.shared.topController()?.present(alertController, animated: true)
+                        })
+                    } else {
+                        PopoverMenuItem(title: "隐藏", systemImage: "eye.slash", action: {
+                            let alertController = UIAlertController(title: "注意", message: "你确定要隐藏该贴吗？", preferredStyle: .alert)
+                            alertController.addAction(UIAlertAction(title: "确定", style: .destructive, handler: { action in
+                                viewModel.hidePostAction(true)
+                            }))
+                            alertController.addAction(UIAlertAction(title: "取消", style: .cancel, handler: { action in
+
+                            }))
+                            UIApplication.shared.topController()?.present(alertController, animated: true)
+                        })
+                    }
+                }
+
+                if viewModel.post.attributes?.canDelete == true {
+                    PopoverMenuItem(title: "永久删除", systemImage: "trash", titleColor: .red, iconColor: .red, action: {
+                        let alertController = UIAlertController(title: "注意", message: "你确定要永久删除该贴吗？该操作无法撤销。", preferredStyle: .alert)
                         alertController.addAction(UIAlertAction(title: "确定", style: .destructive, handler: { action in
-                            viewModel.hidePostAction(true)
+                            viewModel.deletePostAction()
                         }))
                         alertController.addAction(UIAlertAction(title: "取消", style: .cancel, handler: { action in
 
@@ -191,16 +218,6 @@ struct PostCommentCellFooterView: View {
                         UIApplication.shared.topController()?.present(alertController, animated: true)
                     })
                 }
-                PopoverMenuItem(title: "永久删除", systemImage: "trash", titleColor: .red, iconColor: .red, action: {
-                    let alertController = UIAlertController(title: "注意", message: "你确定要永久删除该贴吗？该操作无法撤销。", preferredStyle: .alert)
-                    alertController.addAction(UIAlertAction(title: "确定", style: .destructive, handler: { action in
-                        viewModel.deletePostAction()
-                    }))
-                    alertController.addAction(UIAlertAction(title: "取消", style: .cancel, handler: { action in
-
-                    }))
-                    UIApplication.shared.topController()?.present(alertController, animated: true)
-                })
             } label: {
                 Image(systemName: "ellipsis")
                     .font(.system(size: 20, weight: .regular, design: .rounded))

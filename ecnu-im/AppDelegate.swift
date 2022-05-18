@@ -7,10 +7,6 @@
 
 import UIKit
 
-var idiom: UIUserInterfaceIdiom { UIDevice.current.userInterfaceIdiom }
-var isPortrait: Bool { UIDevice.current.orientation.isPortrait }
-var isHorizontalCompact: Bool { UITraitCollection.current.horizontalSizeClass == .compact }
-
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {

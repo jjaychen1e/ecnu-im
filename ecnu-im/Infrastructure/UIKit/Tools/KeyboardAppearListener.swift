@@ -56,9 +56,9 @@ class KeyboardAppearListener {
         if isKeyboardShowing == false {
             if let superview = viewController.view.superview,
                let window = viewController.view.window {
-                let rect = superview.convert(viewController.view.frame, to: window)
-                accumulatedHeightOffset -= (window.frame.height - rect.maxY)
-                accumulatedHeightOffset += window.frame.height - endKeyboardFrame.origin.y
+                let rect = superview.convert(viewController.view.frame, to: window.screen.coordinateSpace)
+                accumulatedHeightOffset -= (window.screen.bounds.height - rect.maxY)
+                accumulatedHeightOffset += window.screen.bounds.height - endKeyboardFrame.origin.y
             }
         } else {
             accumulatedHeightOffset += beginKeyboardFrame.origin.y - endKeyboardFrame.origin.y

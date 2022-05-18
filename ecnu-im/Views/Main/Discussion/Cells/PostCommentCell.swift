@@ -50,9 +50,10 @@ private struct PostCommentCellFooterViewWrapper: View {
 
     func update(post: FlarumPost,
                 replyAction: @escaping () -> Void,
+                editAction: @escaping () -> Void,
                 hidePostAction: @escaping (Bool) -> Void,
                 deletePostAction: @escaping () -> Void) {
-        view.update(post: post, replyAction: replyAction, hidePostAction: hidePostAction, deletePostAction: deletePostAction)
+        view.update(post: post, replyAction: replyAction, editAction: editAction, hidePostAction: hidePostAction, deletePostAction: deletePostAction)
     }
 
     func update(vc: UIViewController?) {
@@ -96,7 +97,7 @@ final class PostCommentCell: UITableViewCell {
         footerViewHostingVC = UIHostingController(
             rootView:
             PostCommentCellFooterViewWrapper(
-                PostCommentCellFooterView(post: .init(id: ""), replyAction: {}, hidePostAction: { _ in }, deletePostAction: {}),
+                PostCommentCellFooterView(post: .init(id: ""), replyAction: {}, editAction: {}, hidePostAction: { _ in }, deletePostAction: {}),
                 splitVC: nil,
                 nvc: nil,
                 vc: nil
@@ -116,6 +117,7 @@ final class PostCommentCell: UITableViewCell {
                    viewController: UIViewController,
                    updateLayout: (() -> Void)?,
                    replyPostAction: @escaping () -> Void,
+                   editAction: @escaping () -> Void,
                    hidePostAction: @escaping (Bool) -> Void,
                    deletePostAction: @escaping () -> Void) {
         if post != self.post {
@@ -139,7 +141,7 @@ final class PostCommentCell: UITableViewCell {
 
             headerViewHostingVC.rootView.update(post: post)
             headerViewHostingVC.rootView.update(vc: viewController)
-            footerViewHostingVC.rootView.update(post: post, replyAction: replyPostAction, hidePostAction: hidePostAction, deletePostAction: deletePostAction)
+            footerViewHostingVC.rootView.update(post: post, replyAction: replyPostAction, editAction: editAction, hidePostAction: hidePostAction, deletePostAction: deletePostAction)
             footerViewHostingVC.rootView.update(vc: viewController)
 
             if post.attributes?.isHidden == true {
