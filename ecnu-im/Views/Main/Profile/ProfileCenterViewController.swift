@@ -38,7 +38,7 @@ private struct ProfileCenterViewWrapper: View {
     }
 }
 
-class ProfileCenterViewController: NoNavigationBarViewController, NoOverlayViewController {
+class ProfileCenterViewController: NoNavigationBarViewController, NoOverlayViewController, HasNavigationPermission {
     weak var splitVC: UISplitViewController?
     weak var nvc: UINavigationController?
 
@@ -98,14 +98,14 @@ class MyProfileCenterViewController: ProfileCenterViewController, CanSelectWithI
     private var subscriptions: Set<AnyCancellable> = []
 
     init() {
-        super.init(userId: AppGlobalState.shared.userId)
+        super.init(userId: AppGlobalState.shared.account?.userIdString ?? "")
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         AppGlobalState.shared.$tokenPrepared.sink { [weak self] change in
             if let self = self {
-                self.update(userId: AppGlobalState.shared.userId)
+                self.update(userId: AppGlobalState.shared.account?.userIdString ?? "")
             }
         }.store(in: &subscriptions)
     }

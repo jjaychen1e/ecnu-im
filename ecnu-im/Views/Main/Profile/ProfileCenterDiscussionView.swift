@@ -98,24 +98,20 @@ struct ProfileCenterDiscussionView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.primary.opacity(.leastNonzeroMagnitude))
         .onTapGesture {
-            if AppGlobalState.shared.tokenPrepared {
-                if let vc = uiKitEnvironment.vc {
-                    let targetNumber = lastPost?.attributes?.number ?? 0
-                    if vc.presentingViewController != nil {
-                        vc.present(DiscussionViewController(discussion: discussion, nearNumber: targetNumber),
-                                   animated: true)
-                    } else if let splitVC = uiKitEnvironment.splitVC {
-                        splitVC.push(viewController: DiscussionViewController(discussion: discussion, nearNumber: targetNumber),
-                                     column: .secondary,
-                                     toRoot: true)
-                    } else {
-                        fatalErrorDebug()
-                    }
+            if let vc = uiKitEnvironment.vc {
+                let targetNumber = lastPost?.attributes?.number ?? 0
+                if vc.presentingViewController != nil {
+                    vc.present(DiscussionViewController(discussion: discussion, nearNumber: targetNumber),
+                               animated: true)
+                } else if let splitVC = uiKitEnvironment.splitVC {
+                    splitVC.push(viewController: DiscussionViewController(discussion: discussion, nearNumber: targetNumber),
+                                 column: .secondary,
+                                 toRoot: true)
                 } else {
                     fatalErrorDebug()
                 }
             } else {
-                UIApplication.shared.topController()?.presentSignView()
+                fatalErrorDebug()
             }
         }
         .onLoad {

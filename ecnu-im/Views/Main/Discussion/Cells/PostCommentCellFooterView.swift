@@ -40,7 +40,7 @@ class PostCommentCellFooterViewModel: ObservableObject {
         self.post = post
         let likesUsers = post.relationships?.likes ?? []
         likedUsers = likesUsers
-        animatableLiked = AnimatableLiked(AppGlobalState.shared.userId != "" && likesUsers.contains { $0.id == AppGlobalState.shared.userId })
+        animatableLiked = AnimatableLiked(likesUsers.contains { $0.id == AppGlobalState.shared.account?.userIdString })
         repliedPosts = post.relationships?.mentionedBy ?? []
         self.replyAction = replyAction
         self.editAction = editAction
@@ -56,7 +56,7 @@ class PostCommentCellFooterViewModel: ObservableObject {
         self.post = post
         let likesUsers = post.relationships?.likes ?? []
         likedUsers = likesUsers
-        animatableLiked = AnimatableLiked(AppGlobalState.shared.userId != "" && likesUsers.contains { $0.id == AppGlobalState.shared.userId })
+        animatableLiked = AnimatableLiked(likesUsers.contains { $0.id == AppGlobalState.shared.account?.userIdString })
         repliedPosts = post.relationships?.mentionedBy ?? []
         self.replyAction = replyAction
         self.editAction = editAction
@@ -96,7 +96,7 @@ struct PostCommentCellFooterView: View {
 
         if currentLiked {
             withAnimation(.easeInOut(duration: 0.2)) {
-                viewModel.likedUsers.removeAll { $0.id == AppGlobalState.shared.userId }
+                viewModel.likedUsers.removeAll { $0.id == AppGlobalState.shared.account?.userIdString }
             }
         }
         viewModel.animatableLiked = .animated(!currentLiked)
@@ -107,9 +107,9 @@ struct PostCommentCellFooterView: View {
                     return
                 }
                 if let posts = response.data.posts.first,
-                   let user = posts.relationships?.likes?.first(where: { $0.id == AppGlobalState.shared.userId }) {
+                   let user = posts.relationships?.likes?.first(where: { $0.id == AppGlobalState.shared.account?.userIdString }) {
                     withAnimation(.easeInOut(duration: 0.2)) {
-                        viewModel.likedUsers.removeAll { $0.id == AppGlobalState.shared.userId }
+                        viewModel.likedUsers.removeAll { $0.id == AppGlobalState.shared.account?.userIdString }
                         viewModel.likedUsers.append(user)
                     }
                     viewModel.animatableLiked = .animated(true)
@@ -117,7 +117,7 @@ struct PostCommentCellFooterView: View {
                 }
             }
             withAnimation(.easeInOut(duration: 0.2)) {
-                viewModel.likedUsers.removeAll { $0.id == AppGlobalState.shared.userId }
+                viewModel.likedUsers.removeAll { $0.id == AppGlobalState.shared.account?.userIdString }
             }
             viewModel.animatableLiked = .animated(false)
         }

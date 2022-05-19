@@ -63,14 +63,10 @@ struct DiscussionListCell: View {
     var body: some View {
         VStack(spacing: 8) {
             Button {
-                if AppGlobalState.shared.tokenPrepared {
-                    let near = viewModel.discussion.lastPost?.attributes?.number ?? 1
-                    uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: near),
-                                                   column: .secondary,
-                                                   toRoot: true)
-                } else {
-                    UIApplication.shared.topController()?.presentSignView()
-                }
+                let near = viewModel.discussion.lastPost?.attributes?.number ?? 1
+                uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: near),
+                                               column: .secondary,
+                                               toRoot: true)
             } label: {
                 LastPostCell(viewModel: viewModel)
                     .background(Color.white.opacity(0.001))
@@ -81,13 +77,9 @@ struct DiscussionListCell: View {
                 && viewModel.discussion.lastPost != nil
                 && viewModel.discussion.firstPost != viewModel.discussion.lastPost {
                 Button {
-                    if AppGlobalState.shared.tokenPrepared {
-                        uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: 0),
-                                                       column: .secondary,
-                                                       toRoot: true)
-                    } else {
-                        UIApplication.shared.topController()?.presentSignView()
-                    }
+                    uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: 0),
+                                                   column: .secondary,
+                                                   toRoot: true)
                 } label: {
                     FirstPostCell(viewModel: viewModel)
                         .background(Color.white.opacity(0.001))

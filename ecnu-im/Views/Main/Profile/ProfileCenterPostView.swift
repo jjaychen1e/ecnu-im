@@ -74,26 +74,22 @@ struct ProfileCenterPostView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.primary.opacity(0.0001))
         .onTapGesture {
-            if AppGlobalState.shared.tokenPrepared {
-                if let discussion = post.relationships?.discussion,
-                   let number = post.attributes?.number {
-                    if let vc = uiKitEnvironment.vc {
-                        if vc.presentingViewController != nil {
-                            vc.present(DiscussionViewController(discussion: discussion, nearNumber: number),
-                                       animated: true)
-                        } else if let splitVC = uiKitEnvironment.splitVC {
-                            splitVC.push(viewController: DiscussionViewController(discussion: discussion, nearNumber: number),
-                                         column: .secondary,
-                                         toRoot: true)
-                        } else {
-                            fatalErrorDebug()
-                        }
+            if let discussion = post.relationships?.discussion,
+               let number = post.attributes?.number {
+                if let vc = uiKitEnvironment.vc {
+                    if vc.presentingViewController != nil {
+                        vc.present(DiscussionViewController(discussion: discussion, nearNumber: number),
+                                   animated: true)
+                    } else if let splitVC = uiKitEnvironment.splitVC {
+                        splitVC.push(viewController: DiscussionViewController(discussion: discussion, nearNumber: number),
+                                     column: .secondary,
+                                     toRoot: true)
                     } else {
                         fatalErrorDebug()
                     }
+                } else {
+                    fatalErrorDebug()
                 }
-            } else {
-                UIApplication.shared.topController()?.presentSignView()
             }
         }
     }

@@ -58,11 +58,6 @@ struct SignInView: View {
                 Task {
                     logging = true
                     if await AppGlobalState.shared.login(account: signInViewModel.account, password: signInViewModel.password) {
-                        DispatchQueue.main.async {
-                            AppGlobalState.shared.isLogged = true
-                            AppGlobalState.shared.account = signInViewModel.account
-                            AppGlobalState.shared.password = signInViewModel.password
-                        }
                         model.dismissModal.toggle()
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                             let toast = Toast.default(

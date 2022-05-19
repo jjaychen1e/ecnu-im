@@ -17,14 +17,10 @@ struct DiscussionListCardCell: View {
 
     var body: some View {
         Button {
-            if AppGlobalState.shared.tokenPrepared {
-                let near = viewModel.discussion.lastPost?.attributes?.number ?? 1
-                uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: near),
-                                               column: .secondary,
-                                               toRoot: true)
-            } else {
-                UIApplication.shared.topController()?.presentSignView()
-            }
+            let near = viewModel.discussion.lastPost?.attributes?.number ?? 1
+            uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: near),
+                                           column: .secondary,
+                                           toRoot: true)
         } label: {
             Group {
                 VStack(spacing: 4) {
@@ -33,23 +29,19 @@ struct DiscussionListCardCell: View {
                             .mask(Circle())
                             .overlay(Circle().stroke(Color.white, lineWidth: 1))
                             .onTapGesture {
-                                if AppGlobalState.shared.tokenPrepared {
-                                    if AppGlobalState.shared.userId != "",
-                                       let targetId = viewModel.discussion.starter?.id,
-                                       targetId != AppGlobalState.shared.userId {
-                                        if let vc = uiKitEnvironment.vc {
-                                            if vc.presentingViewController != nil {
-                                                vc.present(ProfileCenterViewController(userId: targetId),
-                                                           animated: true)
-                                            } else {
-                                                UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: targetId), animated: true)
-                                            }
+                                if let account = AppGlobalState.shared.account,
+                                   let targetId = viewModel.discussion.starter?.id,
+                                   targetId != account.userIdString {
+                                    if let vc = uiKitEnvironment.vc {
+                                        if vc.presentingViewController != nil {
+                                            vc.present(ProfileCenterViewController(userId: targetId),
+                                                       animated: true)
                                         } else {
-                                            fatalErrorDebug()
+                                            UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: targetId), animated: true)
                                         }
+                                    } else {
+                                        fatalErrorDebug()
                                     }
-                                } else {
-                                    UIApplication.shared.topController()?.presentSignView()
                                 }
                             }
                         VStack(alignment: .leading, spacing: 2) {

@@ -326,8 +326,15 @@ struct HomeView: View {
             header
         }
         .onLoad {
-            AppGlobalState.shared.$tokenPrepared.sink { change in
+            let state = AppGlobalState.shared
+            if state.hasTriedToLogin || state.account == nil {
                 load()
+            }
+
+            state.$tokenPrepared.sink { change in
+                if state.hasTriedToLogin {
+                    load()
+                }
             }.store(in: &subscriptions)
         }
     }
@@ -437,6 +444,12 @@ struct HomeView: View {
                     .foregroundColor(.secondary)
                     .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                     .modifier(OutlineOverlay(cornerRadius: 14))
+                Image(systemName: "plus.message")
+                    .font(.body.weight(.bold))
+                    .frame(width: 36, height: 36)
+                    .foregroundColor(.secondary)
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .modifier(OutlineOverlay(cornerRadius: 14))
             }
             .frame(maxWidth: .infinity, alignment: .trailing)
             .padding(.trailing, 20)
@@ -496,14 +509,10 @@ struct HomeView: View {
                         ForEach(0 ..< viewModel.stickyDiscussions.count, id: \.self) { index in
                             let viewModel = viewModel.stickyDiscussions[index]
                             Button {
-                                if AppGlobalState.shared.tokenPrepared {
-                                    let lastReadPostNumber = viewModel.discussion.attributes?.lastReadPostNumber ?? 0
-                                    uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: lastReadPostNumber + 1),
-                                                                   column: .secondary,
-                                                                   toRoot: true)
-                                } else {
-                                    UIApplication.shared.topController()?.presentSignView()
-                                }
+                                let lastReadPostNumber = viewModel.discussion.attributes?.lastReadPostNumber ?? 0
+                                uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: lastReadPostNumber + 1),
+                                                               column: .secondary,
+                                                               toRoot: true)
                             } label: {
                                 HomePostCardView(viewModel: viewModel)
                                     .overlay(alignment: .topTrailing) {
@@ -543,11 +552,7 @@ struct HomeView: View {
                         .padding(.leading)
                     Spacer(minLength: 0)
                     Button {
-                        if AppGlobalState.shared.tokenPrepared {
-                            uiKitEnvironment.splitVC?.push(viewController: AllDiscussionsViewController(), column: .primary)
-                        } else {
-                            UIApplication.shared.topController()?.presentSignView()
-                        }
+                        uiKitEnvironment.splitVC?.push(viewController: AllDiscussionsViewController(), column: .primary)
                     } label: {
                         Text("查看全部")
                             .font(.system(size: 14, weight: .semibold, design: .rounded).bold())
@@ -562,14 +567,10 @@ struct HomeView: View {
                             let viewModel = viewModel.newestDiscussions[index]
                             let ignored = appGlobalState.ignoredUserIds.contains(viewModel.discussion.starter?.id ?? "")
                             Button {
-                                if AppGlobalState.shared.tokenPrepared {
-                                    let lastReadPostNumber = viewModel.discussion.attributes?.lastReadPostNumber ?? 0
-                                    uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: lastReadPostNumber + 1),
-                                                                   column: .secondary,
-                                                                   toRoot: true)
-                                } else {
-                                    UIApplication.shared.topController()?.presentSignView()
-                                }
+                                let lastReadPostNumber = viewModel.discussion.attributes?.lastReadPostNumber ?? 0
+                                uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: lastReadPostNumber + 1),
+                                                               column: .secondary,
+                                                               toRoot: true)
                             } label: {
                                 HomePostCardViewLarge(viewModel: viewModel)
                             }
@@ -577,11 +578,7 @@ struct HomeView: View {
                             .dimmedOverlay(ignored: .constant(ignored), isHidden: .constant(viewModel.discussion.isHidden))
                         }
                         Button {
-                            if AppGlobalState.shared.tokenPrepared {
-                                uiKitEnvironment.splitVC?.push(viewController: AllDiscussionsViewController(), column: .primary)
-                            } else {
-                                UIApplication.shared.topController()?.presentSignView()
-                            }
+                            uiKitEnvironment.splitVC?.push(viewController: AllDiscussionsViewController(), column: .primary)
                         } label: {
                             Text("查看全部")
                                 .font(.system(size: 14, weight: .semibold, design: .rounded).bold())
@@ -620,23 +617,19 @@ private struct HomePostCardView: View {
                         .mask(Circle())
                         .overlay(Circle().stroke(Color.white, lineWidth: 1))
                         .onTapGesture {
-                            if AppGlobalState.shared.tokenPrepared {
-                                if AppGlobalState.shared.userId != "",
-                                   let targetId = viewModel.discussion.starter?.id,
-                                   targetId != AppGlobalState.shared.userId {
-                                    if let vc = uiKitEnvironment.vc {
-                                        if vc.presentingViewController != nil {
-                                            vc.present(ProfileCenterViewController(userId: targetId),
-                                                       animated: true)
-                                        } else {
-                                            UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: targetId), animated: true)
-                                        }
+                            if let account = AppGlobalState.shared.account,
+                               let targetId = viewModel.discussion.starter?.id,
+                               targetId != account.userIdString {
+                                if let vc = uiKitEnvironment.vc {
+                                    if vc.presentingViewController != nil {
+                                        vc.present(ProfileCenterViewController(userId: targetId),
+                                                   animated: true)
                                     } else {
-                                        fatalErrorDebug()
+                                        UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: targetId), animated: true)
                                     }
+                                } else {
+                                    fatalErrorDebug()
                                 }
-                            } else {
-                                UIApplication.shared.topController()?.presentSignView()
                             }
                         }
                     VStack(alignment: .leading, spacing: 2) {
@@ -722,23 +715,19 @@ struct HomePostCardViewLarge: View {
                         .mask(Circle())
                         .overlay(Circle().stroke(Color.white, lineWidth: 1))
                         .onTapGesture {
-                            if AppGlobalState.shared.tokenPrepared {
-                                if AppGlobalState.shared.userId != "",
-                                   let targetId = viewModel.discussion.starter?.id,
-                                   targetId != AppGlobalState.shared.userId {
-                                    if let vc = uiKitEnvironment.vc {
-                                        if vc.presentingViewController != nil {
-                                            vc.present(ProfileCenterViewController(userId: targetId),
-                                                       animated: true)
-                                        } else {
-                                            UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: targetId), animated: true)
-                                        }
+                            if let account = AppGlobalState.shared.account,
+                               let targetId = viewModel.discussion.starter?.id,
+                               targetId != account.userIdString {
+                                if let vc = uiKitEnvironment.vc {
+                                    if vc.presentingViewController != nil {
+                                        vc.present(ProfileCenterViewController(userId: targetId),
+                                                   animated: true)
                                     } else {
-                                        fatalErrorDebug()
+                                        UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: targetId), animated: true)
                                     }
+                                } else {
+                                    fatalErrorDebug()
                                 }
-                            } else {
-                                UIApplication.shared.topController()?.presentSignView()
                             }
                         }
                     VStack(alignment: .leading, spacing: 2) {

@@ -248,11 +248,6 @@ struct SignUpView: View {
                         } else if let _ = try? result.map(RegisterSuccessModel.self) {
                             Task {
                                 await AppGlobalState.shared.login(account: signUpViewModel.account, password: signUpViewModel.password)
-                                DispatchQueue.main.async {
-                                    AppGlobalState.shared.isLogged = true
-                                    AppGlobalState.shared.account = signUpViewModel.account
-                                    AppGlobalState.shared.password = signUpViewModel.password
-                                }
                             }
                             registering = false
                             model.dismissModal.toggle()

@@ -30,6 +30,16 @@ extension UISplitViewController {
                 guard noOverlayVC.shouldPushTo(nvc: nvc) else { return }
             }
 
+            if let hasNavigationPermission = viewController as? HasNavigationPermission {
+                switch hasNavigationPermission.navigationPermission() {
+                case .login:
+                    if !AppGlobalState.shared.tokenPrepared {
+                        UIApplication.shared.topController()?.presentSignView()
+                        return
+                    }
+                }
+            }
+
             if viewController.navigationItem.scrollEdgeAppearance == nil {
                 viewController.navigationItem.scrollEdgeAppearance = UINavigationBarAppearance()
             }

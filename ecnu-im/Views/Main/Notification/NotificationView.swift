@@ -109,51 +109,35 @@ struct NotificationView: View {
         .onTapGesture {
             switch notification.attributes.content {
             case .postLiked, .postReacted:
-                if AppGlobalState.shared.tokenPrepared {
-                    if let post = originalPost,
-                       let discussion = post.relationships?.discussion,
-                       let number = post.attributes?.number {
-                        uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearNumber: number),
-                                                       column: .secondary,
-                                                       toRoot: true)
-                    }
-                } else {
-                    UIApplication.shared.topController()?.presentSignView()
+                if let post = originalPost,
+                   let discussion = post.relationships?.discussion,
+                   let number = post.attributes?.number {
+                    uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearNumber: number),
+                                                   column: .secondary,
+                                                   toRoot: true)
                 }
             case let .postMentioned(replyNumber):
-                if AppGlobalState.shared.tokenPrepared {
-                    if let post = originalPost,
-                       let discussion = post.relationships?.discussion {
-                        uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearNumber: replyNumber),
-                                                       column: .secondary,
-                                                       toRoot: true)
-                    }
-                } else {
-                    UIApplication.shared.topController()?.presentSignView()
+                if let post = originalPost,
+                   let discussion = post.relationships?.discussion {
+                    uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearNumber: replyNumber),
+                                                   column: .secondary,
+                                                   toRoot: true)
                 }
             case .badgeReceived:
                 uiKitEnvironment.vc?.tabController?.select(tab: .profile, info: [ProfileCategory.key: ProfileCategory.badge])
             case let .privateDiscussionReplied(postNumber):
-                if AppGlobalState.shared.tokenPrepared {
-                    if let post = originalPost,
-                       let discussion = post.relationships?.discussion {
-                        uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearNumber: postNumber),
-                                                       column: .secondary,
-                                                       toRoot: true)
-                    }
-                } else {
-                    UIApplication.shared.topController()?.presentSignView()
+                if let post = originalPost,
+                   let discussion = post.relationships?.discussion {
+                    uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearNumber: postNumber),
+                                                   column: .secondary,
+                                                   toRoot: true)
                 }
             case .privateDiscussionCreated:
-                if AppGlobalState.shared.tokenPrepared {
-                    if let post = originalPost,
-                       let discussion = post.relationships?.discussion {
-                        uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearNumber: 0),
-                                                       column: .secondary,
-                                                       toRoot: true)
-                    }
-                } else {
-                    UIApplication.shared.topController()?.presentSignView()
+                if let post = originalPost,
+                   let discussion = post.relationships?.discussion {
+                    uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearNumber: 0),
+                                                   column: .secondary,
+                                                   toRoot: true)
                 }
             }
         }

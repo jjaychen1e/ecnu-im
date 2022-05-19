@@ -5,23 +5,56 @@
 //  Created by 陈俊杰 on 2022/5/14.
 //
 
+import Combine
 import Foundation
 import SwiftUI
 
+struct Account: Codable {
+    var account: String
+    var password: String
+    var userId: Int
+
+    var userIdString: String {
+        "\(userId)"
+    }
+}
+
+/// https://stackoverflow.com/a/68795484
+extension Optional: RawRepresentable where Wrapped: Codable {
+    public var rawValue: String {
+        guard let data = try? JSONEncoder().encode(self),
+              let json = String(data: data, encoding: .utf8)
+        else {
+            return "{}"
+        }
+        return json
+    }
+
+    public init?(rawValue: String) {
+        guard let data = rawValue.data(using: .utf8),
+              let value = try? JSONDecoder().decode(Self.self, from: data)
+        else {
+            return nil
+        }
+        self = value
+    }
+}
+
 class AppGlobalState: ObservableObject {
-    @AppStorage("isLogged") var isLogged = false
-    @AppStorage("account") var account: String = ""
-    @AppStorage("userId") var userId: String = ""
-    @AppStorage("password") var password: String = ""
+    @AppStorage("account") private(set) var account: Account? = nil
     @Published var unreadNotificationCount = 0
     @Published var tokenPrepared = false
     @Published var userInfo: FlarumUser?
     @Published var ignoredUserIds: Set<String> = []
+
+    @Published var hasTriedToLogin = false
+    var loginEvent = PassthroughSubject<Void, Never>()
+
     private var flarumTokenCookie: HTTPCookie?
 
     var userIdInt: Int? {
-        if let userIdInt = Int(userId) {
-            return userIdInt
+        if let account = account {
+            return account.userId
         }
         return nil
     }
@@ -29,22 +62,14 @@ class AppGlobalState: ObservableObject {
     static let shared = AppGlobalState()
 
     func clearCookieStorage() {
-        if let cookieStorage = flarumProvider.session.sessionConfiguration.httpCookieStorage,
-           let cookies = cookieStorage.cookies(for: URL(string: "https://ecnu.im")!) {
-            for cookie: HTTPCookie in cookies {
-                cookieStorage.deleteCookie(cookie)
-            }
-        }
+        flarumProvider.session.session.reset(completionHandler: {})
     }
 
     func logout() {
         clearCookieStorage()
         AppGlobalState.shared.tokenPrepared = false
         AppGlobalState.shared.unreadNotificationCount = 0
-        AppGlobalState.shared.isLogged = false
-        AppGlobalState.shared.account = ""
-        AppGlobalState.shared.userId = ""
-        AppGlobalState.shared.password = ""
+        AppGlobalState.shared.account = nil
     }
 
     @discardableResult
@@ -59,7 +84,8 @@ class AppGlobalState: ObservableObject {
                 ])!
                 flarumProvider.session.sessionConfiguration.httpCookieStorage?.setCookie(flarumTokenCookie)
                 DispatchQueue.main.async {
-                    AppGlobalState.shared.userId = "\(token.userId)"
+                    self.account = Account(account: account, password: password, userId: token.userId)
+                    self.hasTriedToLogin = true
                     self.tokenPrepared = true
                 }
                 if let response = try? await flarumProvider.request(.user(id: token.userId)).flarumResponse() {
@@ -81,12 +107,14 @@ class AppGlobalState: ObservableObject {
                 }
             }
         }
+        loginEvent.send()
+        hasTriedToLogin = true
         return false
     }
 
     func tryToLoginWithStoredAccount() async {
-        if isLogged {
-            let loginResult = await login(account: account, password: password)
+        if let account = account {
+            let loginResult = await login(account: account.account, password: account.password)
             if !loginResult {
                 // Maybe password has been modified
                 await UIApplication.shared.topController()?.presentSignView()

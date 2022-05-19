@@ -10,7 +10,7 @@ import RxSwift
 import SwiftUI
 import UIKit
 
-class AllDiscussionsViewController: UIViewController {
+class AllDiscussionsViewController: UIViewController, HasNavigationPermission {
     private var hostingViewController: UIHostingController<EnvironmentWrapperView<AllDiscussionsView>>!
     weak var splitVC: UISplitViewController?
     weak var nvc: UINavigationController?

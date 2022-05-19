@@ -21,16 +21,14 @@ class TabItem {
     var name: String
     var color: Color
     var viewController: UIViewController
-    var loginRequired: Bool
     var badgeCount: Int = 0
 
-    internal init(tab: TabItem.Tab, icon: String, name: String, color: Color, viewController: UIViewController, loginRequired: Bool = false, badgeCount: Int = 0) {
+    internal init(tab: TabItem.Tab, icon: String, name: String, color: Color, viewController: UIViewController, badgeCount: Int = 0) {
         self.tab = tab
         self.icon = icon
         self.name = name
         self.color = color
         self.viewController = viewController
-        self.loginRequired = loginRequired
         self.badgeCount = badgeCount
     }
 }

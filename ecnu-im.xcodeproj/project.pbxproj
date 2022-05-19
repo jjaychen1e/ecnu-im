@@ -97,6 +97,7 @@
 		6365778227F19C52008AD10E /* FontAwesome+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6365778127F19C52008AD10E /* FontAwesome+Extension.swift */; };
 		6365778627F1D897008AD10E /* UserDefaluts+JSON+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6365778527F1D897008AD10E /* UserDefaluts+JSON+Extension.swift */; };
 		636673912807308A00A732A3 /* MiniEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 636673902807308A00A732A3 /* MiniEditor.swift */; };
+		636AE8022836903F0035EFB5 /* HasNavigationPermission.swift in Sources */ = {isa = PBXBuildFile; fileRef = 636AE8012836903F0035EFB5 /* HasNavigationPermission.swift */; };
 		636BE16B27F7231900283943 /* Regex in Frameworks */ = {isa = PBXBuildFile; productRef = 636BE16A27F7231900283943 /* Regex */; };
 		636BE17127F7FD6600283943 /* IMTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 636BE17027F7FD6600283943 /* IMTheme.swift */; };
 		636BE17327F7FDB800283943 /* DefaultTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 636BE17227F7FDB800283943 /* DefaultTheme.swift */; };
@@ -287,6 +288,7 @@
 		6365778127F19C52008AD10E /* FontAwesome+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FontAwesome+Extension.swift"; sourceTree = "<group>"; };
 		6365778527F1D897008AD10E /* UserDefaluts+JSON+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaluts+JSON+Extension.swift"; sourceTree = "<group>"; };
 		636673902807308A00A732A3 /* MiniEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniEditor.swift; sourceTree = "<group>"; };
+		636AE8012836903F0035EFB5 /* HasNavigationPermission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HasNavigationPermission.swift; sourceTree = "<group>"; };
 		636BE17027F7FD6600283943 /* IMTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IMTheme.swift; sourceTree = "<group>"; };
 		636BE17227F7FDB800283943 /* DefaultTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultTheme.swift; sourceTree = "<group>"; };
 		636BE17427F7FE0C00283943 /* ThemeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeManager.swift; sourceTree = "<group>"; };
@@ -721,6 +723,7 @@
 		635B2A5F27EEE78000FF6109 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				636AE800283690190035EFB5 /* Navigation Permission */,
 				634A57552816D65E0022B27E /* Content Parser */,
 				636BE16F27F7FD3C00283943 /* Themes */,
 				63DA4FC727F5751900F4FA6E /* Images Viewer */,
@@ -829,6 +832,14 @@
 				636673902807308A00A732A3 /* MiniEditor.swift */,
 			);
 			path = Editor;
+			sourceTree = "<group>";
+		};
+		636AE800283690190035EFB5 /* Navigation Permission */ = {
+			isa = PBXGroup;
+			children = (
+				636AE8012836903F0035EFB5 /* HasNavigationPermission.swift */,
+			);
+			path = "Navigation Permission";
 			sourceTree = "<group>";
 		};
 		636BE16F27F7FD3C00283943 /* Themes */ = {
@@ -1550,6 +1561,7 @@
 				63706E1127F5EDFE00BE3A48 /* SwiftyJSON+Extension.swift in Sources */,
 				634003E1282FD68C001A5D37 /* ProfileCenterPostView.swift in Sources */,
 				638F90912802B4BB002308E0 /* AllDiscussionsView.swift in Sources */,
+				636AE8022836903F0035EFB5 /* HasNavigationPermission.swift in Sources */,
 				631BB0382805E4FD007D4138 /* Extensions.swift in Sources */,
 				63B74093280277A900376B94 /* SignUpView.swift in Sources */,
 				6380BC112833D9EA00050AFA /* PostUserStorage.swift in Sources */,

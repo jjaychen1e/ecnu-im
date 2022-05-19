@@ -47,8 +47,8 @@ class TabController: UIViewController {
 
     private lazy var tabBarItems: [TabItem] = [
         .init(tab: .posts, icon: "message", name: "帖子", color: .teal, viewController: homeViewController),
-        .init(tab: .notifications, icon: "bell", name: "通知", color: .red, viewController: notificationCenterViewController, loginRequired: true),
-        .init(tab: .profile, icon: "person", name: "个人资料", color: .blue, viewController: myProfileViewController, loginRequired: true),
+        .init(tab: .notifications, icon: "bell", name: "通知", color: .red, viewController: notificationCenterViewController),
+        .init(tab: .profile, icon: "person", name: "个人资料", color: .blue, viewController: myProfileViewController),
         .init(tab: .setting, icon: "gearshape", name: "设置", color: .gray, viewController: SettingViewController()),
     ]
 
@@ -86,11 +86,15 @@ class TabController: UIViewController {
     func select(tab: TabItem.Tab, info: [String: Any] = [:]) {
         if let nextVCIndex = tabBarItems.firstIndex(where: { $0.tab == tab }) {
             let tabBarItem = tabBarItems[nextVCIndex]
-            if tabBarItem.loginRequired, !AppGlobalState.shared.tokenPrepared {
-                UIApplication.shared.topController()?.presentSignView()
-                return
-            }
             let nextVC = tabBarItem.viewController
+            if let hasNavigationPermission = nextVC as? HasNavigationPermission {
+                switch hasNavigationPermission.navigationPermission() {
+                case .login:
+                    if !AppGlobalState.shared.tokenPrepared {
+                        UIApplication.shared.topController()?.presentSignView()
+                    }
+                }
+            }
             if let currentController = currentController {
                 currentController.safelyRemoveFromParent()
             }
