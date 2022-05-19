@@ -8,11 +8,13 @@
 import SwiftUI
 
 struct DiscussionTagsView: View {
-    private let tags: [TagViewModel]
+    @State var tags: [TagViewModel]
+    @State var fontSize: CGFloat = 12
+    @State var horizontalPadding: CGFloat = 5
+    @State var verticalPadding: CGFloat = 4
+    @State var cornerRadius: CGFloat = 5
+    @State var spacing: CGFloat = 2
 
-    init(tags: [TagViewModel]) {
-        self.tags = tags
-    }
 
     var body: some View {
         if tags.count > 0 {
@@ -26,23 +28,23 @@ struct DiscussionTagsView: View {
                     }
                 }
             }
-            .mask(RoundedRectangle(cornerRadius: 5, style: .continuous))
+            .mask(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
         } else {
             EmptyView()
         }
     }
 
     func singleTagView(tag: TagViewModel) -> some View {
-        HStack(spacing: 2) {
+        HStack(spacing: spacing) {
             if let iconInfo = tag.iconInfo {
-                Text(fa: iconInfo.icon, faStyle: iconInfo.style, size: 12)
+                Text(fa: iconInfo.icon, faStyle: iconInfo.style, size: fontSize)
             }
             Text(tag.name)
-                .font(.system(size: 12))
+                .font(.system(size: fontSize))
         }
         .foregroundColor(tag.fontColor ?? .primary)
-        .padding(.horizontal, 5)
-        .padding(.vertical, 4)
+        .padding(.horizontal, horizontalPadding)
+        .padding(.vertical, verticalPadding)
         .background(tag.backgroundColor)
     }
 }

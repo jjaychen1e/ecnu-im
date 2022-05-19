@@ -26,8 +26,5 @@ class AllDiscussionsViewController: UIViewController {
         ))
         self.hostingViewController = hostingViewController
         addChildViewController(hostingViewController, addConstrains: true)
-        title = "最新回复"
-        let scrollEdgeAppearance = UINavigationBarAppearance()
-        navigationItem.scrollEdgeAppearance = scrollEdgeAppearance
     }
 }

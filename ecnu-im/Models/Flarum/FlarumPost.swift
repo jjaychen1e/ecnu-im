@@ -187,6 +187,10 @@ extension FlarumPost {
             return nil
         }
     }
+    
+    var isHidden: Bool {
+        attributes?.isHidden ?? false
+    }
 }
 
 extension FlarumPost: Equatable {

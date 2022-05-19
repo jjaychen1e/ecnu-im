@@ -83,13 +83,13 @@ struct TabBarContentView: View {
         let tabCount = viewModel.tabBarItems.count
         let tabWidth = min(44, totalWidth / CGFloat(tabCount))
         return ForEach(Array(zip(viewModel.tabBarItems.indices, viewModel.tabBarItems)), id: \.0) { index, tabItem in
-            if index == 0 { Spacer() }
+            if index == 0 { Spacer(minLength: 0) }
 
             Button {
                 viewModel.selectAction(tabItem.tab)
             } label: {
                 VStack(spacing: 0) {
-                    Spacer()
+                    Spacer(minLength: 0)
                     Image(systemName: tabItem.icon)
                         .symbolVariant(.fill)
                         .font(.system(size: 17, weight: .bold))
@@ -118,7 +118,7 @@ struct TabBarContentView: View {
             .frame(width: tabWidth)
             .foregroundColor(selectedTab == tabItem.tab ? .primary : .secondary)
 
-            Spacer()
+            Spacer(minLength: 0)
         }
     }
 }

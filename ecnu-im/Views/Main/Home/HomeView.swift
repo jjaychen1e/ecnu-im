@@ -20,6 +20,7 @@ struct ScrollPreferenceKey: PreferenceKey {
 
 private class FlarumDiscussionPreviewViewModel: ObservableObject {
     @Published var discussion: FlarumDiscussion
+    @Published var likesUsers: [FlarumUser] = []
     @Published var relatedUsers: [FlarumUser] = []
     @Published var postExcerpt: String = ""
     init(discussion: FlarumDiscussion) {
@@ -59,6 +60,8 @@ struct HomeView: View {
 
     @State var hasScrolled = false
 
+    @ObservedObject var appGlobalState = AppGlobalState.shared
+
     private func processDiscussions(discussions: [FlarumDiscussion]) async {
         withAnimation {
             viewModel.stickyDiscussions = discussions.filter {
@@ -95,7 +98,13 @@ struct HomeView: View {
                                                                                imageCountMax: 0)) {
                             correspondingDiscussionViewModel.postExcerpt = excerpt
                         } else {
-                            correspondingDiscussionViewModel.postExcerpt = AppGlobalState.shared.tokenPrepared ? "无法查看预览内容，请检查账号邮箱是否已验证。" : "登录以查看内容预览"
+                            if !AppGlobalState.shared.tokenPrepared {
+                                correspondingDiscussionViewModel.postExcerpt = "登录以查看内容预览"
+                            } else if AppGlobalState.shared.userInfo?.isEmailConfirmed == false {
+                                correspondingDiscussionViewModel.postExcerpt = "无法查看预览内容，请检查账号邮箱是否已验证。"
+                            } else {
+                                correspondingDiscussionViewModel.postExcerpt = "未知错误，无法查看预览内容"
+                            }
                         }
                     }
                 }
@@ -119,6 +128,13 @@ struct HomeView: View {
                             withAnimation {
                                 correspondingDiscussionViewModel.relatedUsers = filteredUsers
                             }
+                        }
+                    }
+                    Task {
+                        if let id = Int(discussion.lastPost?.id ?? ""),
+                           let response = try? await flarumProvider.request(.postsById(id: id, includes: [.likes])).flarumResponse() {
+                            let users = response.data.posts.first?.relationships?.likes?.unique { $0.id }.prefix(5).compactMap { $0 } ?? []
+                            correspondingDiscussionViewModel.likesUsers = Array(users)
                         }
                     }
                 }
@@ -221,6 +237,11 @@ struct HomeView: View {
                                                     Task {
                                                         if let id = AppGlobalState.shared.userIdInt {
                                                             if let response = try? await flarumProvider.request(.user(id: id)).flarumResponse() {
+                                                                if appGlobalState.userInfo == nil {
+                                                                    DispatchQueue.main.async {
+                                                                        appGlobalState.userInfo = response.data.users.first
+                                                                    }
+                                                                }
                                                                 let userBadges = response.included.userBadges
                                                                 FlarumBadgeStorage.shared.store(userBadges: userBadges)
                                                                 if let userBadge = FlarumBadgeStorage.shared.userBadge(for: userBadgeId),
@@ -305,8 +326,6 @@ struct HomeView: View {
             header
         }
         .onLoad {
-            load()
-
             AppGlobalState.shared.$tokenPrepared.sink { change in
                 load()
             }.store(in: &subscriptions)
@@ -498,6 +517,7 @@ struct HomeView: View {
                                     }
                             }
                             .buttonStyle(.plain)
+                            .opacity(appGlobalState.ignoredUserIds.contains(viewModel.discussion.starter?.id ?? "") == true ? 0.3 : 1.0)
                         }
                     }
                     .padding(.all, 24)
@@ -521,8 +541,14 @@ struct HomeView: View {
                     Text("最新动态")
                         .font(.system(size: 34, weight: .bold, design: .rounded))
                         .padding(.leading)
-                    Spacer()
-                    Button {} label: {
+                    Spacer(minLength: 0)
+                    Button {
+                        if AppGlobalState.shared.tokenPrepared {
+                            uiKitEnvironment.splitVC?.push(viewController: AllDiscussionsViewController(), column: .primary)
+                        } else {
+                            UIApplication.shared.topController()?.presentSignView()
+                        }
+                    } label: {
                         Text("查看全部")
                             .font(.system(size: 14, weight: .semibold, design: .rounded).bold())
                             .padding(.trailing)
@@ -534,6 +560,7 @@ struct HomeView: View {
                     VStack(spacing: 16) {
                         ForEach(0 ..< viewModel.newestDiscussions.count, id: \.self) { index in
                             let viewModel = viewModel.newestDiscussions[index]
+                            let ignored = appGlobalState.ignoredUserIds.contains(viewModel.discussion.starter?.id ?? "")
                             Button {
                                 if AppGlobalState.shared.tokenPrepared {
                                     let lastReadPostNumber = viewModel.discussion.attributes?.lastReadPostNumber ?? 0
@@ -547,6 +574,18 @@ struct HomeView: View {
                                 HomePostCardViewLarge(viewModel: viewModel)
                             }
                             .buttonStyle(.plain)
+                            .dimmedOverlay(ignored: .constant(ignored), isHidden: .constant(viewModel.discussion.isHidden))
+                        }
+                        Button {
+                            if AppGlobalState.shared.tokenPrepared {
+                                uiKitEnvironment.splitVC?.push(viewController: AllDiscussionsViewController(), column: .primary)
+                            } else {
+                                UIApplication.shared.topController()?.presentSignView()
+                            }
+                        } label: {
+                            Text("查看全部")
+                                .font(.system(size: 14, weight: .semibold, design: .rounded).bold())
+                                .padding(.trailing)
                         }
                     }
                     .padding(.all, 24)
@@ -567,6 +606,7 @@ struct HomeView: View {
 
 private struct HomePostCardView: View {
     @ObservedObject private var viewModel: FlarumDiscussionPreviewViewModel
+    @EnvironmentObject var uiKitEnvironment: UIKitEnvironment
 
     fileprivate init(viewModel: FlarumDiscussionPreviewViewModel) {
         self.viewModel = viewModel
@@ -579,6 +619,26 @@ private struct HomePostCardView: View {
                     PostAuthorAvatarView(name: viewModel.discussion.starterName, url: viewModel.discussion.starterAvatarURL, size: 40)
                         .mask(Circle())
                         .overlay(Circle().stroke(Color.white, lineWidth: 1))
+                        .onTapGesture {
+                            if AppGlobalState.shared.tokenPrepared {
+                                if AppGlobalState.shared.userId != "",
+                                   let targetId = viewModel.discussion.starter?.id,
+                                   targetId != AppGlobalState.shared.userId {
+                                    if let vc = uiKitEnvironment.vc {
+                                        if vc.presentingViewController != nil {
+                                            vc.present(ProfileCenterViewController(userId: targetId),
+                                                       animated: true)
+                                        } else {
+                                            UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: targetId), animated: true)
+                                        }
+                                    } else {
+                                        fatalErrorDebug()
+                                    }
+                                }
+                            } else {
+                                UIApplication.shared.topController()?.presentSignView()
+                            }
+                        }
                     VStack(alignment: .leading, spacing: 2) {
                         Text(viewModel.discussion.discussionTitle)
                             .lineLimit(1)
@@ -608,7 +668,7 @@ private struct HomePostCardView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
 
                 HStack(spacing: 4) {
-                    Spacer()
+                    Spacer(minLength: 0)
                     HStack(spacing: -3) {
                         ForEach(0 ..< viewModel.relatedUsers.count, id: \.self) { index in
                             let user = viewModel.relatedUsers[index]
@@ -648,6 +708,7 @@ private struct HomePostCardView: View {
 
 struct HomePostCardViewLarge: View {
     @ObservedObject private var viewModel: FlarumDiscussionPreviewViewModel
+    @EnvironmentObject var uiKitEnvironment: UIKitEnvironment
 
     fileprivate init(viewModel: FlarumDiscussionPreviewViewModel) {
         self.viewModel = viewModel
@@ -660,6 +721,26 @@ struct HomePostCardViewLarge: View {
                     PostAuthorAvatarView(name: viewModel.discussion.starterName, url: viewModel.discussion.starterAvatarURL, size: 40)
                         .mask(Circle())
                         .overlay(Circle().stroke(Color.white, lineWidth: 1))
+                        .onTapGesture {
+                            if AppGlobalState.shared.tokenPrepared {
+                                if AppGlobalState.shared.userId != "",
+                                   let targetId = viewModel.discussion.starter?.id,
+                                   targetId != AppGlobalState.shared.userId {
+                                    if let vc = uiKitEnvironment.vc {
+                                        if vc.presentingViewController != nil {
+                                            vc.present(ProfileCenterViewController(userId: targetId),
+                                                       animated: true)
+                                        } else {
+                                            UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: targetId), animated: true)
+                                        }
+                                    } else {
+                                        fatalErrorDebug()
+                                    }
+                                }
+                            } else {
+                                UIApplication.shared.topController()?.presentSignView()
+                            }
+                        }
                     VStack(alignment: .leading, spacing: 2) {
                         Text(viewModel.discussion.discussionTitle)
                             .lineLimit(1)
@@ -687,7 +768,8 @@ struct HomePostCardViewLarge: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
 
                 HStack(spacing: 4) {
-                    Spacer()
+                    likeHint
+                    Spacer(minLength: 0)
                     HStack(spacing: -3) {
                         ForEach(0 ..< viewModel.relatedUsers.count, id: \.self) { index in
                             let user = viewModel.relatedUsers[index]
@@ -720,6 +802,28 @@ struct HomePostCardViewLarge: View {
             .padding(.bottom, 6)
             .background(.ultraThinMaterial)
             .backgroundStyle(cornerRadius: 15, opacity: 0.3)
+        }
+    }
+
+    var likeHint: some View {
+        Group {
+            if let likesUsers = viewModel.likesUsers,
+               likesUsers.count > 0 {
+                let threshold = 3
+                let likesUserName = likesUsers.prefix(threshold).map { $0.attributes.displayName }.joined(separator: ", ")
+                    + "\(likesUsers.count > 3 ? "等\(likesUsers.count)人" : "")"
+                Group {
+                    (Text(Image(systemName: "heart.fill")) + Text(" \(likesUserName)觉得很赞"))
+                        .font(.system(size: 11, weight: .medium, design: .rounded))
+                        .foregroundColor(.primary.opacity(0.8))
+                }
+                .font(.system(size: 11, weight: .medium, design: .rounded))
+                .foregroundColor(.primary.opacity(0.8))
+                .padding(.horizontal, 6)
+                .padding(.vertical, 4)
+                .background(Color.primary.opacity(0.1))
+                .cornerRadius(4)
+            }
         }
     }
 }

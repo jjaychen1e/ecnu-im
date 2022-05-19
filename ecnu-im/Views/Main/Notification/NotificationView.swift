@@ -32,7 +32,7 @@ struct NotificationView: View {
                 }
             }
             .font(.system(size: 17, weight: .bold, design: .rounded))
-            .foregroundColor(.init(rgba: "#566A89"))
+            .foregroundColor(Color(light: Color(rgba: "#566A89"), dark: Color(rgba: "#96AAC9")))
 
             originalPostExcerptView(post: originalPost)
 
@@ -148,7 +148,7 @@ struct NotificationView: View {
                 if AppGlobalState.shared.tokenPrepared {
                     if let post = originalPost,
                        let discussion = post.relationships?.discussion {
-                        uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearOffset: 0),
+                        uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearNumber: 0),
                                                        column: .secondary,
                                                        toRoot: true)
                     }

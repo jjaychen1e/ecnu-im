@@ -5,6 +5,7 @@
 //  Created by 陈俊杰 on 2022/4/30.
 //
 
+import Combine
 import FlexLayout
 import PinLayout
 import SnapKit
@@ -64,10 +65,13 @@ private struct PostCommentCellFooterViewWrapper: View {
 final class PostCommentCell: UITableViewCell {
     static let identifier = "PostCommentCell"
 
+    private var subscriptions: Set<AnyCancellable> = []
+
     private var post: FlarumPost?
     private var postContentItemsUIView: PostContentItemsUIView?
     private var headerViewHostingVC: UIHostingController<PostCommentCellHeaderViewWrapper>!
     private var footerViewHostingVC: UIHostingController<PostCommentCellFooterViewWrapper>!
+    private var dimmedReasonView = UILabel()
 
     private let avatarViewSize: CGFloat = 40.0
     private let avatarContentMargin: CGFloat = 8.0
@@ -106,6 +110,12 @@ final class PostCommentCell: UITableViewCell {
         )
         footerViewHostingVC.view.backgroundColor = .clear
         contentView.addSubview(footerViewHostingVC.view)
+        
+        contentView.addSubview(dimmedReasonView)
+        dimmedReasonView.font = .systemFont(ofSize: 14, weight: .bold)
+        dimmedReasonView.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+        }
     }
 
     @available(*, unavailable)
@@ -122,6 +132,11 @@ final class PostCommentCell: UITableViewCell {
                    deletePostAction: @escaping () -> Void) {
         if post != self.post {
             self.post = post
+            subscriptions = []
+            headerViewHostingVC.view.alpha = 1.0
+            footerViewHostingVC.view.alpha = 1.0
+            postContentItemsUIView?.alpha = 1.0
+            dimmedReasonView.text = nil
             postContentItemsUIView?.removeFromSuperview()
 
             if let content = post.attributes?.content, case let .comment(comment) = content {
@@ -133,7 +148,15 @@ final class PostCommentCell: UITableViewCell {
                 self.postContentItemsUIView = postContentItemsUIView
                 contentView.addSubview(postContentItemsUIView)
             } else {
-                let attributedString = NSAttributedString(string: "无法查看预览内容，请检查账号邮箱是否已验证。")
+                var errHint: String
+                if !AppGlobalState.shared.tokenPrepared {
+                    errHint = "登录以查看内容预览"
+                } else if AppGlobalState.shared.userInfo?.isEmailConfirmed == false {
+                    errHint = "无法查看预览内容，请检查账号邮箱是否已验证。"
+                } else {
+                    errHint = "未知错误，无法查看预览内容"
+                }
+                let attributedString = NSAttributedString(string: errHint)
                 let postContentItemsUIView = PostContentItemsUIView(contentItems: [ContentItemParagraphUIView(attributedText: attributedString)])
                 self.postContentItemsUIView = postContentItemsUIView
                 contentView.addSubview(postContentItemsUIView)
@@ -144,11 +167,34 @@ final class PostCommentCell: UITableViewCell {
             footerViewHostingVC.rootView.update(post: post, replyAction: replyPostAction, editAction: editAction, hidePostAction: hidePostAction, deletePostAction: deletePostAction)
             footerViewHostingVC.rootView.update(vc: viewController)
 
-            if post.attributes?.isHidden == true {
-                contentView.alpha = 0.3
-            } else {
-                contentView.alpha = 1.0
+            AppGlobalState.shared.$ignoredUserIds.sink { [weak self] change in
+                if let self = self {
+                    let ignored: Bool
+                    if let authorId = self.post?.author?.id, change.contains(authorId) {
+                        ignored = true
+                    } else {
+                        ignored = false
+                    }
+                    let isDimmed = post.isHidden || ignored
+                    let color: UIColor = ignored ? .red : Asset.DynamicColors.dynamicBlack.color.withAlphaComponent(0.7)
+                    let overlayText: String = {
+                        var overlayTexts: [String] = []
+                        if post.isHidden {
+                            overlayTexts.append("已隐藏")
+                        }
+                        if ignored {
+                            overlayTexts.append("已屏蔽")
+                        }
+                        return overlayTexts.joined(separator: ", ")
+                    }()
+                    self.dimmedReasonView.text = overlayText
+                    self.dimmedReasonView.textColor = color
+                    self.postContentItemsUIView?.alpha = isDimmed ? 0.3 : 1.0
+                    self.headerViewHostingVC.view.alpha = isDimmed ? 0.3 : 1.0
+                    self.footerViewHostingVC.view.alpha = isDimmed ? 0.3 : 1.0
+                }
             }
+            .store(in: &subscriptions)
         }
     }
 

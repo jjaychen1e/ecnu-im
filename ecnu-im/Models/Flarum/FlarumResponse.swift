@@ -136,7 +136,7 @@ struct FlarumResponse {
                                     }
                                 } else {
                                     debugExecution {
-                                        let whitelist = ["discussionSuperStickied", "discussionMerged", "recipientsModified"]
+                                        let whitelist = ["discussionStickied", "discussionSuperStickied", "discussionMerged", "recipientsModified"]
                                         if let contentType = attributes["contentType"].string,
                                            !whitelist.contains(contentType) {
                                             fatalErrorDebug("\(contentType) is not in the whitelist.")
@@ -205,7 +205,11 @@ struct FlarumResponse {
                                 if let profileAnswerIds = dataJSON["relationships"]["masqueradeAnswers"]["data"].array?.compactMap({ $0["id"].string }) {
                                     profileAnswers = includedData.profileAnswers.filter { profileAnswerIds.contains($0.id) }
                                 }
-                                user.relationships = FlarumUserRelationships(userBadges: userBadges, profileAnswers: profileAnswers)
+                                var ignoredUsers: [FlarumUser] = []
+                                if let ignoredUserIds = dataJSON["relationships"]["ignoredUsers"]["data"].array?.compactMap({ $0["id"].string }) {
+                                    ignoredUsers = includedData.users.filter { ignoredUserIds.contains($0.id) }
+                                }
+                                user.relationships = FlarumUserRelationships(userBadges: userBadges, profileAnswers: profileAnswers, ignoredUsers: ignoredUsers)
                             }
                             responseData.allData.append(.user(user))
                             responseData.users.append(user)

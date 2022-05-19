@@ -15,6 +15,8 @@ class AppGlobalState: ObservableObject {
     @AppStorage("password") var password: String = ""
     @Published var unreadNotificationCount = 0
     @Published var tokenPrepared = false
+    @Published var userInfo: FlarumUser?
+    @Published var ignoredUserIds: Set<String> = []
     private var flarumTokenCookie: HTTPCookie?
 
     var userIdInt: Int? {
@@ -59,6 +61,17 @@ class AppGlobalState: ObservableObject {
                 DispatchQueue.main.async {
                     AppGlobalState.shared.userId = "\(token.userId)"
                     self.tokenPrepared = true
+                }
+                if let response = try? await flarumProvider.request(.user(id: token.userId)).flarumResponse() {
+                    if AppGlobalState.shared.userInfo == nil {
+                        DispatchQueue.main.async {
+                            AppGlobalState.shared.userInfo = response.data.users.first
+                        }
+                    }
+                    FlarumBadgeStorage.shared.store(userBadges: response.included.userBadges)
+                    DispatchQueue.main.async {
+                        AppGlobalState.shared.ignoredUserIds = Set(response.data.users.first?.relationships?.ignoredUsers.compactMap { $0.id } ?? [])
+                    }
                 }
                 return true
             } else {

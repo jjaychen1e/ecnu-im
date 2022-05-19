@@ -45,7 +45,7 @@ struct DiscussionHeaderView: View {
                 if let splitVC = uiKitEnvironment.splitVC,
                    let nvc = uiKitEnvironment.nvc {
                     Button(action: {
-                        splitVC.pop(from: nvc, animated: true)
+                        splitVC.pop(from: nvc)
                     }, label: {
                         Image(systemName: "arrow.backward.circle.fill")
                             .font(.system(size: 30, weight: .medium))

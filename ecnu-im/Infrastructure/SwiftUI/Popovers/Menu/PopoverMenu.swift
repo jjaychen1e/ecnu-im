@@ -17,6 +17,8 @@ struct PopoverMenuItem: View {
     @Environment(\.operatePopoverMenu) var operatePopoverMenu
     @Environment(\.popoverMenuMinWidth) var popoverMenuMinWidth
 
+    @Environment(\.isEnabled) var isEnabled
+
     var body: some View {
         Button {
             operatePopoverMenu(false, action)
@@ -24,13 +26,14 @@ struct PopoverMenuItem: View {
             HStack {
                 Image(systemName: systemImage)
                     .frame(width: 25, height: 25)
-                    .foregroundColor(iconColor)
+                    .foregroundColor(isEnabled ? iconColor : nil)
                 Text(title)
                     .font(.system(size: 15, weight: .regular, design: .rounded))
-                    .foregroundColor(titleColor)
+                    .foregroundColor(isEnabled ? titleColor : nil)
             }
             .frame(minWidth: popoverMenuMinWidth, alignment: .leading)
         }
+        .disabled(!isEnabled)
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
         .overlay(

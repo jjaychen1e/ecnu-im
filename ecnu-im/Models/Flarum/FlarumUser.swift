@@ -19,6 +19,9 @@ struct FlarumUserAttributes: Codable {
     var likesReceived: Int?
     var commentCount: Int?
     var discussionCount: Int?
+    var ignored: Bool?
+    var canBeIgnored: Bool?
+    var isEmailConfirmed: Bool?
 
     var lastSeenAtDate: Date? {
         // date format, example: 2022-03-23T13:37:49+00:00
@@ -44,6 +47,7 @@ struct FlarumUserAttributes: Codable {
 struct FlarumUserRelationships: Codable {
     var userBadges: [FlarumUserBadge]
     var profileAnswers: [FlarumProfileAnswer]
+    var ignoredUsers: [FlarumUser]
 }
 
 final class FlarumUser {
@@ -113,6 +117,10 @@ extension FlarumUser {
 
     var discussionCount: Int {
         attributes.discussionCount ?? 0
+    }
+    
+    var isEmailConfirmed: Bool {
+        attributes.isEmailConfirmed ?? false
     }
 }
 

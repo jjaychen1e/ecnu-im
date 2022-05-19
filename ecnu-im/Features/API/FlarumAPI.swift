@@ -30,6 +30,13 @@ enum DiscussionIncludeOption: String, RawRepresentable {
     }()
 }
 
+enum PostIncludeOption: String, RawRepresentable {
+    case user
+    case likes
+    case mentionedBy
+    case mentionedBy_User = "mentionedBy.user"
+}
+
 enum DiscussionSortOption: String, RawRepresentable {
     case newest = "-createdAt"
     case oldest = "createdAt"
@@ -51,8 +58,8 @@ enum Flarum {
     case deletePost(id: Int)
     case posts(discussionID: Int, offset: Int, limit: Int)
     case postsNearNumber(discussionID: Int, nearNumber: Int, limit: Int)
-    case postsById(id: Int)
-    case postsByIds(ids: [Int])
+    case postsById(id: Int, includes: Set<PostIncludeOption> = [.user])
+    case postsByIds(ids: [Int], includes: Set<PostIncludeOption> = [.user])
     case postsByUserAccount(account: String, offset: Int, limit: Int, sort: DiscussionSortOption = .newest)
     case postLikeAction(id: Int, like: Bool)
     case register(email: String, username: String, nickname: String, password: String, recaptcha: String)
@@ -61,6 +68,7 @@ enum Flarum {
     case notification(offset: Int, limit: Int)
     case lastSeenUsers(limit: Int)
     case user(id: Int)
+    case ignoreUser(id: Int, ignored: Bool)
     case allBadgeCategories
     case allBadges
 }
@@ -112,6 +120,9 @@ extension Flarum: TargetType {
             return "api/users"
         case let .user(id):
             return "api/users/\(id)"
+        case let .ignoreUser(id, _):
+            return "api/users/\(id)"
+
         case .allBadgeCategories:
             return "api/badge_categories"
         case .allBadges:
@@ -161,6 +172,8 @@ extension Flarum: TargetType {
             return .get
         case .user:
             return .get
+        case .ignoreUser:
+            return .patch
         case .allBadgeCategories:
             return .get
         case .allBadges:
@@ -223,13 +236,15 @@ extension Flarum: TargetType {
                 "page[near]": max(0, nearNumber),
                 "page[limit]": limit,
             ], encoding: URLEncoding.default)
-        case let .postsById(id):
+        case let .postsById(id, includes):
             return .requestParameters(parameters: [
                 "filter[id]": "\(id)",
+                "include": includes.map { $0.rawValue }.joined(separator: ","),
             ], encoding: URLEncoding.default)
-        case let .postsByIds(ids):
+        case let .postsByIds(ids, includes):
             return .requestParameters(parameters: [
                 "filter[id]": ids.map { String($0) }.joined(separator: ","),
+                "include": includes.map { $0.rawValue }.joined(separator: ","),
             ], encoding: URLEncoding.default)
         case let .postsByUserAccount(account, offset, limit, sort):
             return .requestParameters(parameters: [
@@ -298,6 +313,16 @@ extension Flarum: TargetType {
             ], encoding: URLEncoding.default)
         case .user:
             return .requestPlain
+        case let .ignoreUser(id, ignored):
+            return .requestParameters(parameters: [
+                "data": [
+                    "type": "users",
+                    "id": "\(id)",
+                    "attributes": [
+                        "ignored": ignored,
+                    ],
+                ],
+            ], encoding: JSONEncoding.default)
         case .allBadgeCategories:
             return .requestPlain
         case .allBadges:
@@ -310,18 +335,16 @@ extension Flarum: TargetType {
             let basicHeader = [
                 "Accept-Language": "zh-CN,zh;",
             ]
-            switch self {
-            case .register, .newPost, .postLikeAction, .hidePost, .deletePost, .editPost:
+            let whitelist: [HTTPMethod] = [.post, .delete, .patch]
+            if whitelist.contains(method) {
                 let regex = Regex("\"csrfToken\":\"(.*?)\"")
                 if let homeResult = try? await flarumProvider.request(.home),
                    let homeContentStr = try? homeResult.mapString(),
                    let csrfToken = regex.firstMatch(in: homeContentStr)?.captures[0] {
                     return basicHeader.merging(["X-CSRF-Token": csrfToken]) { _, new in new }
                 }
-                fallthrough
-            default:
-                return basicHeader
             }
+            return basicHeader
         }
     }
 }

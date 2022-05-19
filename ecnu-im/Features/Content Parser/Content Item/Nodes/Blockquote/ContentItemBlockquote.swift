@@ -18,7 +18,7 @@ struct ContentItemBlockquote: View {
                 HStack {
                     Color.blue.opacity(0.3)
                         .frame(width: 5)
-                    Spacer()
+                    Spacer(minLength: 0)
                 }
             )
     }

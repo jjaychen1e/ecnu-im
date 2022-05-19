@@ -30,7 +30,6 @@ class DiscussionViewController: NoNavigationBarViewController, NoOverlayViewCont
     private var discussion: FlarumDiscussion
 
     private enum InitState {
-        case nearOffset(Int)
         case nearNumber(Int)
     }
 
@@ -62,14 +61,6 @@ class DiscussionViewController: NoNavigationBarViewController, NoOverlayViewCont
         let commentCount = discussion.attributes?.commentCount ?? 0
         let lastPostNumber = discussion.lastPost?.attributes?.number ?? 0
         return max(commentCount, lastPostNumber)
-    }
-
-    init(discussion: FlarumDiscussion, nearOffset: Int) {
-        self.discussion = discussion
-        initState = .nearOffset(nearOffset)
-        loader = DiscussionPostsLoader(discussionID: Int(discussion.id)!, limit: limit)
-        super.init(nibName: nil, bundle: nil)
-        loadMoreStates = .init(repeating: .placeholder, count: initialPostsCount)
     }
 
     init(discussion: FlarumDiscussion, nearNumber: Int) {
@@ -382,8 +373,6 @@ extension DiscussionViewController {
         case .placeholder:
             var targetNeat: Int
             switch initState {
-            case let .nearOffset(nearOffset):
-                targetNeat = nearOffset
             case let .nearNumber(nearNumber):
                 targetNeat = nearNumber
             }
@@ -404,17 +393,6 @@ extension DiscussionViewController {
     /// Only called when first time initialized
     private func loadData(initState: InitState) async {
         switch initState {
-        case let .nearOffset(nearOffset):
-            let offset = max(0, nearOffset - limit / 2)
-            await loadData(offset: offset, completionHandler: { [weak self] in
-                if let self = self {
-                    if offset < self.posts.count {
-                        self.tableView.scrollToRow(at: IndexPath(row: offset, section: 0), at: .top, animated: false)
-                    } else {
-                        fatalErrorDebug("Scroll target out of index!!")
-                    }
-                }
-            })
         case let .nearNumber(nearNumber):
             await loadData(nearNumber: nearNumber, completionHandler: { [weak self] in
                 if let self = self {

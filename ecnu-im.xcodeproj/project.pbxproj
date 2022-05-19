@@ -49,6 +49,7 @@
 		632B6247281A2E480064380C /* ContentItemBlockquote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632B6246281A2E480064380C /* ContentItemBlockquote.swift */; };
 		632B6249281A32FE0064380C /* ContentItemParagraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632B6248281A32FE0064380C /* ContentItemParagraph.swift */; };
 		633691B5282E7A6300730F9E /* ProfileCenterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633691B4282E7A6300730F9E /* ProfileCenterView.swift */; };
+		633A97B6283624A800F9E546 /* DimmedOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633A97B5283624A800F9E546 /* DimmedOverlay.swift */; };
 		633BC2E62813D98E00BC0930 /* FlarumDiscussion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633BC2E52813D98E00BC0930 /* FlarumDiscussion.swift */; };
 		633BC2E82813D9F900BC0930 /* FlarumPost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633BC2E72813D9F900BC0930 /* FlarumPost.swift */; };
 		633BC2EA2813DA4400BC0930 /* FlarumReaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633BC2E92813DA4400BC0930 /* FlarumReaction.swift */; };
@@ -140,6 +141,7 @@
 		63A6CCCF28156A51000075F7 /* DiscussionTagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63A6CCCE28156A51000075F7 /* DiscussionTagsView.swift */; };
 		63A6CCD128157FE0000075F7 /* DiscussionHeaderTagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63A6CCD028157FE0000075F7 /* DiscussionHeaderTagsView.swift */; };
 		63B3C72F28348F450068701F /* FlarumProfileAnswer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B3C72E28348F450068701F /* FlarumProfileAnswer.swift */; };
+		63B3C73228352CC60068701F /* DiscussionListCardCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B3C73128352CC60068701F /* DiscussionListCardCell.swift */; };
 		63B74092280277A900376B94 /* SignModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B7408F280277A900376B94 /* SignModalView.swift */; };
 		63B74093280277A900376B94 /* SignUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B74090280277A900376B94 /* SignUpView.swift */; };
 		63B74094280277A900376B94 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B74091280277A900376B94 /* SignInView.swift */; };
@@ -152,6 +154,8 @@
 		63B740A72802795900376B94 /* SlideFadeIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B740A62802795900376B94 /* SlideFadeIn.swift */; };
 		63B740A92802799300376B94 /* BackgroundColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B740A82802799300376B94 /* BackgroundColor.swift */; };
 		63B740AB280279A200376B94 /* BackgroundStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B740AA280279A200376B94 /* BackgroundStyle.swift */; };
+		63B833722836884D00BC2EAE /* UIColor+Dynamic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B833712836884D00BC2EAE /* UIColor+Dynamic.swift */; };
+		63B833742836888200BC2EAE /* Color+Dynamic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B833732836888200BC2EAE /* Color+Dynamic.swift */; };
 		63C607D7281E4FBB0008E2F3 /* SelfSizingTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C607D6281E4FBB0008E2F3 /* SelfSizingTextView.swift */; };
 		63CBCB20282AB54B0083018D /* PostCommentCellFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63CBCB1F282AB54B0083018D /* PostCommentCellFooterView.swift */; };
 		63CBCB22282AB57B0083018D /* PostCommentCellHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63CBCB21282AB57B0083018D /* PostCommentCellHeaderView.swift */; };
@@ -239,6 +243,7 @@
 		632B6246281A2E480064380C /* ContentItemBlockquote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentItemBlockquote.swift; sourceTree = "<group>"; };
 		632B6248281A32FE0064380C /* ContentItemParagraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentItemParagraph.swift; sourceTree = "<group>"; };
 		633691B4282E7A6300730F9E /* ProfileCenterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileCenterView.swift; sourceTree = "<group>"; };
+		633A97B5283624A800F9E546 /* DimmedOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DimmedOverlay.swift; sourceTree = "<group>"; };
 		633BC2E52813D98E00BC0930 /* FlarumDiscussion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlarumDiscussion.swift; sourceTree = "<group>"; };
 		633BC2E72813D9F900BC0930 /* FlarumPost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlarumPost.swift; sourceTree = "<group>"; };
 		633BC2E92813DA4400BC0930 /* FlarumReaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlarumReaction.swift; sourceTree = "<group>"; };
@@ -322,6 +327,7 @@
 		63A6CCCE28156A51000075F7 /* DiscussionTagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscussionTagsView.swift; sourceTree = "<group>"; };
 		63A6CCD028157FE0000075F7 /* DiscussionHeaderTagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscussionHeaderTagsView.swift; sourceTree = "<group>"; };
 		63B3C72E28348F450068701F /* FlarumProfileAnswer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlarumProfileAnswer.swift; sourceTree = "<group>"; };
+		63B3C73128352CC60068701F /* DiscussionListCardCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscussionListCardCell.swift; sourceTree = "<group>"; };
 		63B7408F280277A900376B94 /* SignModalView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignModalView.swift; sourceTree = "<group>"; };
 		63B74090280277A900376B94 /* SignUpView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignUpView.swift; sourceTree = "<group>"; };
 		63B74091280277A900376B94 /* SignInView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
@@ -334,6 +340,8 @@
 		63B740A62802795900376B94 /* SlideFadeIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlideFadeIn.swift; sourceTree = "<group>"; };
 		63B740A82802799300376B94 /* BackgroundColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundColor.swift; sourceTree = "<group>"; };
 		63B740AA280279A200376B94 /* BackgroundStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundStyle.swift; sourceTree = "<group>"; };
+		63B833712836884D00BC2EAE /* UIColor+Dynamic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+Dynamic.swift"; sourceTree = "<group>"; };
+		63B833732836888200BC2EAE /* Color+Dynamic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Dynamic.swift"; sourceTree = "<group>"; };
 		63C607D6281E4FBB0008E2F3 /* SelfSizingTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelfSizingTextView.swift; sourceTree = "<group>"; };
 		63CBCB1F282AB54B0083018D /* PostCommentCellFooterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostCommentCellFooterView.swift; sourceTree = "<group>"; };
 		63CBCB21282AB57B0083018D /* PostCommentCellHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostCommentCellHeaderView.swift; sourceTree = "<group>"; };
@@ -512,6 +520,14 @@
 			path = Profile;
 			sourceTree = "<group>";
 		};
+		633A97B42836249C00F9E546 /* Dimmed */ = {
+			isa = PBXGroup;
+			children = (
+				633A97B5283624A800F9E546 /* DimmedOverlay.swift */,
+			);
+			path = Dimmed;
+			sourceTree = "<group>";
+		};
 		633BC2E42813D98200BC0930 /* Flarum */ = {
 			isa = PBXGroup;
 			children = (
@@ -625,14 +641,13 @@
 		634C470127F9C17900FC591D /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				633A97B42836249C00F9E546 /* Dimmed */,
 				63A6CCCD28156A19000075F7 /* Tag */,
 				63E971FA281185D1003974B6 /* TabBar */,
 				6366738F2807308000A732A3 /* Editor */,
 				63B74097280277E700376B94 /* Buttons */,
 				63B7408E2802778600376B94 /* Sign in & Sign out */,
-				6318B66927EF755A00108D49 /* DiscussionListCell.swift */,
 				63150ABA27F0340B00D83D9D /* LinkPreviewView.swift */,
-				638F90902802B4BB002308E0 /* AllDiscussionsView.swift */,
 				63706E1227F5F08800BE3A48 /* PostAuthorAvatarView.swift */,
 			);
 			path = Components;
@@ -653,6 +668,7 @@
 				634C470627F9C21F00FC591D /* UIViewController+Sub+Extension.swift */,
 				634C470827F9E76C00FC591D /* UISplitViewController+Helper+Extension.swift */,
 				63146573282F84FB00484CC9 /* UIView+ParentController.swift */,
+				63B833712836884D00BC2EAE /* UIColor+Dynamic.swift */,
 			);
 			path = Extension;
 			sourceTree = "<group>";
@@ -688,6 +704,7 @@
 		635B2A5E27EEE76D00FF6109 /* Infrastructure */ = {
 			isa = PBXGroup;
 			children = (
+				63B3C73328354DCD0068701F /* Concurrency */,
 				6380BBFA2833858300050AFA /* Debug */,
 				6357EB97282C075B005C0D49 /* Swift */,
 				635FF1BB2803028D00C7CDBF /* Toast */,
@@ -750,6 +767,7 @@
 				63706E1627F6BC9C00BE3A48 /* NavigationViwe+BackGesture+Extension.swift */,
 				63EA3D5828293FD600C774CB /* UIHostingController+sizeThatFits.swift */,
 				63706E1427F6BA9700BE3A48 /* View+ViewDidLoad+Extension.swift */,
+				63B833732836888200BC2EAE /* Color+Dynamic.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -988,6 +1006,32 @@
 			path = Tag;
 			sourceTree = "<group>";
 		};
+		63B3C73028352C9D0068701F /* Discussion List */ = {
+			isa = PBXGroup;
+			children = (
+				6318B66927EF755A00108D49 /* DiscussionListCell.swift */,
+				638F90902802B4BB002308E0 /* AllDiscussionsView.swift */,
+				634C470227F9C18E00FC591D /* AllDiscussionsViewController.swift */,
+				63B3C73128352CC60068701F /* DiscussionListCardCell.swift */,
+			);
+			path = "Discussion List";
+			sourceTree = "<group>";
+		};
+		63B3C73328354DCD0068701F /* Concurrency */ = {
+			isa = PBXGroup;
+			children = (
+				63B3C73428354DD50068701F /* Extension */,
+			);
+			path = Concurrency;
+			sourceTree = "<group>";
+		};
+		63B3C73428354DD50068701F /* Extension */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Extension;
+			sourceTree = "<group>";
+		};
 		63B7408E2802778600376B94 /* Sign in & Sign out */ = {
 			isa = PBXGroup;
 			children = (
@@ -1103,6 +1147,7 @@
 		63E8BF0427F98AAF0021E4C2 /* Main */ = {
 			isa = PBXGroup;
 			children = (
+				63B3C73028352C9D0068701F /* Discussion List */,
 				633691B3282E7A4E00730F9E /* Profile */,
 				6310E17F282D5B2400E72F0D /* Empty Views */,
 				6357EB91282AC7A6005C0D49 /* Notification */,
@@ -1111,7 +1156,6 @@
 				637751B6281D144500A13241 /* Discussion */,
 				6391FCD12811BAC2006E086D /* Home */,
 				63E8BF0527F98ADC0021E4C2 /* MainSplitViewController.swift */,
-				634C470227F9C18E00FC591D /* AllDiscussionsViewController.swift */,
 				63E971FD28118AD0003974B6 /* TabController.swift */,
 			);
 			path = Main;
@@ -1405,6 +1449,7 @@
 				6329EE70281AAEFC001BE8DD /* ContentItemSingleImage.swift in Sources */,
 				63B740A72802795900376B94 /* SlideFadeIn.swift in Sources */,
 				6380BC132833E40A00050AFA /* NotificationView.swift in Sources */,
+				633A97B6283624A800F9E546 /* DimmedOverlay.swift in Sources */,
 				63146574282F84FB00484CC9 /* UIView+ParentController.swift in Sources */,
 				631BB03E2805E4FD007D4138 /* Style.swift in Sources */,
 				63B74094280277A900376B94 /* SignInView.swift in Sources */,
@@ -1472,6 +1517,7 @@
 				63146572282F81CE00484CC9 /* EnvironmentWrapperView.swift in Sources */,
 				63E971FE28118AD0003974B6 /* TabController.swift in Sources */,
 				63B740A12802791700376B94 /* AngularButton.swift in Sources */,
+				63B3C73228352CC60068701F /* DiscussionListCardCell.swift in Sources */,
 				63E8BEFD27F968940021E4C2 /* SceneDelegate.swift in Sources */,
 				631BB03B2805E4FD007D4138 /* ThemeConfigProperty.swift in Sources */,
 				637751B8281D145600A13241 /* DiscussionHeaderViewController.swift in Sources */,
@@ -1490,6 +1536,7 @@
 				63146576282FA2AF00484CC9 /* AppGlobalState.swift in Sources */,
 				63DD1F8A2832828100193CFC /* FlarumBadge.swift in Sources */,
 				6379A2AD28201F1700B31330 /* ContentItemImagesGridNode.swift in Sources */,
+				63B833722836884D00BC2EAE /* UIColor+Dynamic.swift in Sources */,
 				63A6CCD128157FE0000075F7 /* DiscussionHeaderTagsView.swift in Sources */,
 				6316117A27EF480F002CD6C4 /* Tag.swift in Sources */,
 				631BB03D2805E4FD007D4138 /* SwiftDown.swift in Sources */,
@@ -1498,6 +1545,7 @@
 				6310E181282D5B3600E72F0D /* DiscussionEmptyViewController.swift in Sources */,
 				634C470327F9C18E00FC591D /* AllDiscussionsViewController.swift in Sources */,
 				63B740A52802794800376B94 /* OutlineOverlay.swift in Sources */,
+				63B833742836888200BC2EAE /* Color+Dynamic.swift in Sources */,
 				631E59E32813FA79009A1A94 /* FlarumUser.swift in Sources */,
 				63706E1127F5EDFE00BE3A48 /* SwiftyJSON+Extension.swift in Sources */,
 				634003E1282FD68C001A5D37 /* ProfileCenterPostView.swift in Sources */,

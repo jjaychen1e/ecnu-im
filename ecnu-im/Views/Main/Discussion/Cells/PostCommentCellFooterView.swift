@@ -174,12 +174,17 @@ struct PostCommentCellFooterView: View {
 
             PopoverMenu {
                 PopoverMenuItem(title: "App 问题反馈", systemImage: "exclamationmark.bubble", action: {})
+                    .disabled(true)
                 PopoverMenuItem(title: "举报", systemImage: "exclamationmark.circle", action: {})
+                    .disabled(true)
                 if viewModel.post.attributes?.canEdit == true {
                     PopoverMenuItem(title: "编辑", systemImage: "pencil", action: {
                         viewModel.editAction()
                     })
+                    .disabled(true)
                 }
+                PopoverMenuItem(title: "分享", systemImage: "square.and.arrow.up", action: {})
+                    .disabled(true)
                 if viewModel.post.attributes?.canHide == true {
                     if viewModel.post.attributes?.isHidden == true {
                         PopoverMenuItem(title: "取消隐藏", systemImage: "eye", action: {

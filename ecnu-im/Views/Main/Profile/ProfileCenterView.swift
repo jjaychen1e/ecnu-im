@@ -31,7 +31,23 @@ class ProfileCenterViewModel: ObservableObject {
 }
 
 struct ProfileCenterView: View {
+    struct DiscussionWithMode: Hashable {
+        var mode: ProfileCategory
+        var discussion: FlarumDiscussion
+    }
+
+    struct PostWithMode: Hashable {
+        var mode: ProfileCategory
+        var post: FlarumPost
+    }
+
+    struct BadgeCategoryWithMode: Hashable {
+        var mode: ProfileCategory
+        var badgeCategory: FlarumBadgeCategory
+    }
+
     @ObservedObject private var viewModel: ProfileCenterViewModel
+    @ObservedObject var appGlobalState = AppGlobalState.shared
     @State private var userFetchTask: Task<Void, Never>?
 
     let pageLimit: Int = 20
@@ -103,24 +119,34 @@ struct ProfileCenterView: View {
                     ProfileCenterViewHeader(user: user, selectedCategory: $viewModel.selectedCategory)
                         .padding(.bottom, 8)
                         .listRowSeparatorTint(.clear) // `listRowSeparator` will cause other row **randomly** lost separator
+                        .buttonStyle(PlainButtonStyle())
 
                     switch viewModel.selectedCategory {
                     case .reply:
-                        ForEach(Array(zip(viewModel.posts.indices, viewModel.posts)), id: \.1) { index, post in
+                        let postWithModeList = viewModel.posts.map { PostWithMode(mode: .reply, post: $0) }
+                        ForEach(Array(zip(postWithModeList.indices, postWithModeList)), id: \.1) { index, postWithMode in
+                            let post = postWithMode.post
+                            let ignored = appGlobalState.ignoredUserIds.contains(user.id)
                             ProfileCenterPostView(user: user, post: post)
                                 .buttonStyle(PlainButtonStyle())
+                                .dimmedOverlay(ignored: .constant(ignored), isHidden: .constant(post.isHidden))
                         }
                     case .discussion:
-                        ForEach(Array(zip(viewModel.discussions.indices, viewModel.discussions)), id: \.1) { index, discussion in
+                        let discussionWithModeList = viewModel.discussions.map { DiscussionWithMode(mode: .reply, discussion: $0) }
+                        ForEach(Array(zip(discussionWithModeList.indices, discussionWithModeList)), id: \.1) { index, discussionWithMode in
+                            let discussion = discussionWithMode.discussion
+                            let ignored = appGlobalState.ignoredUserIds.contains(user.id)
                             ProfileCenterDiscussionView(user: user, discussion: discussion)
                                 .buttonStyle(PlainButtonStyle())
+                                .dimmedOverlay(ignored: .constant(ignored), isHidden: .constant(discussion.isHidden))
                         }
                     case .badge:
-                        EmptyView()
                         let groupedData = Dictionary(grouping: viewModel.userBadges.filter { $0.relationships?.badge.relationships?.category != nil },
                                                      by: { $0.relationships!.badge.relationships!.category })
                         let categories = Array(groupedData.keys).sorted(by: { $0.id < $1.id })
-                        ForEach(Array(zip(categories.indices, categories)), id: \.1) { index, category in
+                        let badgeCategoryWithModeList = categories.map { BadgeCategoryWithMode(mode: .reply, badgeCategory: $0) }
+                        ForEach(Array(zip(badgeCategoryWithModeList.indices, badgeCategoryWithModeList)), id: \.1) { index, badgeCategoryWithMode in
+                            let category = badgeCategoryWithMode.badgeCategory
                             let userBadges = groupedData[category] ?? []
                             if userBadges.count > 0 {
                                 ProfileCenterBadgeCategoryView(badgeCategory: category, userBadges: userBadges)
@@ -141,6 +167,8 @@ struct ProfileCenterView: View {
 private struct ProfileCenterViewHeader: View {
     @State var user: FlarumUser
     @Binding var selectedCategory: ProfileCategory
+
+    @ObservedObject var appGlobalState = AppGlobalState.shared
 
     var body: some View {
         VStack(spacing: 16) {
@@ -196,6 +224,12 @@ private struct ProfileCenterViewHeader: View {
                     }
                 }
 
+                if appGlobalState.ignoredUserIds.contains(user.id) {
+                    Text("已屏蔽")
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .foregroundColor(.red)
+                }
+
                 HStack {
                     if user.isOnline {
                         HStack(spacing: 4) {
@@ -227,7 +261,72 @@ private struct ProfileCenterViewHeader: View {
                 Text(user.attributes.bio ?? "这个人很懒，什么都没留下。")
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundColor(.primary.opacity(0.9))
+                    .padding(.horizontal, 24)
             }
+            .frame(maxWidth: .infinity)
+            .overlay(
+                PopoverMenu {
+                    PopoverMenuItem(title: "分享", systemImage: "square.and.arrow.up", action: {})
+                        .disabled(true)
+                    if user.attributes.canBeIgnored == true {
+                        if user.attributes.ignored == true {
+                            PopoverMenuItem(title: "取消屏蔽", systemImage: "person.crop.circle.fill.badge.checkmark", titleColor: .primary, iconColor: .primary, action: {
+                                let alertController = UIAlertController(title: "注意", message: "你确定要取消屏蔽该用户吗？", preferredStyle: .alert)
+                                alertController.addAction(UIAlertAction(title: "确定", style: .destructive, handler: { action in
+                                    if let id = Int(user.id) {
+                                        Task {
+                                            if let response = try? await flarumProvider.request(.ignoreUser(id: id, ignored: true)).flarumResponse() {
+                                                if let _ = response.data.users.first {
+                                                    user.attributes.ignored = false
+                                                    AppGlobalState.shared.ignoredUserIds.remove(user.id)
+                                                    let toast = Toast.default(
+                                                        icon: .emoji("🤝🏻"),
+                                                        title: "取消屏蔽用户\(user.attributes.displayName)成功"
+                                                    )
+                                                    toast.show()
+                                                }
+                                            }
+                                        }
+                                    }
+                                }))
+                                alertController.addAction(UIAlertAction(title: "取消", style: .cancel, handler: { action in
+
+                                }))
+                                UIApplication.shared.topController()?.present(alertController, animated: true)
+                            })
+                        } else if user.attributes.ignored == false {
+                            PopoverMenuItem(title: "屏蔽", systemImage: "person.crop.circle.fill.badge.minus", titleColor: .red, iconColor: .red, action: {
+                                let alertController = UIAlertController(title: "注意", message: "你确定要屏蔽该用户吗？", preferredStyle: .alert)
+                                alertController.addAction(UIAlertAction(title: "确定", style: .destructive, handler: { action in
+                                    if let id = Int(user.id) {
+                                        Task {
+                                            if let response = try? await flarumProvider.request(.ignoreUser(id: id, ignored: true)).flarumResponse() {
+                                                if let _ = response.data.users.first {
+                                                    user.attributes.ignored = true
+                                                    AppGlobalState.shared.ignoredUserIds.insert(user.id)
+                                                    let toast = Toast.default(
+                                                        icon: .emoji("👋🏻"),
+                                                        title: "屏蔽用户\(user.attributes.displayName)成功"
+                                                    )
+                                                    toast.show()
+                                                }
+                                            }
+                                        }
+                                    }
+                                }))
+                                alertController.addAction(UIAlertAction(title: "取消", style: .cancel, handler: { action in
+
+                                }))
+                                UIApplication.shared.topController()?.present(alertController, animated: true)
+                            })
+                        }
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .font(.system(size: 20, weight: .regular, design: .rounded))
+                },
+                alignment: .bottomTrailing
+            )
 
             Picker("分类", selection: $selectedCategory) {
                 Text("回复")

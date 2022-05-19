@@ -80,6 +80,11 @@ class ProfileCenterViewController: NoNavigationBarViewController, NoOverlayViewC
         }
     }
 
+    func update(userId: String) {
+        self.userId = userId
+        hostingVC.rootView.update(userId: userId)
+    }
+
     func selectTab(selectedCategory: ProfileCategory) {
         if let hostingVC = hostingVC {
             hostingVC.rootView.update(selectedCategory: selectedCategory)
@@ -100,8 +105,7 @@ class MyProfileCenterViewController: ProfileCenterViewController, CanSelectWithI
         super.viewDidLoad()
         AppGlobalState.shared.$tokenPrepared.sink { [weak self] change in
             if let self = self {
-                self.userId = AppGlobalState.shared.userId
-                self.hostingVC.rootView.update(userId: AppGlobalState.shared.userId)
+                self.update(userId: AppGlobalState.shared.userId)
             }
         }.store(in: &subscriptions)
     }

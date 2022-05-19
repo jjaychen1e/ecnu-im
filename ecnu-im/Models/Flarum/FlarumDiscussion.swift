@@ -18,6 +18,7 @@ struct FlarumDiscussionAttributes: Decodable {
     var canRename: Bool?
     var canDelete: Bool?
     var canHide: Bool?
+    var isHidden: Bool?
     var lastReadAt: String?
     var lastReadPostNumber: Int?
     var isApproved: Bool?
@@ -137,7 +138,7 @@ extension FlarumDiscussion {
     var lastPost: FlarumPost? {
         relationships?.lastPost
     }
-
+    
     var lastPostedUser: FlarumUser? {
         relationships?.lastPostedUser
     }
@@ -209,6 +210,10 @@ extension FlarumDiscussion {
     
     var viewCount: Int {
         attributes?.viewCount ?? 0
+    }
+    
+    var isHidden: Bool {
+        attributes?.isHidden ?? false
     }
 }
 

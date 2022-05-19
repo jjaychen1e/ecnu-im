@@ -252,7 +252,7 @@ struct MiniEditor: View {
                         }
                     }
 
-                    Spacer()
+                    Spacer(minLength: 0)
                 }
             }
             .frame(height: 30)

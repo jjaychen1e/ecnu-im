@@ -22,7 +22,7 @@ struct TextFieldModifier: ViewModifier {
                         .offset(x: -46)
                         .foregroundStyle(.secondary)
                         .accessibility(hidden: true)
-                    Spacer()
+                    Spacer(minLength: 0)
                 }
             )
             .foregroundStyle(.primary)

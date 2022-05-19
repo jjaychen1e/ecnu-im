@@ -147,14 +147,5 @@ extension FlarumBadge {
                 FlarumBadgeStorage.shared.store(badges: response.data.badges)
             }
         }
-
-        if AppGlobalState.shared.tokenPrepared,
-           let userId = Int(AppGlobalState.shared.userId) {
-            Task {
-                if let response = try? await flarumProvider.request(.user(id: userId)).flarumResponse() {
-                    FlarumBadgeStorage.shared.store(userBadges: response.included.userBadges)
-                }
-            }
-        }
     }
 }

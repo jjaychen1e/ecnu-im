@@ -23,7 +23,7 @@ private struct DiscussionViewPostCellPlaceholder: View {
                             .font(.system(size: 10, weight: .light))
                     }
                 }
-                Spacer()
+                Spacer(minLength: 0)
             }
             Text(String(repeating: "那只敏捷的棕毛狐狸跳过那只懒狗，消失得无影无踪。", count: 10))
                 .lineLimit(1)

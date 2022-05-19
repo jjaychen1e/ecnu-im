@@ -24,7 +24,7 @@ extension UISplitViewController {
         return nil
     }
 
-    func push(viewController: UIViewController, column: UISplitViewController.Column, animated: Bool = false, toRoot: Bool = false) {
+    func push(viewController: UIViewController, column: UISplitViewController.Column, animated: Bool = true, toRoot: Bool = false) {
         if let nvc = self.viewController(for: column) as? UINavigationController {
             if let noOverlayVC = viewController as? NoOverlayViewController {
                 guard noOverlayVC.shouldPushTo(nvc: nvc) else { return }
@@ -70,20 +70,22 @@ extension UISplitViewController {
         }
     }
 
-    func pop(from nvc: UINavigationController, animated: Bool = false) {
-        if nvc === primaryNVC {
-            nvc.popViewController(animated: animated)
-        } else if nvc === secondaryNVC {
-            if traitCollection.horizontalSizeClass == .compact,
-               nvc.viewControllers.count == 1,
-               let primaryNVC = primaryNVC {
-                // only when in compact mode, since there is no empty view placeholder
-                primaryNVC.popViewController(animated: animated)
-                nvc.viewControllers = []
-                return
-            }
+    func pop(from nvc: UINavigationController?, animated: Bool = true) {
+        if let nvc = nvc {
+            if nvc === primaryNVC {
+                nvc.popViewController(animated: animated)
+            } else if nvc === secondaryNVC {
+                if traitCollection.horizontalSizeClass == .compact,
+                   nvc.viewControllers.count == 1,
+                   let primaryNVC = primaryNVC {
+                    // only when in compact mode, since there is no empty view placeholder
+                    primaryNVC.popViewController(animated: animated)
+                    nvc.viewControllers = []
+                    return
+                }
 
-            nvc.popViewController(animated: animated)
+                nvc.popViewController(animated: animated)
+            }
         }
     }
 }

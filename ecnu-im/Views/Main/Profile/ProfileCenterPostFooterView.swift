@@ -73,6 +73,7 @@ struct ProfileCenterPostFooterView: View {
                 Image(systemName: "ellipsis")
                     .font(.system(size: 20, weight: .regular, design: .rounded))
             }
+            .disabled(true)
         }
         .foregroundColor(.primary.opacity(0.7))
     }

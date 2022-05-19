@@ -133,7 +133,13 @@ class Toast: Hashable {
     /// Show the toast
     /// - Parameter delay: Time after which the toast is shown
     func show(after delay: TimeInterval = 0) {
-        config.view?.addSubview(view) ?? UIApplication.shared.topController()?.view.addSubview(view)
+        if let view = config.view {
+            config.view?.addSubview(view)
+        } else if let window = UIApplication.shared.topController()?.view.window {
+            window.addSubview(view)
+        } else {
+            return
+        }
         view.backgroundColor = .clear
         view.transform = initialTransform
         view.snp.makeConstraints { make in

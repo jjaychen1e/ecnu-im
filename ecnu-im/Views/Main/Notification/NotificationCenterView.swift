@@ -13,6 +13,7 @@ struct NotificationCenterView: View {
     @State private var subscriptions: Set<AnyCancellable> = []
     @State var hasScrolled = false
     @State private var loadTask: Task<Void, Never>? = nil
+    @ObservedObject var appGlobalState = AppGlobalState.shared
 
     var body: some View {
         Group {
@@ -20,6 +21,14 @@ struct NotificationCenterView: View {
                 List {
                     ForEach(0 ..< notifications.count, id: \.self) { index in
                         let notification = notifications[index]
+                        let ignored: Bool = {
+                            if let user = notification.relationships?.fromUser {
+                                if appGlobalState.ignoredUserIds.contains(user.id) {
+                                    return true
+                                }
+                            }
+                            return false
+                        }()
                         NotificationView(notification: notification)
                             .listRowInsets(EdgeInsets())
                             .background(
@@ -30,6 +39,7 @@ struct NotificationCenterView: View {
                                 },
                                 alignment: .topLeading
                             )
+                            .dimmedOverlay(ignored: .constant(ignored), isHidden: .constant(false))
                     }
                 }
                 .listStyle(.plain)
@@ -42,7 +52,6 @@ struct NotificationCenterView: View {
             header
         }
         .onLoad {
-            load()
             AppGlobalState.shared.$tokenPrepared.sink { change in
                 load()
             }.store(in: &subscriptions)

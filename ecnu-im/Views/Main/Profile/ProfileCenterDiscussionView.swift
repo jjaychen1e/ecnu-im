@@ -85,6 +85,12 @@ struct ProfileCenterDiscussionView: View {
                     .foregroundColor(.primary.opacity(0.7))
                     .lineLimit(4)
                     .multilineTextAlignment(.leading)
+            } else {
+                Text("无最新回复")
+                    .font(.system(size: 14, weight: .regular, design: .rounded))
+                    .foregroundColor(.primary.opacity(0.7))
+                    .lineLimit(4)
+                    .multilineTextAlignment(.leading)
             }
             ProfileCenterDiscussionFooterView(discussion: discussion, post: self.$lastPost)
         }
@@ -93,21 +99,20 @@ struct ProfileCenterDiscussionView: View {
         .background(Color.primary.opacity(.leastNonzeroMagnitude))
         .onTapGesture {
             if AppGlobalState.shared.tokenPrepared {
-                if let number = lastPost?.attributes?.number {
-                    if let vc = uiKitEnvironment.vc {
-                        if vc.presentingViewController != nil {
-                            vc.present(DiscussionViewController(discussion: discussion, nearNumber: number),
-                                       animated: true)
-                        } else if let splitVC = uiKitEnvironment.splitVC {
-                            splitVC.push(viewController: DiscussionViewController(discussion: discussion, nearNumber: number),
-                                         column: .secondary,
-                                         toRoot: true)
-                        } else {
-                            fatalErrorDebug()
-                        }
+                if let vc = uiKitEnvironment.vc {
+                    let targetNumber = lastPost?.attributes?.number ?? 0
+                    if vc.presentingViewController != nil {
+                        vc.present(DiscussionViewController(discussion: discussion, nearNumber: targetNumber),
+                                   animated: true)
+                    } else if let splitVC = uiKitEnvironment.splitVC {
+                        splitVC.push(viewController: DiscussionViewController(discussion: discussion, nearNumber: targetNumber),
+                                     column: .secondary,
+                                     toRoot: true)
                     } else {
                         fatalErrorDebug()
                     }
+                } else {
+                    fatalErrorDebug()
                 }
             } else {
                 UIApplication.shared.topController()?.presentSignView()
