@@ -76,6 +76,11 @@ struct AllDiscussionsView: View {
         }
     }
 
+    struct ModeWithID: Hashable {
+        var mode: BrowseCategory
+        var id: Int
+    }
+
     private let pageItemLimit = 20
     @State private var discussionList: [DiscussionListCellViewModel] = []
     @State private var pageOffset = 0
@@ -94,58 +99,70 @@ struct AllDiscussionsView: View {
     }
 
     var body: some View {
-        List {
-            if discussionList.count > 0 {
-                switch selectedMode {
-                case .twitter:
-                    let viewModelWithModeList = discussionList.map { ViewModelWithMode(mode: .twitter, viewModel: $0) }
-                    ForEach(Array(zip(viewModelWithModeList.indices, viewModelWithModeList)), id: \.1) { index, viewModelWithMode in
-                        let viewModel = viewModelWithMode.viewModel
-                        let discussion = viewModel.discussion
-                        let isHidden = discussion.isHidden
-                        let ignored = appGlobalState.ignoredUserIds.contains(viewModel.discussion.starter?.id ?? "")
-                        DiscussionListCell(viewModel: viewModel)
-                            .listRowInsets(EdgeInsets())
-                            .dimmedOverlay(ignored: .constant(ignored), isHidden: .constant(isHidden))
-                            .onAppear {
-                                checkLoadMore(index)
-                            }
+        ScrollViewReader { proxy in
+            List {
+                if discussionList.count > 0 {
+                    switch selectedMode {
+                    case .twitter:
+                        let viewModelWithModeList = discussionList.map { ViewModelWithMode(mode: .twitter, viewModel: $0) }
+                        ForEach(Array(zip(viewModelWithModeList.indices, viewModelWithModeList)), id: \.1) { index, viewModelWithMode in
+                            let viewModel = viewModelWithMode.viewModel
+                            let discussion = viewModel.discussion
+                            let isHidden = discussion.isHidden
+                            let ignored = appGlobalState.ignoredUserIds.contains(viewModel.discussion.starter?.id ?? "")
+                            DiscussionListCell(viewModel: viewModel)
+                                .listRowInsets(EdgeInsets())
+                                .listRowBackground(Color.clear)
+                                .dimmedOverlay(ignored: .constant(ignored), isHidden: .constant(isHidden))
+                                .id(ModeWithID(mode: .twitter, id: index))
+                                .onAppear {
+                                    checkLoadMore(index)
+                                }
+                        }
+                    case .cards:
+                        let viewModelWithModeList = discussionList.map { ViewModelWithMode(mode: .cards, viewModel: $0) }
+                        ForEach(Array(zip(viewModelWithModeList.indices, viewModelWithModeList)), id: \.1) { index, viewModelWithMode in
+                            let viewModel = viewModelWithMode.viewModel
+                            let discussion = viewModel.discussion
+                            let isHidden = discussion.isHidden
+                            let ignored = appGlobalState.ignoredUserIds.contains(viewModel.discussion.starter?.id ?? "")
+                            DiscussionListCardCell(viewModel: viewModel)
+                                .listRowSeparatorTint(.clear, edges: .all)
+                                .listRowInsets(EdgeInsets())
+                                .listRowBackground(Color.clear)
+                                .dimmedOverlay(ignored: .constant(ignored), isHidden: .constant(isHidden))
+                                .id(ModeWithID(mode: .cards, id: index))
+                                .onAppear {
+                                    checkLoadMore(index)
+                                }
+                        }
                     }
-                case .cards:
-                    ForEach(Array(zip(discussionList.indices, discussionList)), id: \.1.discussion) { index, viewModel in
-                        let discussion = viewModel.discussion
-                        let isHidden = discussion.isHidden
-                        let ignored = appGlobalState.ignoredUserIds.contains(viewModel.discussion.starter?.id ?? "")
-                        DiscussionListCardCell(viewModel: viewModel)
-                            .listRowSeparatorTint(.clear, edges: .all)
-                            .listRowInsets(EdgeInsets())
-                            .dimmedOverlay(ignored: .constant(ignored), isHidden: .constant(isHidden))
-                            .onAppear {
-                                checkLoadMore(index)
-                            }
+                } else {
+                    ForEach(0 ..< 10) { _ in
+                        DiscussionListCellPlaceholder()
+                            .listRowInsets(EdgeInsets(top: 4, leading: 4, bottom: 4, trailing: 4))
+                            .listRowBackground(Color.clear)
                     }
-                }
-            } else {
-                ForEach(0 ..< 10) { _ in
-                    DiscussionListCellPlaceholder()
-                        .listRowInsets(EdgeInsets())
                 }
             }
-        }
-        .listStyle(.plain)
-        .background(ThemeManager.shared.theme.backgroundColor1)
-        .safeAreaInset(edge: .top, content: {
-            AllDiscussionsViewNavigationHeader(selectedMode: $selectedMode)
-        })
-        .refreshable(action: {
-            await loadMore(isRefresh: true)
-        })
-        .onLoad {
-            AppGlobalState.shared.$tokenPrepared.sink { change in
-                Task {
-                    await loadMore(isRefresh: true)
-                }
-            }.store(in: &subscriptions)
+            .listStyle(.plain)
+            .background(ThemeManager.shared.theme.backgroundColor1)
+            .safeAreaInset(edge: .top, content: {
+                AllDiscussionsViewNavigationHeader(selectedMode: $selectedMode)
+            })
+            .refreshable(action: {
+                await loadMore(isRefresh: true)
+            })
+            .onLoad {
+                AppGlobalState.shared.$tokenPrepared.sink { change in
+                    Task {
+                        await loadMore(isRefresh: true)
+                    }
+                }.store(in: &subscriptions)
+            }
+            .onChange(of: selectedMode) { newValue in
+                proxy.scrollTo(ModeWithID(mode: newValue, id: 0), anchor: .top)
+            }
         }
     }
 }
