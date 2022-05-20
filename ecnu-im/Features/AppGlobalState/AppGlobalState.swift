@@ -43,14 +43,16 @@ extension Optional: RawRepresentable where Wrapped: Codable {
 class AppGlobalState: ObservableObject {
     @AppStorage("account") private(set) var account: Account? = nil
     @Published var unreadNotificationCount = 0
-    @Published var tokenPrepared = false
     @Published var userInfo: FlarumUser?
     @Published var ignoredUserIds: Set<String> = []
-
     @Published var hasTriedToLogin = false
-    var loginEvent = PassthroughSubject<Void, Never>()
+    @Published var token: String? = nil
+    @Published var tokenPrepared = false
 
-    private var flarumTokenCookie: HTTPCookie?
+    var loginEvent = PassthroughSubject<Void, Never>()
+    var emailVerificationEvent = PassthroughSubject<Void, Never>()
+
+    private var subscriptions: Set<AnyCancellable> = []
 
     var userIdInt: Int? {
         if let account = account {
@@ -59,7 +61,28 @@ class AppGlobalState: ObservableObject {
         return nil
     }
 
+    var flarumCookie: HTTPCookie? {
+        if let token = token, let flarumTokenCookie = HTTPCookie(properties: [
+            HTTPCookiePropertyKey.domain: "ecnu.im",
+            HTTPCookiePropertyKey.path: "/",
+            HTTPCookiePropertyKey.name: "flarum_remember",
+            HTTPCookiePropertyKey.value: token,
+        ]) {
+            return flarumTokenCookie
+        }
+        return nil
+    }
+
     static let shared = AppGlobalState()
+
+    init() {
+        emailVerificationEvent.sink { _ in
+            Task {
+                await self.tryToLoginWithStoredAccount()
+            }
+        }
+        .store(in: &subscriptions)
+    }
 
     func clearCookieStorage() {
         flarumProvider.session.session.reset(completionHandler: {})
@@ -67,9 +90,12 @@ class AppGlobalState: ObservableObject {
 
     func logout() {
         clearCookieStorage()
-        AppGlobalState.shared.tokenPrepared = false
-        AppGlobalState.shared.unreadNotificationCount = 0
-        AppGlobalState.shared.account = nil
+        account = nil
+        unreadNotificationCount = 0
+        userInfo = nil
+        ignoredUserIds = []
+        token = nil
+        tokenPrepared = false
     }
 
     @discardableResult
@@ -86,6 +112,7 @@ class AppGlobalState: ObservableObject {
                 DispatchQueue.main.async {
                     self.account = Account(account: account, password: password, userId: token.userId)
                     self.hasTriedToLogin = true
+                    self.token = token.token
                     self.tokenPrepared = true
                 }
                 if let response = try? await flarumProvider.request(.user(id: token.userId)).flarumResponse() {

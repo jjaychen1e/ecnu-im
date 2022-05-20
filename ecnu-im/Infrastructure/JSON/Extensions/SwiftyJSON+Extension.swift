@@ -16,17 +16,16 @@ extension JSON {
     }
 
     func decode<T>(_ type: T.Type) -> T? where T: Decodable {
-        let jsonDecoder = JSONDecoder()
         if let data = try? rawData() {
             #if DEBUG
                 do {
-                    return try jsonDecoder.decode(type, from: data)
+                    return try JSONDecoder().decode(type, from: data)
                 } catch {
                     print(String(data: data, encoding: .utf8) ?? "Failed to parse.")
-                    _ = try! jsonDecoder.decode(type, from: data)
+                    _ = try! JSONDecoder().decode(type, from: data)
                 }
             #else
-                return try? jsonDecoder.decode(type, from: data)
+                return try? JSONDecoder().decode(type, from: data)
             #endif
         }
         return nil

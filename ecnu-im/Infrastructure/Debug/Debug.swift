@@ -4,10 +4,37 @@
 //
 //  Created by 陈俊杰 on 2022/5/17.
 //
+import Foundation
+
+// 📗
+// 📘
+// 📔
+enum DebugLogLevel: CustomStringConvertible {
+    case normal
+    case warning
+    case error
+
+    var description: String {
+        switch self {
+        case .normal:
+            return "📓"
+        case .warning:
+            return "📙"
+        case .error:
+            return "📕"
+        }
+    }
+}
+
+func printDebug(level: DebugLogLevel = .normal, file: String = #file, line: Int = #line, function: String = #function, _ message: String = "") {
+    #if DEBUG
+        print("[\(level) Debug log] \(URL(fileURLWithPath: file).lastPathComponent)(line \(line)), `\(function)`:\n\t\(message != "" ? " \(message)" : "")")
+    #endif
+}
 
 func fatalErrorDebug(file: String = #file, line: Int = #line, function: String = #function, _ message: String = "") {
     #if DEBUG
-        fatalError("\(file)(line \(line)): \(function).\(message != "" ? " \(message)" : "")")
+        print("[\(DebugLogLevel.error) Debug log] \(URL(fileURLWithPath: file).lastPathComponent)(line \(line)), `\(function)`:\n\t\(message != "" ? " \(message)" : "")")
     #endif
 }
 

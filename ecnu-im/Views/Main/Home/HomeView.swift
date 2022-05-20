@@ -715,18 +715,24 @@ struct HomePostCardViewLarge: View {
                         .mask(Circle())
                         .overlay(Circle().stroke(Color.white, lineWidth: 1))
                         .onTapGesture {
-                            if let account = AppGlobalState.shared.account,
-                               let targetId = viewModel.discussion.starter?.id,
-                               targetId != account.userIdString {
-                                if let vc = uiKitEnvironment.vc {
-                                    if vc.presentingViewController != nil {
-                                        vc.present(ProfileCenterViewController(userId: targetId),
-                                                   animated: true)
+                            if let targetId = viewModel.discussion.starter?.id {
+                                if let account = AppGlobalState.shared.account,
+                                   targetId != account.userIdString {
+                                    if let vc = uiKitEnvironment.vc {
+                                        if vc.presentingViewController != nil {
+                                            vc.present(ProfileCenterViewController(userId: targetId),
+                                                       animated: true)
+                                        } else {
+                                            UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: targetId), animated: true)
+                                        }
                                     } else {
-                                        UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: targetId), animated: true)
+                                        fatalErrorDebug()
                                     }
                                 } else {
-                                    fatalErrorDebug()
+                                    let lastReadPostNumber = viewModel.discussion.attributes?.lastReadPostNumber ?? 0
+                                    uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: lastReadPostNumber + 1),
+                                                                   column: .secondary,
+                                                                   toRoot: true)
                                 }
                             }
                         }

@@ -92,6 +92,7 @@ class TabController: UIViewController {
                 case .login:
                     if !AppGlobalState.shared.tokenPrepared {
                         UIApplication.shared.topController()?.presentSignView()
+                        return
                     }
                 }
             }

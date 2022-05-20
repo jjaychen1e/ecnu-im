@@ -4,19 +4,31 @@ PODS:
     - ReCaptcha/Core
     - RxSwift (~> 6.0)
   - RxSwift (6.5.0)
+  - WebController (0.3.3)
 
 DEPENDENCIES:
   - ReCaptcha/RxSwift
+  - WebController (from `https://github.com/JJAYCHEN1e/WebController.git`)
 
 SPEC REPOS:
   trunk:
     - ReCaptcha
     - RxSwift
 
+EXTERNAL SOURCES:
+  WebController:
+    :git: https://github.com/JJAYCHEN1e/WebController.git
+
+CHECKOUT OPTIONS:
+  WebController:
+    :commit: b89bbbe03c114689369ae44809bc7856e79e7893
+    :git: https://github.com/JJAYCHEN1e/WebController.git
+
 SPEC CHECKSUMS:
   ReCaptcha: d493ed256054a7b6a7eabcaf0b47ec9a8f42a16e
   RxSwift: 5710a9e6b17f3c3d6e40d6e559b9fa1e813b2ef8
+  WebController: 1935cb1b1be52c2b31db707ef129230a8014e61a
 
-PODFILE CHECKSUM: 0d7428891033fc8ef76ee3e03ed57d35821677ed
+PODFILE CHECKSUM: ea65e55536c9ed68381c339f53cde3533c2b2944
 
 COCOAPODS: 1.11.2

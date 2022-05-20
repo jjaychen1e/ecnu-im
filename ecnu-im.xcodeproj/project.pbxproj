@@ -10,6 +10,7 @@
 		63031E242813A5030046F222 /* FlarumResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63031E232813A5030046F222 /* FlarumResponse.swift */; };
 		6310E17B282D4BB100E72F0D /* TwitterLikeButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6310E17A282D4BB100E72F0D /* TwitterLikeButton.swift */; };
 		6310E181282D5B3600E72F0D /* DiscussionEmptyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6310E180282D5B3600E72F0D /* DiscussionEmptyViewController.swift */; };
+		63124C1428373B400019A822 /* EmailVerificationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63124C1328373B400019A822 /* EmailVerificationViewController.swift */; };
 		63127828281A4D710090BAE3 /* DynamicHeightTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63127827281A4D710090BAE3 /* DynamicHeightTextView.swift */; };
 		6312782A281A4E5B0090BAE3 /* ContentItemsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63127829281A4E5B0090BAE3 /* ContentItemsView.swift */; };
 		6314656F282F7E6E00484CC9 /* ProfileCenterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6314656E282F7E6E00484CC9 /* ProfileCenterViewController.swift */; };
@@ -205,6 +206,7 @@
 		63031E232813A5030046F222 /* FlarumResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlarumResponse.swift; sourceTree = "<group>"; };
 		6310E17A282D4BB100E72F0D /* TwitterLikeButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwitterLikeButton.swift; sourceTree = "<group>"; };
 		6310E180282D5B3600E72F0D /* DiscussionEmptyViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscussionEmptyViewController.swift; sourceTree = "<group>"; };
+		63124C1328373B400019A822 /* EmailVerificationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailVerificationViewController.swift; sourceTree = "<group>"; };
 		63127827281A4D710090BAE3 /* DynamicHeightTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicHeightTextView.swift; sourceTree = "<group>"; };
 		63127829281A4E5B0090BAE3 /* ContentItemsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentItemsView.swift; sourceTree = "<group>"; };
 		6314656E282F7E6E00484CC9 /* ProfileCenterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileCenterViewController.swift; sourceTree = "<group>"; };
@@ -424,6 +426,22 @@
 				6310E180282D5B3600E72F0D /* DiscussionEmptyViewController.swift */,
 			);
 			path = "Empty Views";
+			sourceTree = "<group>";
+		};
+		63124C1128373B250019A822 /* Safari */ = {
+			isa = PBXGroup;
+			children = (
+				63124C1228373B2A0019A822 /* Email Verification */,
+			);
+			path = Safari;
+			sourceTree = "<group>";
+		};
+		63124C1228373B2A0019A822 /* Email Verification */ = {
+			isa = PBXGroup;
+			children = (
+				63124C1328373B400019A822 /* EmailVerificationViewController.swift */,
+			);
+			path = "Email Verification";
 			sourceTree = "<group>";
 		};
 		63127826281A4D670090BAE3 /* Component */ = {
@@ -1158,6 +1176,7 @@
 		63E8BF0427F98AAF0021E4C2 /* Main */ = {
 			isa = PBXGroup;
 			children = (
+				63124C1128373B250019A822 /* Safari */,
 				63B3C73028352C9D0068701F /* Discussion List */,
 				633691B3282E7A4E00730F9E /* Profile */,
 				6310E17F282D5B2400E72F0D /* Empty Views */,
@@ -1453,6 +1472,7 @@
 				636BE17D27F81FF500283943 /* SwiftGen+SwiftUI+Extension.swift in Sources */,
 				631BB0352805E4FD007D4138 /* UniversalTypes.swift in Sources */,
 				6365778627F1D897008AD10E /* UserDefaluts+JSON+Extension.swift in Sources */,
+				63124C1428373B400019A822 /* EmailVerificationViewController.swift in Sources */,
 				634A575D2816F0090022B27E /* ContentBlock.swift in Sources */,
 				6380BC0F2833ADCF00050AFA /* PopoverMenu.swift in Sources */,
 				637751CB281D683D00A13241 /* PostDeletedCell.swift in Sources */,

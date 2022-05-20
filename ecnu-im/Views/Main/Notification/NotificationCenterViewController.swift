@@ -8,7 +8,7 @@
 import SwiftUI
 import UIKit
 
-class NotificationCenterViewController: NoNavigationBarViewController {
+class NotificationCenterViewController: NoNavigationBarViewController, HasNavigationPermission {
     weak var splitVC: UISplitViewController?
     weak var nvc: UINavigationController?
 

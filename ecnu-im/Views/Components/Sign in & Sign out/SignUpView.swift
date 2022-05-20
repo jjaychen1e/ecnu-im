@@ -1,6 +1,7 @@
 import ReCaptcha
 import Regex
 import RxSwift
+import SafariServices
 import SwiftUI
 
 private struct RegisterErrorDetail: Decodable {
@@ -257,6 +258,15 @@ struct SignUpView: View {
                                     title: "注册成功"
                                 )
                                 toast.show()
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                                    let alertController = UIAlertController(title: "注意", message: "恭喜您注册成功，请登录校园邮箱以激活账号。您想要现在打开腾讯企业邮箱吗？", preferredStyle: .alert)
+                                    alertController.addAction(UIAlertAction(title: "确定", style: .destructive, handler: { action in
+                                        EmailVerificationViewController.show()
+                                    }))
+                                    alertController.addAction(UIAlertAction(title: "取消", style: .cancel, handler: { action in
+                                    }))
+                                    UIApplication.shared.topController()?.present(alertController, animated: true)
+                                }
                             }
                         } else {
                             registering = false
