@@ -36,6 +36,7 @@ class ContentItemParagraphUIView: UIView & ContentBlockUIView {
         textView.backgroundColor = .clear
         textView.attributedText = attributedText
         textView.textContainerInset = .zero
+        textView.delegate = self
         addSubview(textView)
     }
 
@@ -58,5 +59,17 @@ class ContentItemParagraphUIView: UIView & ContentBlockUIView {
 
     override var intrinsicContentSize: CGSize {
         return .init(width: bounds.width, height: textView.frame.size.height)
+    }
+}
+
+extension ContentItemParagraphUIView: UITextViewDelegate {
+    func textView(_ textView: UITextView, shouldInteractWith url: URL, in characterRange: NSRange, interaction: UITextItemInteraction) -> Bool {
+        if let escapedURL = url.absoluteString.addingPercentEncoding(withAllowedCharacters: .alphanumerics),
+           let url = URL(string: "ecnu-im://\(URLServiceType.link)?href=\(escapedURL)"),
+           UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.open(url)
+            return false
+        }
+        return true
     }
 }

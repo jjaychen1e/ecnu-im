@@ -18,7 +18,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let rootViewController = MainSplitViewController()
 //        let rootViewController = UIHostingController(rootView: EditorView())
         window.rootViewController = rootViewController
-        
+
         self.window = window
         window.makeKeyAndVisible()
     }
@@ -50,4 +50,30 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Use this method to save data, release shared resources, and store enough scene-specific state information
         // to restore the scene back to its current state.
     }
+
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        guard let url = URLContexts.first?.url else { return }
+
+        guard let components = NSURLComponents(url: url, resolvingAgainstBaseURL: true),
+              let scheme = components.scheme,
+              let host = components.host,
+              let path = components.path,
+              let params = components.queryItems
+        else { return }
+
+        if let urlService = URLServiceType(rawValue: host) {
+            switch urlService {
+            case .link:
+                if let href = params.first(where: { $0.name == "href" })?.value,
+                   let url = URL(string: href) {
+                    printDebug(url.absoluteString)
+                    CommonWebViewController.show(url: url)
+                }
+            }
+        }
+    }
+}
+
+enum URLServiceType: String, RawRepresentable {
+    case link
 }

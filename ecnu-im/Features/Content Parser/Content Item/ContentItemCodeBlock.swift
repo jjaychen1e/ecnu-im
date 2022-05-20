@@ -28,6 +28,7 @@ class ContentItemCodeBlockUIView: UIView & ContentBlockUIView {
         textView.textContainer.lineFragmentPadding = 0
         textView.isEditable = false
         textView.isScrollEnabled = false
+        textView.delegate = self
         return textView
     }()
 
@@ -58,5 +59,16 @@ class ContentItemCodeBlockUIView: UIView & ContentBlockUIView {
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+}
+
+extension ContentItemCodeBlockUIView: UITextViewDelegate {
+    func textView(_ textView: UITextView, shouldInteractWith url: URL, in characterRange: NSRange, interaction: UITextItemInteraction) -> Bool {
+        if let url = URL(string: "ecnu-im://\(URLServiceType.link)?href=\(url.absoluteString)"),
+           UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.open(url)
+            return true
+        }
+        return false
     }
 }

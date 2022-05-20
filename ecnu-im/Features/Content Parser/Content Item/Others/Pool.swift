@@ -130,7 +130,7 @@ actor TaskPool<T: PoolTask> {
 
     func add<Result>(task: T, completionHandler: @escaping (Result?) -> Void) where T.Result == Result {
         defer {
-            print("Pool - Statistics(add): fetching task count: \(fetchingPriorityQueue.count), pending task count: \(pendingPriorityQueue.count). \(Unmanaged.passUnretained(self).toOpaque())")
+//            print("Pool - Statistics(add): fetching task count: \(fetchingPriorityQueue.count), pending task count: \(pendingPriorityQueue.count). \(Unmanaged.passUnretained(self).toOpaque())")
         }
 
         var internalTaskIndex: Int?
@@ -147,7 +147,7 @@ actor TaskPool<T: PoolTask> {
             fetchingPriorityQueue.remove(internalTask)
             internalTask.task.creationDate = .now
             fetchingPriorityQueue.insert(internalTask)
-            print("Pool - Start(already running, so we changed the completionHandler): \(internalTask.task.description ?? "No description")")
+//            print("Pool - Start(already running, so we changed the completionHandler): \(internalTask.task.description ?? "No description")")
             internalTask.completionHandler.append(completionHandler)
 
             return
@@ -155,25 +155,25 @@ actor TaskPool<T: PoolTask> {
 
         pendingPriorityQueue.filter { $0.task == task }.forEach {
             pendingPriorityQueue.remove($0)
-            print("Pool - Add while remove a same pending task: \($0.task.description ?? "No description")")
+//            print("Pool - Add while remove a same pending task: \($0.task.description ?? "No description")")
         }
 
         while fetchingPriorityQueue.count >= maxFetchCount, task.creationDate > fetchingPriorityQueue.last!.task.creationDate {
             if let internalTask = fetchingPriorityQueue.popFirst() {
                 internalTask.task.cancel()
                 pendingPriorityQueue.insert(internalTask)
-                print("Pool - Pending(because higher priority task starts): \(internalTask.task.description ?? "No description")")
+//                print("Pool - Pending(because higher priority task starts): \(internalTask.task.description ?? "No description")")
             }
         }
 
         let internalTask = InternalPoolTask(task: task, completionHandler: completionHandler)
         if fetchingPriorityQueue.count >= maxFetchCount {
             pendingPriorityQueue.insert(internalTask)
-            print("Pool - Start failed(no available space): \(task.description ?? "No description")")
+//            print("Pool - Start failed(no available space): \(task.description ?? "No description")")
             return
         }
 
-        print("Pool - Start: \(task.description ?? "No description")")
+//        print("Pool - Start: \(task.description ?? "No description")")
         fetchingPriorityQueue.insert(internalTask)
         task.start { metadata in
             Task {
@@ -200,9 +200,9 @@ actor TaskPool<T: PoolTask> {
 
     private func didFinished(internalTask: InternalPoolTask<T>, result: T.Result?) {
         defer {
-            print("Pool - Statistics(didFinished): fetching task count: \(fetchingPriorityQueue.count), pending task count: \(pendingPriorityQueue.count)")
+//            print("Pool - Statistics(didFinished): fetching task count: \(fetchingPriorityQueue.count), pending task count: \(pendingPriorityQueue.count)")
         }
-        print("Pool - Finished: \(internalTask.task.description ?? "No description")")
+//        print("Pool - Finished: \(internalTask.task.description ?? "No description")")
         for completion in internalTask.completionHandler {
             completion(result)
         }
@@ -215,7 +215,7 @@ actor TaskPool<T: PoolTask> {
         if fetchingPriorityQueue.count < maxFetchCount {
             if let internalTask = pendingPriorityQueue.popLast() {
                 fetchingPriorityQueue.insert(internalTask)
-                print("Pool - Restart: \(internalTask.task.description ?? "No description")")
+//                print("Pool - Restart: \(internalTask.task.description ?? "No description")")
                 internalTask.task.start { result in
                     Task {
                         self.didFinished(internalTask: internalTask, result: result)

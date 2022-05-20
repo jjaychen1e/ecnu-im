@@ -28,13 +28,13 @@ enum DebugLogLevel: CustomStringConvertible {
 
 func printDebug(level: DebugLogLevel = .normal, file: String = #file, line: Int = #line, function: String = #function, _ message: String = "") {
     #if DEBUG
-        print("[\(level) Debug log] \(URL(fileURLWithPath: file).lastPathComponent)(line \(line)), `\(function)`:\n\t\(message != "" ? " \(message)" : "")")
+        print("\(level)\t[Debug log] \(URL(fileURLWithPath: file).lastPathComponent)(line \(line)), `\(function)`:\n\t[Debug log]\(message != "" ? " \(message)" : "")")
     #endif
 }
 
 func fatalErrorDebug(file: String = #file, line: Int = #line, function: String = #function, _ message: String = "") {
     #if DEBUG
-        print("[\(DebugLogLevel.error) Debug log] \(URL(fileURLWithPath: file).lastPathComponent)(line \(line)), `\(function)`:\n\t\(message != "" ? " \(message)" : "")")
+        print("\(DebugLogLevel.error)\t[Debug log] \(URL(fileURLWithPath: file).lastPathComponent)(line \(line)), `\(function)`:\n\t[Debug log]\(message != "" ? " \(message)" : "")")
     #endif
 }
 

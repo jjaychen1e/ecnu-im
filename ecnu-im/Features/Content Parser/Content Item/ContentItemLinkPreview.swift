@@ -112,7 +112,7 @@ class ContentItemLinkPreview: UIView & ContentBlockUIView {
                                                     if let self = self {
                                                         self.lpView.metadata = metadata
                                                         self.setNeedsLayout()
-                                                        print("\(Unmanaged.passUnretained(self).toOpaque()), set metadata")
+//                                                        print("\(Unmanaged.passUnretained(self).toOpaque()), set metadata")
                                                     }
                                                 }
                                             }
