@@ -94,58 +94,51 @@ struct AllDiscussionsView: View {
     }
 
     var body: some View {
-        RefreshableScrollView(loadingViewBackgroundColor: ThemeManager.shared.theme.backgroundColor1,
-                              action: {
-                                  await loadMore(isRefresh: true)
-                              }, progress: { state in
-                                  RefreshActivityIndicator(isAnimating: state == .loading) {
-                                      $0.hidesWhenStopped = false
-                                  }
-                                  .opacity(state == .waiting ? 0 : 1)
-                                  .animation(.default, value: state)
-                              }) {
-            LazyVStack {
-                if discussionList.count > 0 {
-                    switch selectedMode {
-                    case .twitter:
-                        let viewModelWithModeList = discussionList.map { ViewModelWithMode(mode: .twitter, viewModel: $0) }
-                        ForEach(Array(zip(viewModelWithModeList.indices, viewModelWithModeList)), id: \.1) { index, viewModelWithMode in
-                            let viewModel = viewModelWithMode.viewModel
-                            DiscussionListCell(viewModel: viewModel)
-                                .padding(.bottom, 1)
-                                .overlay(
-                                    bottomSeparator,
-                                    alignment: .bottom
-                                )
-                                .onAppear {
-                                    checkLoadMore(index)
-                                }
-                                .opacity(appGlobalState.ignoredUserIds.contains(viewModel.discussion.starter?.id ?? "") == true ? 0.3 : 1.0)
-                        }
-                    case .cards:
-                        ForEach(Array(zip(discussionList.indices, discussionList)), id: \.1.discussion) { index, viewModel in
-                            DiscussionListCardCell(viewModel: viewModel)
-                                .onAppear {
-                                    checkLoadMore(index)
-                                }
-                                .opacity(appGlobalState.ignoredUserIds.contains(viewModel.discussion.starter?.id ?? "") == true ? 0.3 : 1.0)
-                        }
+        List {
+            if discussionList.count > 0 {
+                switch selectedMode {
+                case .twitter:
+                    let viewModelWithModeList = discussionList.map { ViewModelWithMode(mode: .twitter, viewModel: $0) }
+                    ForEach(Array(zip(viewModelWithModeList.indices, viewModelWithModeList)), id: \.1) { index, viewModelWithMode in
+                        let viewModel = viewModelWithMode.viewModel
+                        let discussion = viewModel.discussion
+                        let isHidden = discussion.isHidden
+                        let ignored = appGlobalState.ignoredUserIds.contains(viewModel.discussion.starter?.id ?? "")
+                        DiscussionListCell(viewModel: viewModel)
+                            .listRowInsets(EdgeInsets())
+                            .dimmedOverlay(ignored: .constant(ignored), isHidden: .constant(isHidden))
+                            .onAppear {
+                                checkLoadMore(index)
+                            }
                     }
-                } else {
-                    ForEach(0 ..< 10) { _ in
-                        DiscussionListCellPlaceholder()
-                            .padding(.bottom, 1)
-                            .overlay(
-                                bottomSeparator,
-                                alignment: .bottom
-                            )
+                case .cards:
+                    ForEach(Array(zip(discussionList.indices, discussionList)), id: \.1.discussion) { index, viewModel in
+                        let discussion = viewModel.discussion
+                        let isHidden = discussion.isHidden
+                        let ignored = appGlobalState.ignoredUserIds.contains(viewModel.discussion.starter?.id ?? "")
+                        DiscussionListCardCell(viewModel: viewModel)
+                            .listRowSeparatorTint(.clear, edges: .all)
+                            .listRowInsets(EdgeInsets())
+                            .dimmedOverlay(ignored: .constant(ignored), isHidden: .constant(isHidden))
+                            .onAppear {
+                                checkLoadMore(index)
+                            }
                     }
+                }
+            } else {
+                ForEach(0 ..< 10) { _ in
+                    DiscussionListCellPlaceholder()
+                        .listRowInsets(EdgeInsets())
                 }
             }
         }
+        .listStyle(.plain)
         .background(ThemeManager.shared.theme.backgroundColor1)
         .safeAreaInset(edge: .top, content: {
             AllDiscussionsViewNavigationHeader(selectedMode: $selectedMode)
+        })
+        .refreshable(action: {
+            await loadMore(isRefresh: true)
         })
         .onLoad {
             AppGlobalState.shared.$tokenPrepared.sink { change in

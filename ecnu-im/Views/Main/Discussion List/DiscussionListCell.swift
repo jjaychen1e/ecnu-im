@@ -150,6 +150,8 @@ struct DiscussionListCell: View {
 }
 
 private struct FirstPostCell: View {
+    @EnvironmentObject var uiKitEnvironment: UIKitEnvironment
+
     @ObservedObject private var viewModel: DiscussionListCellViewModel
     @State private var dateDescription: String
 
@@ -164,6 +166,28 @@ private struct FirstPostCell: View {
                 PostAuthorAvatarView(name: viewModel.discussion.starterName,
                                      url: viewModel.discussion.starterAvatarURL,
                                      size: 30)
+                    .onTapGesture {
+                        if let targetId = viewModel.discussion.starter?.id {
+                            if let account = AppGlobalState.shared.account,
+                               targetId != account.userIdString {
+                                if let vc = uiKitEnvironment.vc {
+                                    if vc.presentingViewController != nil {
+                                        vc.present(ProfileCenterViewController(userId: targetId),
+                                                   animated: true)
+                                    } else {
+                                        UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: targetId), animated: true)
+                                    }
+                                } else {
+                                    fatalErrorDebug()
+                                }
+                            } else {
+                                let lastReadPostNumber = viewModel.discussion.attributes?.lastReadPostNumber ?? 0
+                                uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: lastReadPostNumber + 1),
+                                                               column: .secondary,
+                                                               toRoot: true)
+                            }
+                        }
+                    }
 
                 VStack(alignment: .leading, spacing: 0) {
                     Text(viewModel.discussion.discussionTitle)
@@ -197,7 +221,7 @@ private struct FirstPostCell: View {
                         .lineLimit(4)
                         .truncationMode(.tail)
                         .font(.system(size: 16, weight: .regular, design: .rounded))
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                        .frame(maxWidth: .infinity, alignment: .topLeading)
                 }
             }
             if let repliedPosts = viewModel.completedFirstPost?.relationships?.mentionedBy, repliedPosts.count > 0 {
@@ -264,6 +288,7 @@ private struct FirstPostCell: View {
 }
 
 private struct LastPostCell: View {
+    @EnvironmentObject var uiKitEnvironment: UIKitEnvironment
     @ObservedObject private var viewModel: DiscussionListCellViewModel
     @State private var dateDescription: String
 
@@ -278,6 +303,28 @@ private struct LastPostCell: View {
                 PostAuthorAvatarView(name: viewModel.discussion.lastPostedUserName,
                                      url: viewModel.discussion.lastPostedUserAvatarURL,
                                      size: 40)
+                    .onTapGesture {
+                        if let targetId = viewModel.discussion.starter?.id {
+                            if let account = AppGlobalState.shared.account,
+                               targetId != account.userIdString {
+                                if let vc = uiKitEnvironment.vc {
+                                    if vc.presentingViewController != nil {
+                                        vc.present(ProfileCenterViewController(userId: targetId),
+                                                   animated: true)
+                                    } else {
+                                        UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: targetId), animated: true)
+                                    }
+                                } else {
+                                    fatalErrorDebug()
+                                }
+                            } else {
+                                let lastReadPostNumber = viewModel.discussion.attributes?.lastReadPostNumber ?? 0
+                                uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: lastReadPostNumber + 1),
+                                                               column: .secondary,
+                                                               toRoot: true)
+                            }
+                        }
+                    }
                 VStack(alignment: .leading, spacing: 0) {
                     Text(viewModel.discussion.discussionTitle)
                         .font(.system(size: 17, weight: .bold))
@@ -304,7 +351,7 @@ private struct LastPostCell: View {
                         .lineLimit(4)
                         .truncationMode(.tail)
                         .font(.system(size: 16, weight: .regular, design: .rounded))
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                        .frame(maxWidth: .infinity, alignment: .topLeading)
                 }
             }
         }
