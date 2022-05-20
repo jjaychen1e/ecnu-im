@@ -80,11 +80,11 @@ struct PopoverMenu<Label, Content>: View where Label: View, Content: View {
                         .environment(\.popoverMenuMinWidth, minWidth)
                 }
                 .overlay(
-                    Asset.DynamicColors.dynamicWhite.swiftUIColor.frame(height: 1).frame(maxWidth: .infinity),
+                    Color(uiColor: UIColor.systemBackground).frame(height: 1).frame(maxWidth: .infinity),
                     alignment: .top
                 )
                 .overlay(
-                    Asset.DynamicColors.dynamicWhite.swiftUIColor.frame(height: 1).frame(maxWidth: .infinity),
+                    Color(uiColor: UIColor.systemBackground).frame(height: 1).frame(maxWidth: .infinity),
                     alignment: .bottom
                 )
             }

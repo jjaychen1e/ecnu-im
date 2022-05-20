@@ -21,7 +21,7 @@ class ContentViewController<V>: UIHostingController<V>, UIPopoverPresentationCon
         super.viewDidLoad()
 
         let size = sizeThatFits(in: UIView.layoutFittingExpandedSize)
-        preferredContentSize = size
+        preferredContentSize = CGSize(width: size.width, height: max(45, size.height))
     }
 
     func adaptivePresentationStyle(for controller: UIPresentationController, traitCollection: UITraitCollection) -> UIModalPresentationStyle {
