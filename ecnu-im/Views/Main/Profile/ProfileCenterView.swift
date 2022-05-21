@@ -8,7 +8,7 @@
 import FontAwesome
 import SwiftUI
 
-enum ProfileCategory: String, CaseIterable, Identifiable {
+enum ProfileCategory: String, CaseIterable, Identifiable, Hashable {
     static let key = "ProfileCategory"
     case reply
     case discussion
@@ -32,17 +32,17 @@ class ProfileCenterViewModel: ObservableObject {
 
 struct ProfileCenterView: View {
     struct DiscussionWithMode: Hashable {
-        var mode: ProfileCategory
+        private let mode: ProfileCategory = .discussion
         var discussion: FlarumDiscussion
     }
 
     struct PostWithMode: Hashable {
-        var mode: ProfileCategory
+        private let mode: ProfileCategory = .reply
         var post: FlarumPost
     }
 
     struct BadgeCategoryWithMode: Hashable {
-        var mode: ProfileCategory
+        private let mode: ProfileCategory = .badge
         var badgeCategory: FlarumBadgeCategory
     }
 
@@ -53,7 +53,8 @@ struct ProfileCenterView: View {
     let pageLimit: Int = 20
 
     init(userId: String) {
-        viewModel = .init(userId: userId)
+        viewModel = .init(userId: "")
+        update(userId: userId)
     }
 
     func update(userId: String) {
@@ -71,46 +72,44 @@ struct ProfileCenterView: View {
         userFetchTask = Task {
             if let id = Int(viewModel.userId) {
                 if let response = try? await flarumProvider.request(.user(id: id)).flarumResponse() {
-                    guard !Task.isCancelled else { return }
+                    guard !Task.isCancelled else {
+                        return
+                    }
                     if let user = response.data.users.first {
                         viewModel.user = user
                         viewModel.userBadges = response.included.userBadges
                         FlarumBadgeStorage.shared.store(userBadges: response.included.userBadges)
-                        fetchUserComment(offset: 0)
-                        fetchUserDiscussion(offset: 0)
+                        await fetchUserComment(offset: 0)
+                        await fetchUserDiscussion(offset: 0)
                     }
                 }
             }
         }
     }
 
-    private func fetchUserComment(offset: Int) {
-        Task {
-            if let user = viewModel.user {
-                if let response = try? await flarumProvider.request(.postsByUserAccount(account: user.attributes.username,
-                                                                                        offset: offset,
-                                                                                        limit: pageLimit,
-                                                                                        sort: .newest)).flarumResponse() {
-                    viewModel.posts.append(contentsOf: response.data.posts)
-                }
+    private func fetchUserComment(offset: Int) async {
+        if let user = viewModel.user {
+            if let response = try? await flarumProvider.request(.postsByUserAccount(account: user.attributes.username,
+                                                                                    offset: offset,
+                                                                                    limit: pageLimit,
+                                                                                    sort: .newest)).flarumResponse() {
+                guard !Task.isCancelled else { return }
+                viewModel.posts.append(contentsOf: response.data.posts)
             }
         }
     }
 
-    private func fetchUserDiscussion(offset: Int) {
-        Task {
-            if let user = viewModel.user {
-                if let response = try? await flarumProvider.request(.discussionByUserAccount(account: user.attributes.username,
-                                                                                             offset: offset,
-                                                                                             limit: pageLimit,
-                                                                                             sort: .newest)).flarumResponse() {
-                    viewModel.discussions.append(contentsOf: response.data.discussions)
-                }
+    private func fetchUserDiscussion(offset: Int) async {
+        if let user = viewModel.user {
+            if let response = try? await flarumProvider.request(.discussionByUserAccount(account: user.attributes.username,
+                                                                                         offset: offset,
+                                                                                         limit: pageLimit,
+                                                                                         sort: .newest)).flarumResponse() {
+                guard !Task.isCancelled else { return }
+                viewModel.discussions.append(contentsOf: response.data.discussions)
             }
         }
     }
-
-    private func fetchUserBadge() {}
 
     var body: some View {
         Group {
@@ -123,7 +122,7 @@ struct ProfileCenterView: View {
 
                     switch viewModel.selectedCategory {
                     case .reply:
-                        let postWithModeList = viewModel.posts.map { PostWithMode(mode: .reply, post: $0) }
+                        let postWithModeList = viewModel.posts.map { PostWithMode(post: $0) }
                         ForEach(Array(zip(postWithModeList.indices, postWithModeList)), id: \.1) { index, postWithMode in
                             let post = postWithMode.post
                             let ignored = appGlobalState.ignoredUserIds.contains(user.id)
@@ -132,7 +131,7 @@ struct ProfileCenterView: View {
                                 .dimmedOverlay(ignored: .constant(ignored), isHidden: .constant(post.isHidden))
                         }
                     case .discussion:
-                        let discussionWithModeList = viewModel.discussions.map { DiscussionWithMode(mode: .reply, discussion: $0) }
+                        let discussionWithModeList = viewModel.discussions.map { DiscussionWithMode(discussion: $0) }
                         ForEach(Array(zip(discussionWithModeList.indices, discussionWithModeList)), id: \.1) { index, discussionWithMode in
                             let discussion = discussionWithMode.discussion
                             let ignored = appGlobalState.ignoredUserIds.contains(user.id)
@@ -144,7 +143,7 @@ struct ProfileCenterView: View {
                         let groupedData = Dictionary(grouping: viewModel.userBadges.filter { $0.relationships?.badge.relationships?.category != nil },
                                                      by: { $0.relationships!.badge.relationships!.category })
                         let categories = Array(groupedData.keys).sorted(by: { $0.id < $1.id })
-                        let badgeCategoryWithModeList = categories.map { BadgeCategoryWithMode(mode: .reply, badgeCategory: $0) }
+                        let badgeCategoryWithModeList = categories.map { BadgeCategoryWithMode(badgeCategory: $0) }
                         ForEach(Array(zip(badgeCategoryWithModeList.indices, badgeCategoryWithModeList)), id: \.1) { index, badgeCategoryWithMode in
                             let category = badgeCategoryWithMode.badgeCategory
                             let userBadges = groupedData[category] ?? []
@@ -157,9 +156,6 @@ struct ProfileCenterView: View {
                 }
                 .listStyle(.plain)
             }
-        }
-        .onLoad {
-            fetchUser()
         }
     }
 }

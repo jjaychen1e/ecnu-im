@@ -105,7 +105,9 @@ class MyProfileCenterViewController: ProfileCenterViewController, CanSelectWithI
         super.viewDidLoad()
         AppGlobalState.shared.$tokenPrepared.sink { [weak self] change in
             if let self = self {
-                self.update(userId: AppGlobalState.shared.account?.userIdString ?? "")
+                if self.userId != AppGlobalState.shared.account?.userIdString {
+                    self.update(userId: AppGlobalState.shared.account?.userIdString ?? "")
+                }
             }
         }.store(in: &subscriptions)
     }

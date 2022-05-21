@@ -66,7 +66,7 @@ struct HomeView: View {
         withAnimation {
             viewModel.stickyDiscussions = discussions.filter {
                 if let attributes = $0.attributes {
-                    return (attributes.lastReadPostNumber ?? 0 < attributes.lastPostNumber ?? 0) && (attributes.isSticky ?? false || attributes.isStickiest ?? false)
+                    return (attributes.lastReadPostNumber ?? 1 < attributes.lastPostNumber ?? 1) && (attributes.isSticky ?? false || attributes.isStickiest ?? false)
                 } else {
                     return false
                 }
@@ -509,8 +509,8 @@ struct HomeView: View {
                         ForEach(0 ..< viewModel.stickyDiscussions.count, id: \.self) { index in
                             let viewModel = viewModel.stickyDiscussions[index]
                             Button {
-                                let lastReadPostNumber = viewModel.discussion.attributes?.lastReadPostNumber ?? 0
-                                uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: lastReadPostNumber + 1),
+                                let number = viewModel.discussion.attributes?.lastPostNumber ?? 1
+                                uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: number),
                                                                column: .secondary,
                                                                toRoot: true)
                             } label: {
@@ -567,8 +567,8 @@ struct HomeView: View {
                             let viewModel = viewModel.newestDiscussions[index]
                             let ignored = appGlobalState.ignoredUserIds.contains(viewModel.discussion.starter?.id ?? "")
                             Button {
-                                let lastReadPostNumber = viewModel.discussion.attributes?.lastReadPostNumber ?? 0
-                                uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: lastReadPostNumber + 1),
+                                let number = viewModel.discussion.attributes?.lastPostNumber ?? 1
+                                uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: number),
                                                                column: .secondary,
                                                                toRoot: true)
                             } label: {
@@ -616,6 +616,43 @@ private struct HomePostCardView: View {
                     PostAuthorAvatarView(name: viewModel.discussion.starterName, url: viewModel.discussion.starterAvatarURL, size: 40)
                         .mask(Circle())
                         .overlay(Circle().stroke(Color.white, lineWidth: 1))
+                        .overlay(
+                            Group {
+                                if viewModel.discussion.firstPost?.id != viewModel.discussion.lastPost?.id {
+                                    PostAuthorAvatarView(name: viewModel.discussion.lastPostedUserName, url: viewModel.discussion.lastPostedUserAvatarURL, size: 25)
+                                        .mask(Circle())
+                                        .overlay(Circle().stroke(Color.white, lineWidth: 1))
+                                        .overlay(
+                                            Color.primary.opacity(0.001)
+                                                .offset(x: 10, y: 10)
+                                                .onTapGesture {
+                                                    if let targetId = viewModel.discussion.lastPostedUser?.id {
+                                                        if let account = AppGlobalState.shared.account,
+                                                           targetId != account.userIdString {
+                                                            if let vc = uiKitEnvironment.vc {
+                                                                if vc.presentingViewController != nil {
+                                                                    vc.present(ProfileCenterViewController(userId: targetId),
+                                                                               animated: true)
+                                                                } else {
+                                                                    UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: targetId), animated: true)
+                                                                }
+                                                            } else {
+                                                                fatalErrorDebug()
+                                                            }
+                                                        } else {
+                                                            let number = viewModel.discussion.attributes?.lastPostNumber ?? 1
+                                                            uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: number),
+                                                                                           column: .secondary,
+                                                                                           toRoot: true)
+                                                        }
+                                                    }
+                                                }
+                                        )
+                                        .offset(x: 5, y: 0)
+                                }
+                            },
+                            alignment: .bottomTrailing
+                        )
                         .onTapGesture {
                             if let account = AppGlobalState.shared.account,
                                let targetId = viewModel.discussion.starter?.id,
@@ -714,6 +751,43 @@ struct HomePostCardViewLarge: View {
                     PostAuthorAvatarView(name: viewModel.discussion.starterName, url: viewModel.discussion.starterAvatarURL, size: 40)
                         .mask(Circle())
                         .overlay(Circle().stroke(Color.white, lineWidth: 1))
+                        .overlay(
+                            Group {
+                                if viewModel.discussion.firstPost?.id != viewModel.discussion.lastPost?.id {
+                                    PostAuthorAvatarView(name: viewModel.discussion.lastPostedUserName, url: viewModel.discussion.lastPostedUserAvatarURL, size: 25)
+                                        .mask(Circle())
+                                        .overlay(Circle().stroke(Color.white, lineWidth: 1))
+                                        .overlay(
+                                            Color.primary.opacity(0.001)
+                                                .offset(x: 10, y: 10)
+                                                .onTapGesture {
+                                                    if let targetId = viewModel.discussion.lastPostedUser?.id {
+                                                        if let account = AppGlobalState.shared.account,
+                                                           targetId != account.userIdString {
+                                                            if let vc = uiKitEnvironment.vc {
+                                                                if vc.presentingViewController != nil {
+                                                                    vc.present(ProfileCenterViewController(userId: targetId),
+                                                                               animated: true)
+                                                                } else {
+                                                                    UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: targetId), animated: true)
+                                                                }
+                                                            } else {
+                                                                fatalErrorDebug()
+                                                            }
+                                                        } else {
+                                                            let number = viewModel.discussion.attributes?.lastPostNumber ?? 1
+                                                            uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: number),
+                                                                                           column: .secondary,
+                                                                                           toRoot: true)
+                                                        }
+                                                    }
+                                                }
+                                        )
+                                        .offset(x: 5, y: 0)
+                                }
+                            },
+                            alignment: .bottomTrailing
+                        )
                         .onTapGesture {
                             if let targetId = viewModel.discussion.starter?.id {
                                 if let account = AppGlobalState.shared.account,
@@ -729,8 +803,8 @@ struct HomePostCardViewLarge: View {
                                         fatalErrorDebug()
                                     }
                                 } else {
-                                    let lastReadPostNumber = viewModel.discussion.attributes?.lastReadPostNumber ?? 0
-                                    uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: lastReadPostNumber + 1),
+                                    let number = viewModel.discussion.attributes?.lastPostNumber ?? 1
+                                    uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: number),
                                                                    column: .secondary,
                                                                    toRoot: true)
                                 }

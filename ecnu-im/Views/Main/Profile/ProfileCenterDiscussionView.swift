@@ -24,21 +24,46 @@ struct ProfileCenterDiscussionView: View {
                let lastPostUser = lastPost.author {
                 let lastPostExcerptText = lastPost.excerptText(configuration: .init(textLengthMax: 200, textLineMax: 5, imageCountMax: 0)) ?? "无预览内容"
                 HStack(alignment: .top) {
-                    PostAuthorAvatarView(name: lastPostUser.attributes.displayName, url: lastPostUser.avatarURL, size: 40)
-                        .onTapGesture {
-                            if lastPostUser.id != user.id {
-                                if let vc = uiKitEnvironment.vc {
-                                    if vc.presentingViewController != nil {
-                                        vc.present(ProfileCenterViewController(userId: lastPostUser.id),
-                                                   animated: true)
-                                    } else {
-                                        UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: lastPostUser.id), animated: true)
-                                    }
-                                } else {
-                                    fatalErrorDebug()
+                    PostAuthorAvatarView(name: user.attributes.displayName, url: user.avatarURL, size: 40)
+                        .mask(Circle())
+                        .overlay(Circle().stroke(Color.white, lineWidth: 1))
+                        .overlay(
+                            Group {
+                                if discussion.firstPost?.id != discussion.lastPost?.id {
+                                    PostAuthorAvatarView(name: discussion.lastPostedUserName, url: discussion.lastPostedUserAvatarURL, size: 25)
+                                        .mask(Circle())
+                                        .overlay(Circle().stroke(Color.white, lineWidth: 1))
+                                        .overlay(
+                                            Color.primary.opacity(0.001)
+                                                .offset(x: 10, y: 10)
+                                                .onTapGesture {
+                                                    if let targetId = discussion.lastPostedUser?.id {
+                                                        if let account = AppGlobalState.shared.account,
+                                                           targetId != account.userIdString {
+                                                            if let vc = uiKitEnvironment.vc {
+                                                                if vc.presentingViewController != nil {
+                                                                    vc.present(ProfileCenterViewController(userId: targetId),
+                                                                               animated: true)
+                                                                } else {
+                                                                    UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: targetId), animated: true)
+                                                                }
+                                                            } else {
+                                                                fatalErrorDebug()
+                                                            }
+                                                        } else {
+                                                            let number = lastPost.attributes?.number ?? 1
+                                                            uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearNumber: number),
+                                                                                           column: .secondary,
+                                                                                           toRoot: true)
+                                                        }
+                                                    }
+                                                }
+                                        )
+                                        .offset(x: 5, y: 0)
                                 }
-                            }
-                        }
+                            },
+                            alignment: .bottomTrailing
+                        )
                     VStack(alignment: .leading, spacing: 4) {
                         HStack {
                             Text(lastPostUser.attributes.displayName)
@@ -99,7 +124,7 @@ struct ProfileCenterDiscussionView: View {
         .background(Color.primary.opacity(.leastNonzeroMagnitude))
         .onTapGesture {
             if let vc = uiKitEnvironment.vc {
-                let targetNumber = lastPost?.attributes?.number ?? 0
+                let targetNumber = lastPost?.attributes?.number ?? 1
                 if vc.presentingViewController != nil {
                     vc.present(DiscussionViewController(discussion: discussion, nearNumber: targetNumber),
                                animated: true)

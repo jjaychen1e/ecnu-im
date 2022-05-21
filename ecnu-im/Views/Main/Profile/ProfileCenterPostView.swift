@@ -24,6 +24,8 @@ struct ProfileCenterPostView: View {
 
             HStack(alignment: .top) {
                 PostAuthorAvatarView(name: user.attributes.displayName, url: user.avatarURL, size: 40)
+                    .mask(Circle())
+                    .overlay(Circle().stroke(Color.white, lineWidth: 1))
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
                         Text(user.attributes.displayName)

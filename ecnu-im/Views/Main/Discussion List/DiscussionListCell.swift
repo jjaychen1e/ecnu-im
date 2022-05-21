@@ -63,7 +63,7 @@ struct DiscussionListCell: View {
     var body: some View {
         VStack(spacing: 8) {
             Button {
-                let near = viewModel.discussion.lastPost?.attributes?.number ?? 1
+                let near = viewModel.discussion.attributes?.lastPostNumber ?? 1
                 uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: near),
                                                column: .secondary,
                                                toRoot: true)
@@ -181,8 +181,8 @@ private struct FirstPostCell: View {
                                     fatalErrorDebug()
                                 }
                             } else {
-                                let lastReadPostNumber = viewModel.discussion.attributes?.lastReadPostNumber ?? 0
-                                uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: lastReadPostNumber + 1),
+                                let number = viewModel.discussion.attributes?.lastPostNumber ?? 1
+                                uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: number),
                                                                column: .secondary,
                                                                toRoot: true)
                             }
@@ -318,8 +318,8 @@ private struct LastPostCell: View {
                                     fatalErrorDebug()
                                 }
                             } else {
-                                let lastReadPostNumber = viewModel.discussion.attributes?.lastReadPostNumber ?? 0
-                                uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: lastReadPostNumber + 1),
+                                let number = viewModel.discussion.attributes?.lastPostNumber ?? 1
+                                uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: number),
                                                                column: .secondary,
                                                                toRoot: true)
                             }

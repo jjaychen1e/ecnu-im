@@ -191,6 +191,14 @@ extension FlarumPost {
     var isHidden: Bool {
         attributes?.isHidden ?? false
     }
+    
+    var discussion: FlarumDiscussion? {
+        relationships?.discussion ?? nil
+    }
+    
+    var discussionAuthor: FlarumUser? {
+        discussion?.starter
+    }
 }
 
 extension FlarumPost: Equatable {

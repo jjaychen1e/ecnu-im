@@ -59,7 +59,7 @@ class DiscussionViewController: NoNavigationBarViewController, NoOverlayViewCont
 
     var initialPostsCount: Int {
         let commentCount = discussion.attributes?.commentCount ?? 0
-        let lastPostNumber = discussion.lastPost?.attributes?.number ?? 0
+        let lastPostNumber = discussion.attributes?.lastPostNumber ?? 1
         return max(commentCount, lastPostNumber)
     }
 
