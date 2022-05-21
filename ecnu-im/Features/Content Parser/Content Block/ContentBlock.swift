@@ -260,22 +260,40 @@ extension ContentBlock {
     /// - Parameter content: original markdown content
     /// - Returns: processed markdown content
     private static func processParagraph(content: String) -> String {
+        var content = content
+
         // A strong regex to match urls(and possible alt text)
         let _us = "(https?:\\/\\/)(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&\\/\\/=]*)"
 
         // Remove possible alt text
-        let _us_with_alt_text = "\\[(.*?)\\]\\((\(_us))(\\s+.*?)?\\)"
-        let _r0 = try! Regex(string: "\(_us_with_alt_text)", options: .ignoreCase)
-        var content = content.replacingAll(matching: _r0, with: "[$1]($2)")
+        let markdownURLWithAltText = "\\[(.*?)\\]\\((\(_us))(\\s+.*?)?\\)"
+        let _rMarkdownURL = try! Regex(string: "\(markdownURLWithAltText)", options: .ignoreCase)
+        content = content.replacingAll(matching: _rMarkdownURL, with: "[$1]($2)")
 
-        let _r1 = try! Regex(string: "(\(_us))", options: .ignoreCase)
-        content = content.replacingAll(matching: _r1, with: "[\(Self.magicStringLink)]($1)")
+        // All link ranges, in a reversed order
+        let _rURL = try! Regex(string: "(\(_us))", options: .ignoreCase)
+        let linkMatches = _rURL.allMatches(in: content).sorted(by: { $0.range.lowerBound > $1.range.lowerBound })
 
-        let _r2 = try! Regex(string: "\\[(.*?)\\]\\(\\[\(Self.magicStringLink)\\]\\((.*?)\\)\\s*?\\)", options: .ignoreCase)
-        content = content.replacingAll(matching: _r2, with: "[$1]($2)")
+        let markdownURLWithAltText2 = "\\[.*?\\]\\((\(_us))(\\s+.*?)?\\)"
+        let _rMarkdownURL2 = try! Regex(string: "\(markdownURLWithAltText2)", options: .ignoreCase)
+        let markdownLinkMatches = _rMarkdownURL2.allMatches(in: content).sorted(by: { $0.range.lowerBound > $1.range.lowerBound })
+        let markdownLinkCaptureRanges = markdownLinkMatches.compactMap { $0.captureRanges.first }.compactMap { $0 }
+        let markdownLinkCaptureRangeLowerBounds = markdownLinkCaptureRanges.map { $0.lowerBound }
 
-        let _r3 = try! Regex(string: "\\[\(Self.magicStringLink)\\]\\((\(_us)\\.(png|jpe?g|gif))\\)", options: .ignoreCase)
-        content = content.replacingAll(matching: _r3, with: "![\(Self.magicStringImage)]($1)")
+        for linkMatch in linkMatches {
+            if !markdownLinkCaptureRangeLowerBounds.contains(linkMatch.range.lowerBound) {
+                var isImage = false
+                if let url = URL(string: linkMatch.matchedString),
+                   let components = URLComponents(url: url, resolvingAgainstBaseURL: true) {
+                    let path = components.path
+                    let _rImageSuffix = try! Regex(string: "\\.(png|jpe?g|gif)", options: .ignoreCase)
+                    if _rImageSuffix.matches(path) {
+                        isImage = true
+                    }
+                }
+                content.replaceSubrange(linkMatch.range, with: "\(isImage ? "!" : "")[\(isImage ? Self.magicStringImage : Self.magicStringLink)](\(linkMatch.matchedString))")
+            }
+        }
 
         return content
     }
