@@ -254,7 +254,8 @@ private struct ProfileCenterViewHeader: View {
                     }
                 }
 
-                Text(user.attributes.bio ?? "这个人很懒，什么都没留下。")
+                let bio = user.attributes.bio ?? "这个人很懒，什么都没留下。"
+                Text(bio == "" ? "这个人很懒，什么都没留下。" : bio)
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundColor(.primary.opacity(0.9))
                     .padding(.horizontal, 24)

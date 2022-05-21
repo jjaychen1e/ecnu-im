@@ -49,6 +49,18 @@ struct EnvironmentWrapperView<Content: View>: View {
     var body: some View {
         view
             .environmentObject(uiKitEnvironment)
+            .environment(\.openURL, OpenURLAction { url in
+                if url.absoluteString.hasPrefix(URLService.scheme) {
+                    // Our scheme
+                    UIApplication.shared.open(url)
+                } else {
+                    // As a normal link
+                    if let url = URLService.link(href: url.absoluteString).url.url {
+                        UIApplication.shared.open(url)
+                    }
+                }
+                return .handled
+            })
     }
 
     func update(splitVC: UISplitViewController?, nvc: UINavigationController?, vc: UIViewController?) {

@@ -77,3 +77,20 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 enum URLServiceType: String, RawRepresentable {
     case link
 }
+
+enum URLService {
+    static let scheme = "ecnu-im"
+
+    case link(href: String)
+
+    var schemePrefix: String {
+        Self.scheme + "://"
+    }
+
+    var url: String {
+        switch self {
+        case let .link(href):
+            return schemePrefix + "link?" + "href=\(href)"
+        }
+    }
+}
