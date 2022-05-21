@@ -64,11 +64,16 @@ class ContentItemCodeBlockUIView: UIView & ContentBlockUIView {
 
 extension ContentItemCodeBlockUIView: UITextViewDelegate {
     func textView(_ textView: UITextView, shouldInteractWith url: URL, in characterRange: NSRange, interaction: UITextItemInteraction) -> Bool {
-        if let url = URL(string: "ecnu-im://\(URLServiceType.link)?href=\(url.absoluteString)"),
-           UIApplication.shared.canOpenURL(url) {
+        if url.absoluteString.hasPrefix(URLService.scheme) {
+            // Our scheme
             UIApplication.shared.open(url)
-            return true
+        } else {
+            // As a normal link
+            if let escapedURL = url.absoluteString.addingPercentEncoding(withAllowedCharacters: .alphanumerics),
+               let url = URLService.link(href: escapedURL).url.url {
+                UIApplication.shared.open(url)
+            }
         }
-        return false
+        return true
     }
 }

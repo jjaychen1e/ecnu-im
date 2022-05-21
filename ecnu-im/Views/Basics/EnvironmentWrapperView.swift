@@ -55,7 +55,8 @@ struct EnvironmentWrapperView<Content: View>: View {
                     UIApplication.shared.open(url)
                 } else {
                     // As a normal link
-                    if let url = URLService.link(href: url.absoluteString).url.url {
+                    if let escapedURL = url.absoluteString.addingPercentEncoding(withAllowedCharacters: .alphanumerics),
+                       let url = URLService.link(href: escapedURL).url.url {
                         UIApplication.shared.open(url)
                     }
                 }

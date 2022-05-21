@@ -64,12 +64,16 @@ class ContentItemParagraphUIView: UIView & ContentBlockUIView {
 
 extension ContentItemParagraphUIView: UITextViewDelegate {
     func textView(_ textView: UITextView, shouldInteractWith url: URL, in characterRange: NSRange, interaction: UITextItemInteraction) -> Bool {
-        if let escapedURL = url.absoluteString.addingPercentEncoding(withAllowedCharacters: .alphanumerics),
-           let url = URL(string: "ecnu-im://\(URLServiceType.link)?href=\(escapedURL)"),
-           UIApplication.shared.canOpenURL(url) {
+        if url.absoluteString.hasPrefix(URLService.scheme) {
+            // Our scheme
             UIApplication.shared.open(url)
-            return false
+        } else {
+            // As a normal link
+            if let escapedURL = url.absoluteString.addingPercentEncoding(withAllowedCharacters: .alphanumerics),
+               let url = URLService.link(href: escapedURL).url.url {
+                UIApplication.shared.open(url)
+            }
         }
-        return true
+        return false
     }
 }
