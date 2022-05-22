@@ -34,7 +34,7 @@ func printDebug(level: DebugLogLevel = .normal, file: String = #file, line: Int 
 
 func fatalErrorDebug(file: String = #file, line: Int = #line, function: String = #function, _ message: String = "") {
     #if DEBUG
-        print("\(DebugLogLevel.error)\t[Debug log] \(URL(fileURLWithPath: file).lastPathComponent)(line \(line)), `\(function)`:\n\t[Debug log]\(message != "" ? " \(message)" : "")")
+    fatalError("\(DebugLogLevel.error)\t[Debug log] \(URL(fileURLWithPath: file).lastPathComponent)(line \(line)), `\(function)`:\n\t[Debug log]\(message != "" ? " \(message)" : "")")
     #endif
 }
 

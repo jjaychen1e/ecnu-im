@@ -273,6 +273,10 @@ struct FlarumResponse {
                                         attributes["content"] = JSON([
                                             "postMentioned": attributes["content"],
                                         ])
+                                    case .userMentioned:
+                                        attributes["content"] = JSON([
+                                            "userMentioned": [:],
+                                        ])
                                     case .postReacted:
                                         if let reactionString = attributes["content"].string {
                                             var json = JSON(parseJSON: reactionString)
@@ -296,6 +300,10 @@ struct FlarumResponse {
                                         attributes["content"] = JSON([
                                             "badgeReceived": [:],
                                         ])
+                                    case .newPost:
+                                        attributes["content"] = JSON([
+                                            "newPost": attributes["content"],
+                                        ])
                                     case .privateDiscussionReplied:
                                         attributes["content"] = JSON([
                                             "privateDiscussionReplied": attributes["content"],
@@ -307,7 +315,7 @@ struct FlarumResponse {
                                     }
                                 } else {
                                     debugExecution {
-                                        let whitelist = [""]
+                                        let whitelist: [String] = []
                                         if let contentType = attributes["contentType"].string,
                                            !whitelist.contains(contentType) {
                                             fatalErrorDebug("\(contentType) is not in the whitelist.")

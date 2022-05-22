@@ -200,10 +200,6 @@ extension AllDiscussionsView {
         }
 
         if let response = try? await flarumProvider.request(.allDiscussions(pageOffset: pageOffset, pageItemLimit: pageItemLimit)).flarumResponse() {
-            guard !Task.isCancelled else {
-                print("1")
-                return
-            }
             let newDiscussions = response.data.discussions.sorted { d1, d2 in
                 if let id1 = d1.lastPost?.id, let id2 = d2.lastPost?.id {
                     return id1 > id2

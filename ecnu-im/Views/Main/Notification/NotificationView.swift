@@ -25,7 +25,7 @@ struct NotificationView: View {
         VStack(alignment: .leading, spacing: 6) {
             Group {
                 switch type {
-                case .postLiked, .postMentioned, .postReacted, .privateDiscussionReplied, .privateDiscussionCreated:
+                case .postLiked, .postMentioned, .userMentioned, .postReacted, .newPost, .privateDiscussionReplied, .privateDiscussionCreated:
                     Text(relatedDiscussion?.discussionTitle ?? "Unkown")
                 case .badgeReceived:
                     Text(badgeNotificationTitle ?? "Unkown")
@@ -51,7 +51,7 @@ struct NotificationView: View {
                                 }
                             }
                         }
-                    (Text(user.attributes.displayName) + Text(" \(type.actionDescription)了你"))
+                    (Text(user.attributes.displayName) + Text(" \(type.actionDescription)"))
                         .font(.system(size: 15, weight: .medium, design: .rounded))
                 }
 
@@ -72,7 +72,7 @@ struct NotificationView: View {
         .background(notification.attributes.isRead ? Color.clear.opacity(0.0001) : colorScheme == .light ? Color(rgba: "#e4ebf6") : Color(rgba: "#e4ebf6").opacity(0.2))
         .onLoad {
             Task {
-                if let repliedPost = await notification.repliedPost() {
+                if let repliedPost = await notification.newPost() {
                     replyExcerptText = repliedPost.excerptText(configuration: .init(textLengthMax: 150,
                                                                                     textLineMax: 3,
                                                                                     imageCountMax: 0))
@@ -106,6 +106,7 @@ struct NotificationView: View {
                 }
             }
         }
+        .background(Color.primary.opacity(0.0001))
         .onTapGesture {
             switch notification.attributes.content {
             case .postLiked, .postReacted:
@@ -125,6 +126,17 @@ struct NotificationView: View {
                 }
             case .badgeReceived:
                 uiKitEnvironment.vc?.tabController?.select(tab: .profile, info: [ProfileCategory.key: ProfileCategory.badge])
+            case .newPost:
+                Task {
+                    if let newPost = await notification.newPost() {
+                        if let discussion = newPost.relationships?.discussion {
+                            let number = newPost.attributes?.number ?? 1
+                            uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearNumber: number),
+                                                           column: .secondary,
+                                                           toRoot: true)
+                        }
+                    }
+                }
             case let .privateDiscussionReplied(postNumber):
                 if let post = originalPost,
                    let discussion = post.relationships?.discussion {
@@ -135,9 +147,20 @@ struct NotificationView: View {
             case .privateDiscussionCreated:
                 if let post = originalPost,
                    let discussion = post.relationships?.discussion {
-                    uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearNumber: 0),
+                    uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearNumber: 1),
                                                    column: .secondary,
                                                    toRoot: true)
+                }
+            case .userMentioned:
+                Task {
+                    if let newPost = await notification.newPost() {
+                        if let discussion = newPost.relationships?.discussion {
+                            let number = newPost.attributes?.number ?? 1
+                            uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearNumber: number),
+                                                           column: .secondary,
+                                                           toRoot: true)
+                        }
+                    }
                 }
             }
         }
@@ -150,11 +173,17 @@ struct NotificationView: View {
             Image(systemName: "heart.fill")
                 .foregroundColor(.pink)
         case .postMentioned:
-            Image(systemName: "message.fill")
+            Image(systemName: "arrowshape.turn.up.left.fill")
+                .foregroundColor(.blue)
+        case .userMentioned:
+            Image(systemName: "at.circle.fill")
                 .foregroundColor(.blue)
         case .postReacted:
             Image(systemName: "hands.sparkles.fill")
                 .foregroundColor(.purple)
+        case .newPost:
+            Image(systemName: "message.fill")
+                .foregroundColor(.teal)
         case .badgeReceived:
             EmptyView()
         case .privateDiscussionReplied:
@@ -184,7 +213,7 @@ struct NotificationView: View {
         switch notification.attributes.content {
         case .postLiked, .postReacted, .privateDiscussionCreated, .badgeReceived:
             EmptyView()
-        case .postMentioned, .privateDiscussionReplied:
+        case .postMentioned, .newPost, .userMentioned, .privateDiscussionReplied:
             if let replyExcerptText = replyExcerptText, replyExcerptText != "" {
                 Text(replyExcerptText)
                     .font(.system(size: 15, weight: .regular, design: .rounded))

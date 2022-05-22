@@ -8,12 +8,21 @@
 import Combine
 import SwiftUI
 
+private class NotificationCenterViewLoadInfo {
+    var task: Task<Void, Never>?
+    let limit: Int = 30
+    var loadingOffset: Int = 0
+    var isLoading = false
+}
+
 struct NotificationCenterView: View {
     @State private var notifications: [FlarumNotification] = []
     @State private var subscriptions: Set<AnyCancellable> = []
-    @State var hasScrolled = false
-    @State private var loadTask: Task<Void, Never>? = nil
+    @State private var hasScrolled = false
+    @State private var loadInfo = NotificationCenterViewLoadInfo()
     @ObservedObject var appGlobalState = AppGlobalState.shared
+
+    @State private var sequenceQueue = DispatchQueue(label: "NotificationCenterViewLoadQueue")
 
     var body: some View {
         Group {
@@ -40,10 +49,16 @@ struct NotificationCenterView: View {
                                 alignment: .topLeading
                             )
                             .dimmedOverlay(ignored: .constant(ignored), isHidden: .constant(false))
+                            .onAppear {
+                                checkLoadMore(index)
+                            }
                     }
                 }
                 .listStyle(.plain)
                 .coordinateSpace(name: "scroll")
+                .refreshable {
+                    load(isRefresh: true)
+                }
             } else {
                 Color.clear
             }
@@ -58,14 +73,40 @@ struct NotificationCenterView: View {
         }
     }
 
-    func load() {
-        loadTask?.cancel()
-        loadTask = nil
-        notifications = []
-        loadTask = Task {
-            if let response = try? await flarumProvider.request(.notification(offset: 0, limit: 30)).flarumResponse() {
-                guard !Task.isCancelled else { return }
-                self.notifications = response.data.notifications
+    func checkLoadMore(_ i: Int) {
+        if i == notifications.count - 10 || i == notifications.count - 1 {
+            load()
+        }
+    }
+
+    func load(isRefresh: Bool = false) {
+        sequenceQueue.async {
+            if isRefresh {
+                loadInfo.task?.cancel()
+                loadInfo.task = nil
+                loadInfo.loadingOffset = 0
+                loadInfo.isLoading = true
+                withAnimation {
+                    notifications = []
+                }
+            } else {
+                if loadInfo.isLoading {
+                    return
+                }
+            }
+
+            let loadInfo = self.loadInfo
+            loadInfo.task = Task {
+                if let response = try? await flarumProvider.request(.notification(offset: loadInfo.loadingOffset, limit: loadInfo.limit)).flarumResponse() {
+                    guard !Task.isCancelled else { return }
+                    withAnimation {
+                        self.notifications.append(contentsOf: response.data.notifications)
+                    }
+                    sequenceQueue.async {
+                        loadInfo.loadingOffset += loadInfo.limit
+                        loadInfo.isLoading = false
+                    }
+                }
             }
         }
     }

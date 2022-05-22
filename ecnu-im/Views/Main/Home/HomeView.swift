@@ -207,7 +207,7 @@ struct HomeView: View {
 
                                 if let latestNotification = notifications.first {
                                     switch latestNotification.attributes.contentType {
-                                    case .postLiked, .postMentioned, .postReacted, .privateDiscussionReplied, .privateDiscussionCreated:
+                                    case .postLiked, .postMentioned, .userMentioned, .postReacted, .newPost, .privateDiscussionReplied, .privateDiscussionCreated:
                                         let latestNotificationUserName: String = notifications.first?.relationships?.fromUser?.attributes.displayName ?? "Unkown"
                                         let latestNotificationDiscussionTitle: String = {
                                             if let subject = notifications.first?.relationships?.subject {
@@ -272,8 +272,8 @@ struct HomeView: View {
                                     } else {
                                         fatalErrorDebug()
                                     }
-                                case .postMentioned, .privateDiscussionReplied:
-                                    if let repliedPost = await notifications[0].repliedPost() {
+                                case .postMentioned, .userMentioned, .newPost, .privateDiscussionReplied:
+                                    if let repliedPost = await notifications[0].newPost() {
                                         if let excerpt = repliedPost.excerptText(configuration: .init(textLengthMax: 150, textLineMax: 3, imageCountMax: 0)) {
                                             withAnimation {
                                                 viewModel.latestNotificationExcerpt = excerpt
