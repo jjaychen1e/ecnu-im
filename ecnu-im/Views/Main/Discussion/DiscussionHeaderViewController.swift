@@ -47,7 +47,7 @@ class DiscussionHeaderViewController: UIViewController {
     }
 
     private func setUpViews(viewModel: DiscussionHeaderViewModel) {
-        if let cgColor = (viewModel.discussion.synthesizedTags.first?.backgroundColor ?? .gray).cgColor {
+        if let cgColor = (viewModel.discussion.tagViewModels.first?.backgroundColor ?? .gray).cgColor {
             headerBackgroundView.backgroundColor = UIColor(cgColor: cgColor)
         } else {
             headerBackgroundView.backgroundColor = .gray

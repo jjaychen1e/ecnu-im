@@ -444,12 +444,17 @@ struct HomeView: View {
                     .foregroundColor(.secondary)
                     .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                     .modifier(OutlineOverlay(cornerRadius: 14))
-                Image(systemName: "plus.message")
-                    .font(.body.weight(.bold))
-                    .frame(width: 36, height: 36)
-                    .foregroundColor(.secondary)
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    .modifier(OutlineOverlay(cornerRadius: 14))
+
+                Button {
+                    UIApplication.shared.topController()?.present(NewDiscussionViewController(), animated: true)
+                } label: {
+                    Image(systemName: "plus.message")
+                        .font(.body.weight(.bold))
+                        .frame(width: 36, height: 36)
+                        .foregroundColor(.secondary)
+                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .modifier(OutlineOverlay(cornerRadius: 14))
+                }
             }
             .frame(maxWidth: .infinity, alignment: .trailing)
             .padding(.trailing, 20)
@@ -683,7 +688,7 @@ private struct HomePostCardView: View {
                                     .fixedSize()
                             }
                             Spacer(minLength: 0)
-                            DiscussionTagsView(tags: viewModel.discussion.synthesizedTags)
+                            DiscussionTagsView(tags: .constant(viewModel.discussion.tagViewModels))
                                 .fixedSize()
 //                                .frame(maxWidth: .infinity, alignment: .trailing)
                         }
@@ -823,7 +828,7 @@ struct HomePostCardViewLarge: View {
                                     .font(.system(size: 10, weight: .regular, design: .rounded))
                             }
                             Spacer(minLength: 0)
-                            DiscussionTagsView(tags: viewModel.discussion.synthesizedTags)
+                            DiscussionTagsView(tags: .constant(viewModel.discussion.tagViewModels))
                                 .fixedSize()
                         }
                     }

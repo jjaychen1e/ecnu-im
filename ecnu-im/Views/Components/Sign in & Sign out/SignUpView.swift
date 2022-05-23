@@ -4,16 +4,6 @@ import RxSwift
 import SafariServices
 import SwiftUI
 
-private struct RegisterErrorDetail: Decodable {
-    let status: String
-    let code: String
-    let detail: String
-}
-
-private struct RegisterErrorModel: Decodable {
-    let errors: [RegisterErrorDetail]
-}
-
 private struct RegisterSuccessData: Decodable {
     let id: String
 }
@@ -233,7 +223,7 @@ struct SignUpView: View {
                                                                                 nickname: nickname,
                                                                                 password: signUpViewModel.password,
                                                                                 recaptcha: next)) {
-                        if let error = try? result.map(RegisterErrorModel.self) {
+                        if let error = try? result.map(FlarumAPIErrorModel.self) {
                             let errorDetail = error.errors.map { $0.detail }.joined(separator: "")
                                 .replacingOccurrences(of: "username ", with: "帐号")
                                 .replacingOccurrences(of: "email ", with: "邮箱")

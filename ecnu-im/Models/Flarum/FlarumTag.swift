@@ -38,3 +38,9 @@ class FlarumTag: Codable {
     var attributes: FlarumTagAttributes
     var relationships: FlarumTagRelationships?
 }
+
+extension FlarumTag: Equatable {
+    static func == (lhs: FlarumTag, rhs: FlarumTag) -> Bool {
+        lhs.id == rhs.id
+    }
+}

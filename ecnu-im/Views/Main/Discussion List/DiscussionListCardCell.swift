@@ -94,7 +94,7 @@ struct DiscussionListCardCell: View {
                                         .font(.system(size: 10, weight: .regular, design: .rounded))
                                 }
                                 Spacer(minLength: 0)
-                                DiscussionTagsView(tags: viewModel.discussion.synthesizedTags)
+                                DiscussionTagsView(tags: .constant(viewModel.discussion.tagViewModels))
                                     .fixedSize()
                             }
                         }

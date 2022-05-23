@@ -138,7 +138,7 @@ extension FlarumDiscussion {
     var lastPost: FlarumPost? {
         relationships?.lastPost
     }
-    
+
     var lastPostedUser: FlarumUser? {
         relationships?.lastPostedUser
     }
@@ -147,19 +147,8 @@ extension FlarumDiscussion {
         relationships?.tags ?? []
     }
 
-    var synthesizedTags: [TagViewModel] {
-        var tagViewModels: [TagViewModel] = []
-        let subTags = tags.filter { $0.attributes.isChild }
-        let firstLevelTags = tags.filter { !$0.attributes.isChild }
-        for tag in firstLevelTags {
-            let tagViewModel = TagViewModel(tag: tag)
-            if let childTag = subTags.first(where: { $0.relationships?.parent?.id == tag.id }) {
-                tagViewModel.child = TagViewModel(tag: childTag)
-            }
-            tagViewModels.append(tagViewModel)
-        }
-
-        return tagViewModels
+    var tagViewModels: [TagViewModel] {
+        tags.mappedTagViewModels
     }
 
     var discussionTitle: String {
@@ -203,15 +192,15 @@ extension FlarumDiscussion {
             return "Unknown"
         }
     }
-    
+
     var commentCount: Int {
         attributes?.commentCount ?? 0
     }
-    
+
     var viewCount: Int {
         attributes?.viewCount ?? 0
     }
-    
+
     var isHidden: Bool {
         attributes?.isHidden ?? false
     }
@@ -241,5 +230,22 @@ extension FlarumDiscussion: Hashable {
         if let lastPostContentHtml = lastPost?.attributes?.contentHtml {
             hasher.combine(lastPostContentHtml)
         }
+    }
+}
+
+extension Array where Element == FlarumTag {
+    var mappedTagViewModels: [TagViewModel] {
+        var tagViewModels: [TagViewModel] = []
+        let subTags = filter { $0.attributes.isChild }
+        let firstLevelTags = filter { !$0.attributes.isChild }
+        for tag in firstLevelTags {
+            let tagViewModel = TagViewModel(tag: tag)
+            if let childTag = subTags.first(where: { $0.relationships?.parent?.id == tag.id }) {
+                tagViewModel.child = TagViewModel(tag: childTag)
+            }
+            tagViewModels.append(tagViewModel)
+        }
+
+        return tagViewModels
     }
 }

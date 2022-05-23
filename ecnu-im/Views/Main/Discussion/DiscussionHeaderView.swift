@@ -26,12 +26,12 @@ struct DiscussionHeaderView: View {
     var body: some View {
         VStack {
             Group {
-                if viewModel.discussion.synthesizedTags.count > 0 {
-                    DiscussionHeaderTagsView(tags: viewModel.discussion.synthesizedTags)
+                if viewModel.discussion.tagViewModels.count > 0 {
+                    DiscussionHeaderTagsView(tags: viewModel.discussion.tagViewModels)
                 }
                 Text(viewModel.discussion.discussionTitle)
                     .font(.system(size: 20, weight: .medium, design: .default))
-                    .padding(.horizontal, viewModel.discussion.synthesizedTags.count == 0 ? 30 : 0)
+                    .padding(.horizontal, viewModel.discussion.tagViewModels.count == 0 ? 30 : 0)
             }
         }
         .padding(.horizontal)
@@ -39,7 +39,7 @@ struct DiscussionHeaderView: View {
         .padding(.top, 8)
         .frame(maxWidth: .infinity, minHeight: 50, alignment: .bottom)
         .foregroundColor(Asset.DynamicColors.dynamicWhite.swiftUIColor)
-        .background(viewModel.discussion.synthesizedTags.first?.backgroundColor ?? .init(uiColor: UIColor.gray))
+        .background(viewModel.discussion.tagViewModels.first?.backgroundColor ?? .init(uiColor: UIColor.gray))
         .overlay(
             Group {
                 if let splitVC = uiKitEnvironment.splitVC,

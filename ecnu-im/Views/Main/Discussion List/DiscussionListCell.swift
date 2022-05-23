@@ -336,7 +336,7 @@ private struct LastPostCell: View {
                                 .font(.system(size: 12, weight: .light))
                                 .fixedSize()
                             Spacer(minLength: 0)
-                            DiscussionTagsView(tags: viewModel.discussion.synthesizedTags, fontSize: 14, horizontalPadding: 6, verticalPadding: 4, cornerRadius: 5)
+                            DiscussionTagsView(tags: .constant(viewModel.discussion.tagViewModels), fontSize: 14, horizontalPadding: 6, verticalPadding: 4, cornerRadius: 5)
                                 .fixedSize()
                         }
                     }

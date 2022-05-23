@@ -8,13 +8,12 @@
 import SwiftUI
 
 struct DiscussionTagsView: View {
-    @State var tags: [TagViewModel]
+    @Binding var tags: [TagViewModel]
     @State var fontSize: CGFloat = 12
     @State var horizontalPadding: CGFloat = 5
     @State var verticalPadding: CGFloat = 4
-    @State var cornerRadius: CGFloat = 5
+    @State var cornerRadius: CGFloat = 4
     @State var spacing: CGFloat = 2
-
 
     var body: some View {
         if tags.count > 0 {
@@ -55,9 +54,9 @@ struct DiscussionTagsView_Previews: PreviewProvider {
         let chitChatTag = TagViewModel(tag: .init(id: "1", attributes: .init(name: "灌水闲聊", description: "", slug: "", color: "#42A5F5", icon: "fas fa-water", discussionCount: 0, isChild: false, isHidden: false, lastPostedAt: "", canStartDiscussion: true, canAddToDiscussion: true)),
                                        child: podcastTag)
         let eliteTag = TagViewModel(tag: .init(id: "1", attributes: .init(name: "精华", description: "", slug: "", color: "#FFCA28", icon: "fas fa-star", discussionCount: 0, isChild: false, isHidden: false, lastPostedAt: "", canStartDiscussion: true, canAddToDiscussion: true)))
-        DiscussionTagsView(tags: [
+        DiscussionTagsView(tags: .constant([
             chitChatTag,
             eliteTag,
-        ])
+        ]))
     }
 }
