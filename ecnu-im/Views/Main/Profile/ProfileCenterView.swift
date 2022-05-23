@@ -28,6 +28,25 @@ class ProfileCenterViewModel: ObservableObject {
     init(userId: String) {
         self.userId = userId
     }
+
+    func refresh() {
+        DispatchQueue.main.sync {
+            withAnimation {
+                self.user = nil
+                self.posts = []
+                self.discussions = []
+                self.userBadges = []
+            }
+        }
+    }
+}
+
+private class ProfileCenterViewLoadInfo {
+    var task: Task<Void, Never>?
+    let limit: Int = 30
+    var postLoadingOffset: Int = 0
+    var discussionLoadingOffset: Int = 0
+    var isLoading = false
 }
 
 struct ProfileCenterView: View {
@@ -49,8 +68,9 @@ struct ProfileCenterView: View {
     @ObservedObject private var viewModel: ProfileCenterViewModel
     @ObservedObject var appGlobalState = AppGlobalState.shared
     @State private var userFetchTask: Task<Void, Never>?
+    @State private var loadInfo = ProfileCenterViewLoadInfo()
 
-    let pageLimit: Int = 20
+    @State private var sequenceQueue = DispatchQueue(label: "ProfileCenterViewLoadQueue")
 
     init(userId: String) {
         viewModel = .init(userId: "")
@@ -59,54 +79,135 @@ struct ProfileCenterView: View {
 
     func update(userId: String) {
         viewModel.userId = userId
-        fetchUser()
+        fetch(isRefresh: true)
     }
 
     func update(selectedCategory: ProfileCategory) {
         viewModel.selectedCategory = selectedCategory
     }
 
-    private func fetchUser() {
-        userFetchTask?.cancel()
-        userFetchTask = nil
-        userFetchTask = Task {
-            if let id = Int(viewModel.userId) {
-                if let response = try? await flarumProvider.request(.user(id: id)).flarumResponse() {
-                    guard !Task.isCancelled else {
-                        return
+    private func checkLoadMore(_ i: Int) {
+        switch viewModel.selectedCategory {
+        case .badge:
+            break
+        case .discussion:
+            if i == viewModel.discussions.count - 10 || i == viewModel.discussions.count - 1 {
+                fetch()
+            }
+        case .reply:
+            if i == viewModel.posts.count - 10 || i == viewModel.posts.count - 1 {
+                fetch()
+            }
+        }
+    }
+
+    private func fetch(isRefresh: Bool = false) {
+        sequenceQueue.async {
+            if isRefresh {
+                loadInfo.task?.cancel()
+                loadInfo.task = nil
+                loadInfo.postLoadingOffset = 0
+                loadInfo.discussionLoadingOffset = 0
+                loadInfo.isLoading = true
+                viewModel.refresh()
+            } else {
+                if loadInfo.isLoading {
+                    return
+                }
+            }
+
+            let loadInfo = self.loadInfo
+            if isRefresh {
+                loadInfo.task = Task {
+                    if let id = Int(viewModel.userId) {
+                        if let response = try? await flarumProvider.request(.user(id: id)).flarumResponse() {
+                            if let user = response.data.users.first {
+                                guard !Task.isCancelled else { return }
+                                sequenceQueue.async {
+                                    guard !Task.isCancelled else { return }
+                                    DispatchQueue.main.sync {
+                                        withAnimation {
+                                            viewModel.user = user
+                                            viewModel.userBadges = response.included.userBadges
+                                        }
+                                    }
+                                }
+                                FlarumBadgeStorage.shared.store(userBadges: response.included.userBadges)
+                                guard !Task.isCancelled else { return }
+                                await fetchUserComment(user: user, offset: loadInfo.postLoadingOffset)
+                                guard !Task.isCancelled else { return }
+                                await fetchUserDiscussion(user: user, offset: loadInfo.discussionLoadingOffset)
+                                sequenceQueue.async {
+                                    guard !Task.isCancelled else { return }
+                                    loadInfo.postLoadingOffset = loadInfo.limit
+                                    loadInfo.discussionLoadingOffset = loadInfo.limit
+                                    loadInfo.task = nil
+                                    loadInfo.isLoading = false
+                                }
+                            }
+                        }
                     }
-                    if let user = response.data.users.first {
-                        viewModel.user = user
-                        viewModel.userBadges = response.included.userBadges
-                        FlarumBadgeStorage.shared.store(userBadges: response.included.userBadges)
-                        await fetchUserComment(offset: 0)
-                        await fetchUserDiscussion(offset: 0)
+                }
+            } else {
+                switch viewModel.selectedCategory {
+                case .badge:
+                    break
+                case .discussion:
+                    if let user = viewModel.user {
+                        loadInfo.task = Task {
+                            await fetchUserDiscussion(user: user, offset: loadInfo.discussionLoadingOffset)
+                            sequenceQueue.async {
+                                guard !Task.isCancelled else { return }
+                                loadInfo.discussionLoadingOffset += loadInfo.limit
+                                loadInfo.task = nil
+                                loadInfo.isLoading = false
+                            }
+                        }
+                    }
+                case .reply:
+                    if let user = viewModel.user {
+                        loadInfo.task = Task {
+                            await fetchUserComment(user: user, offset: loadInfo.postLoadingOffset)
+                            sequenceQueue.async {
+                                guard !Task.isCancelled else { return }
+                                loadInfo.postLoadingOffset += loadInfo.limit
+                                loadInfo.isLoading = false
+                            }
+                        }
                     }
                 }
             }
         }
     }
 
-    private func fetchUserComment(offset: Int) async {
-        if let user = viewModel.user {
-            if let response = try? await flarumProvider.request(.postsByUserAccount(account: user.attributes.username,
-                                                                                    offset: offset,
-                                                                                    limit: pageLimit,
-                                                                                    sort: .newest)).flarumResponse() {
+    private func fetchUserComment(user: FlarumUser, offset: Int) async {
+        if let response = try? await flarumProvider.request(.postsByUserAccount(account: user.attributes.username,
+                                                                                offset: offset,
+                                                                                limit: loadInfo.limit,
+                                                                                sort: .newest)).flarumResponse() {
+            sequenceQueue.async {
                 guard !Task.isCancelled else { return }
-                viewModel.posts.append(contentsOf: response.data.posts)
+                withAnimation {
+                    DispatchQueue.main.sync {
+                        viewModel.posts.append(contentsOf: response.data.posts)
+                    }
+                }
             }
         }
     }
 
-    private func fetchUserDiscussion(offset: Int) async {
-        if let user = viewModel.user {
-            if let response = try? await flarumProvider.request(.discussionByUserAccount(account: user.attributes.username,
-                                                                                         offset: offset,
-                                                                                         limit: pageLimit,
-                                                                                         sort: .newest)).flarumResponse() {
+    private func fetchUserDiscussion(user: FlarumUser, offset: Int) async {
+        if let response = try? await flarumProvider.request(.discussionByUserAccount(account: user.attributes.username,
+                                                                                     offset: offset,
+                                                                                     limit: loadInfo.limit,
+                                                                                     sort: .newest)).flarumResponse() {
+            sequenceQueue.async {
                 guard !Task.isCancelled else { return }
-                viewModel.discussions.append(contentsOf: response.data.discussions)
+                withAnimation {
+                    DispatchQueue.main.sync {
+                        viewModel.discussions.append(contentsOf: response.data.discussions)
+                    }
+                }
             }
         }
     }
@@ -129,6 +230,9 @@ struct ProfileCenterView: View {
                             ProfileCenterPostView(user: user, post: post)
                                 .buttonStyle(PlainButtonStyle())
                                 .dimmedOverlay(ignored: .constant(ignored), isHidden: .constant(post.isHidden))
+                                .onAppear {
+                                    checkLoadMore(index)
+                                }
                         }
                     case .discussion:
                         let discussionWithModeList = viewModel.discussions.map { DiscussionWithMode(discussion: $0) }
@@ -138,6 +242,9 @@ struct ProfileCenterView: View {
                             ProfileCenterDiscussionView(user: user, discussion: discussion)
                                 .buttonStyle(PlainButtonStyle())
                                 .dimmedOverlay(ignored: .constant(ignored), isHidden: .constant(discussion.isHidden))
+                                .onAppear {
+                                    checkLoadMore(index)
+                                }
                         }
                     case .badge:
                         let groupedData = Dictionary(grouping: viewModel.userBadges.filter { $0.relationships?.badge.relationships?.category != nil },
@@ -155,6 +262,9 @@ struct ProfileCenterView: View {
                     }
                 }
                 .listStyle(.plain)
+                .refreshable {
+                    fetch(isRefresh: true)
+                }
             }
         }
     }

@@ -73,7 +73,7 @@ struct NotificationCenterView: View {
         }
     }
 
-    func checkLoadMore(_ i: Int) {
+    private func checkLoadMore(_ i: Int) {
         if i == notifications.count - 10 || i == notifications.count - 1 {
             load()
         }
@@ -103,6 +103,7 @@ struct NotificationCenterView: View {
                         self.notifications.append(contentsOf: response.data.notifications)
                     }
                     sequenceQueue.async {
+                        guard !Task.isCancelled else { return }
                         loadInfo.loadingOffset += loadInfo.limit
                         loadInfo.isLoading = false
                     }
