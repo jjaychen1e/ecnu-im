@@ -359,7 +359,6 @@ class DiscussionViewController: UIViewController, NoOverlayViewController, HasNa
     }
 
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        print(indexPath.row)
         if initialized {
             checkAndLoadMoreData(index: indexPath.row)
         }

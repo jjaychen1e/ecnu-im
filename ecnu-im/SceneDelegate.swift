@@ -57,7 +57,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         if let urlService = url.urlService {
             switch urlService {
             case let .link(href):
-                if let url = URL(string: href) {
+                if let urlWithoutPercentEncoding = href.removingPercentEncoding,
+                   let url = URL(string: urlWithoutPercentEncoding) {
                     CommonWebViewController.show(url: url)
                 }
             case .safari:

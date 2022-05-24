@@ -9,9 +9,6 @@ import Foundation
 
 extension String {
     var url: URL? {
-        if let percentEncodingUrl = addingPercentEncoding(withAllowedCharacters: .alphanumerics) {
-            return URL(string: percentEncodingUrl)
-        }
-        return nil
+        URL(string: self)
     }
 }

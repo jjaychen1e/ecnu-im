@@ -9,12 +9,14 @@ import UIKit
 
 class MyApplication: UIApplication {
     override func open(_ url: URL, options: [UIApplication.OpenExternalURLOptionsKey: Any] = [:], completionHandler completion: ((Bool) -> Void)? = nil) {
-        if url.absoluteString.hasPrefix(URLService.scheme) {
+        if let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
+           components.scheme == URLService.scheme {
             if let urlService = url.urlService {
                 switch urlService {
                 case let .safari(href):
                     // Open in Safari:
-                    if let url = URL(string: href) {
+                    if let urlWithoutPercentEncoding = href.removingPercentEncoding,
+                       let url = URL(string: urlWithoutPercentEncoding) {
                         super.open(url, options: options, completionHandler: completion)
                     }
                 default:
