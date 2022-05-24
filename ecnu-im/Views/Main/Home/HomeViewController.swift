@@ -9,7 +9,7 @@ import SwiftUI
 import UIKit
 import SafariServices
 
-class HomeViewController: NoNavigationBarViewController {
+class HomeViewController: UIViewController {
     weak var splitVC: UISplitViewController?
     weak var nvc: UINavigationController?
 

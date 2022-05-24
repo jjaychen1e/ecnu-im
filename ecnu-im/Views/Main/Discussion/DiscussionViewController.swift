@@ -18,7 +18,7 @@ private enum Post: Hashable {
     case placeholder(Int)
 }
 
-class DiscussionViewController: NoNavigationBarViewController, NoOverlayViewController, HasNavigationPermission, UITableViewDelegate, UITableViewDataSource {
+class DiscussionViewController: UIViewController, NoOverlayViewController, HasNavigationPermission, UITableViewDelegate, UITableViewDataSource {
     static let margin = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
     static let backgroundColor = UIColor(dynamicProvider: { trait in
         if trait.userInterfaceStyle == .dark {

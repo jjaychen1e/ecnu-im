@@ -8,7 +8,7 @@
 import SwiftUI
 import UIKit
 
-class DiscussionEmptyViewController: NoNavigationBarViewController {
+class DiscussionEmptyViewController: UIViewController {
     private var hostingViewController: UIHostingController<EnvironmentWrapperView<DiscussionEmptyView>>!
     weak var splitVC: UISplitViewController?
     weak var nvc: UINavigationController?

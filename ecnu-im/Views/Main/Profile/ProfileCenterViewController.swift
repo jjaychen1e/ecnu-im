@@ -38,7 +38,7 @@ private struct ProfileCenterViewWrapper: View {
     }
 }
 
-class ProfileCenterViewController: NoNavigationBarViewController, NoOverlayViewController, HasNavigationPermission {
+class ProfileCenterViewController: UIViewController, NoOverlayViewController, HasNavigationPermission {
     weak var splitVC: UISplitViewController?
     weak var nvc: UINavigationController?
 

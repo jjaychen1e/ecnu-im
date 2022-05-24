@@ -13,7 +13,7 @@ class MyApplication: UIApplication {
             // Our scheme
             super.open(url, options: options, completionHandler: completion)
         } else {
-            if URLComponents(url: url, resolvingAgainstBaseURL: true)?.scheme != nil {
+            if !["http", "https"].contains(URLComponents(url: url, resolvingAgainstBaseURL: true)?.scheme) {
                 super.open(url, options: options, completionHandler: completion)
             } else {
                 // As a normal link

@@ -19,13 +19,13 @@ class MainSplitViewController: UIViewController {
 
     private lazy var emptyViewController: DiscussionEmptyViewController = .init()
 
-    private lazy var primaryNavigationViewController: UINavigationController = {
-        let nvc = UINavigationController()
+    private lazy var primaryNavigationViewController: NoNavigationBarNavigationController = {
+        let nvc = NoNavigationBarNavigationController()
         return nvc
     }()
 
-    private lazy var secondaryNavigationViewController: UINavigationController = {
-        let nvc = UINavigationController()
+    private lazy var secondaryNavigationViewController: NoNavigationBarNavigationController = {
+        let nvc = NoNavigationBarNavigationController()
         nvc.viewControllers = [emptyViewController]
         return nvc
     }()
