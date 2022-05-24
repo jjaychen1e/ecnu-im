@@ -71,7 +71,9 @@ struct ProfileCenterPostView: View {
                 .lineLimit(4)
                 .multilineTextAlignment(.leading)
 
-            ProfileCenterPostFooterView(post: post)
+            if let discussion = post.relationships?.discussion {
+                ProfileCenterPostFooterView(discussion: discussion, post: post)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.primary.opacity(0.0001))

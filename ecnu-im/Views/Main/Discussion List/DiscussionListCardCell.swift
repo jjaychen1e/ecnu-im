@@ -154,6 +154,9 @@ struct DiscussionListCardCell: View {
                 .padding(.vertical, 4)
                 .background(Color.primary.opacity(0.1))
                 .cornerRadius(4)
+                .onTapGesture {
+                    UIApplication.shared.presentOnTop(LikeListViewController(users: likesUsers))
+                }
             }
         }
     }

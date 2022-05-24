@@ -23,6 +23,7 @@ struct AnimatableLiked: Equatable {
 }
 
 class PostCommentCellFooterViewModel: ObservableObject {
+    @Published var discussion: FlarumDiscussion
     @Published var post: FlarumPost
     @Published var animatableLiked: AnimatableLiked
     @Published var likedUsers: [FlarumUser]
@@ -32,11 +33,13 @@ class PostCommentCellFooterViewModel: ObservableObject {
     @Published var hidePostAction: (Bool) -> Void
     @Published var deletePostAction: () -> Void
 
-    init(post: FlarumPost,
+    init(discussion: FlarumDiscussion,
+         post: FlarumPost,
          replyAction: @escaping () -> Void,
          editAction: @escaping () -> Void,
          hidePostAction: @escaping (Bool) -> Void,
          deletePostAction: @escaping () -> Void) {
+        self.discussion = discussion
         self.post = post
         let likesUsers = post.relationships?.likes ?? []
         likedUsers = likesUsers
@@ -48,11 +51,13 @@ class PostCommentCellFooterViewModel: ObservableObject {
         self.deletePostAction = deletePostAction
     }
 
-    func update(post: FlarumPost,
+    func update(discussion: FlarumDiscussion,
+                post: FlarumPost,
                 replyAction: @escaping () -> Void,
                 editAction: @escaping () -> Void,
                 hidePostAction: @escaping (Bool) -> Void,
                 deletePostAction: @escaping () -> Void) {
+        self.discussion = discussion
         self.post = post
         let likesUsers = post.relationships?.likes ?? []
         likedUsers = likesUsers
@@ -72,20 +77,24 @@ struct PostCommentCellFooterView: View {
 
     @State private var likedActionNetworkTask: Task<Void, Never>?
 
-    init(post: FlarumPost,
-         replyAction: @escaping () -> Void,
-         editAction: @escaping () -> Void,
-         hidePostAction: @escaping (Bool) -> Void,
-         deletePostAction: @escaping () -> Void) {
-        viewModel = .init(post: post, replyAction: replyAction, editAction: editAction, hidePostAction: hidePostAction, deletePostAction: deletePostAction)
+    init(
+        discussion: FlarumDiscussion,
+        post: FlarumPost,
+        replyAction: @escaping () -> Void,
+        editAction: @escaping () -> Void,
+        hidePostAction: @escaping (Bool) -> Void,
+        deletePostAction: @escaping () -> Void
+    ) {
+        viewModel = .init(discussion: discussion, post: post, replyAction: replyAction, editAction: editAction, hidePostAction: hidePostAction, deletePostAction: deletePostAction)
     }
 
-    func update(post: FlarumPost,
+    func update(discussion: FlarumDiscussion,
+                post: FlarumPost,
                 replyAction: @escaping () -> Void,
                 editAction: @escaping () -> Void,
                 hidePostAction: @escaping (Bool) -> Void,
                 deletePostAction: @escaping () -> Void) {
-        viewModel.update(post: post, replyAction: replyAction, editAction: editAction, hidePostAction: hidePostAction, deletePostAction: deletePostAction)
+        viewModel.update(discussion: discussion, post: post, replyAction: replyAction, editAction: editAction, hidePostAction: hidePostAction, deletePostAction: deletePostAction)
     }
 
     private func likeButtonAction() {
@@ -138,6 +147,9 @@ struct PostCommentCellFooterView: View {
                 .padding(.vertical, 4)
                 .background(Color.primary.opacity(0.1))
                 .cornerRadius(4)
+                .onTapGesture {
+                    UIApplication.shared.presentOnTop(ReplyListViewController(discussion: viewModel.discussion, originalPost: viewModel.post, posts: viewModel.repliedPosts))
+                }
             }
         }
     }
@@ -151,6 +163,9 @@ struct PostCommentCellFooterView: View {
                 Text(" \(likesUserName)觉得很赞")
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundColor(.primary.opacity(0.8))
+                    .onTapGesture {
+                        UIApplication.shared.presentOnTop(LikeListViewController(users: viewModel.likedUsers))
+                    }
             }
         }
     }

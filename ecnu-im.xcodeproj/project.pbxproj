@@ -189,6 +189,10 @@
 		63EABDAF283BE53900A21BE4 /* SearchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63EABDAE283BE53900A21BE4 /* SearchViewController.swift */; };
 		63EABDB1283C7A9500A21BE4 /* SearchResultUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63EABDB0283C7A9500A21BE4 /* SearchResultUser.swift */; };
 		63EABDB3283C7A9F00A21BE4 /* SearchResultPost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63EABDB2283C7A9F00A21BE4 /* SearchResultPost.swift */; };
+		63EABDB7283C8A5500A21BE4 /* LikeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63EABDB6283C8A5500A21BE4 /* LikeListView.swift */; };
+		63EABDB9283C8B1400A21BE4 /* ReplyListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63EABDB8283C8B1400A21BE4 /* ReplyListView.swift */; };
+		63EABDBB283C8CA800A21BE4 /* LikeListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63EABDBA283C8CA800A21BE4 /* LikeListViewController.swift */; };
+		63EABDBD283C8D2C00A21BE4 /* ReplyListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63EABDBC283C8D2C00A21BE4 /* ReplyListViewController.swift */; };
 		63EB854B27F2E8A00064F5A8 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 63EB854A27F2E8A00064F5A8 /* Kingfisher */; };
 		63EB854E27F2EC1D0064F5A8 /* AvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63EB854D27F2EC1D0064F5A8 /* AvatarView.swift */; };
 		63EB855727F300080064F5A8 /* SwiftUIPullToRefresh in Frameworks */ = {isa = PBXBuildFile; productRef = 63EB855627F300080064F5A8 /* SwiftUIPullToRefresh */; };
@@ -381,6 +385,10 @@
 		63EABDAE283BE53900A21BE4 /* SearchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewController.swift; sourceTree = "<group>"; };
 		63EABDB0283C7A9500A21BE4 /* SearchResultUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultUser.swift; sourceTree = "<group>"; };
 		63EABDB2283C7A9F00A21BE4 /* SearchResultPost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultPost.swift; sourceTree = "<group>"; };
+		63EABDB6283C8A5500A21BE4 /* LikeListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LikeListView.swift; sourceTree = "<group>"; };
+		63EABDB8283C8B1400A21BE4 /* ReplyListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplyListView.swift; sourceTree = "<group>"; };
+		63EABDBA283C8CA800A21BE4 /* LikeListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LikeListViewController.swift; sourceTree = "<group>"; };
+		63EABDBC283C8D2C00A21BE4 /* ReplyListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplyListViewController.swift; sourceTree = "<group>"; };
 		63EB854D27F2EC1D0064F5A8 /* AvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarView.swift; sourceTree = "<group>"; };
 		63F1AF3A281BDB9400EF5CAF /* ContentItemLinkPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentItemLinkPreview.swift; sourceTree = "<group>"; };
 		63F6321A2830F76B002623F8 /* KeyboardAppearListener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardAppearListener.swift; sourceTree = "<group>"; };
@@ -936,6 +944,8 @@
 		637751B6281D144500A13241 /* Discussion */ = {
 			isa = PBXGroup;
 			children = (
+				63EABDB5283C898800A21BE4 /* Like List */,
+				63EABDB4283C897900A21BE4 /* Reply List */,
 				63CBCB1E282AB5330083018D /* Cells */,
 				636C450B28276F2D00EDE6F5 /* Others */,
 				637751B9281D154700A13241 /* DiscussionHeaderView.swift */,
@@ -1251,6 +1261,24 @@
 			path = Search;
 			sourceTree = "<group>";
 		};
+		63EABDB4283C897900A21BE4 /* Reply List */ = {
+			isa = PBXGroup;
+			children = (
+				63EABDB8283C8B1400A21BE4 /* ReplyListView.swift */,
+				63EABDBC283C8D2C00A21BE4 /* ReplyListViewController.swift */,
+			);
+			path = "Reply List";
+			sourceTree = "<group>";
+		};
+		63EABDB5283C898800A21BE4 /* Like List */ = {
+			isa = PBXGroup;
+			children = (
+				63EABDB6283C8A5500A21BE4 /* LikeListView.swift */,
+				63EABDBA283C8CA800A21BE4 /* LikeListViewController.swift */,
+			);
+			path = "Like List";
+			sourceTree = "<group>";
+		};
 		63EB854C27F2EC100064F5A8 /* DefaultAvatar */ = {
 			isa = PBXGroup;
 			children = (
@@ -1520,6 +1548,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				63EABDBB283C8CA800A21BE4 /* LikeListViewController.swift in Sources */,
 				636BE17D27F81FF500283943 /* SwiftGen+SwiftUI+Extension.swift in Sources */,
 				631BB0352805E4FD007D4138 /* UniversalTypes.swift in Sources */,
 				6365778627F1D897008AD10E /* UserDefaluts+JSON+Extension.swift in Sources */,
@@ -1542,6 +1571,7 @@
 				6379A2B12820201200B31330 /* ContentItemParagraphNode.swift in Sources */,
 				6377517B2822863500BE52D5 /* SortedSet.swift in Sources */,
 				637751C2281D1B3C00A13241 /* PostPlaceholderCell.swift in Sources */,
+				63EABDBD283C8D2C00A21BE4 /* ReplyListViewController.swift in Sources */,
 				635B2A5127EEB08400FF6109 /* Response.swift in Sources */,
 				63DD1F8C2832845A00193CFC /* FlarumUserBadge.swift in Sources */,
 				636BE17327F7FDB800283943 /* DefaultTheme.swift in Sources */,
@@ -1593,6 +1623,7 @@
 				6357EB90282AC135005C0D49 /* FlarumNotification.swift in Sources */,
 				6329EE6B281A9C78001BE8DD /* ContentItemDivider.swift in Sources */,
 				635B2A6427EEF0A700FF6109 /* Token.swift in Sources */,
+				63EABDB7283C8A5500A21BE4 /* LikeListView.swift in Sources */,
 				636BE17127F7FD6600283943 /* IMTheme.swift in Sources */,
 				636673912807308A00A732A3 /* MiniEditor.swift in Sources */,
 				635B2A6227EEE79200FF6109 /* FlarumAPI.swift in Sources */,
@@ -1614,6 +1645,7 @@
 				6314656F282F7E6E00484CC9 /* ProfileCenterViewController.swift in Sources */,
 				63B740AB280279A200376B94 /* BackgroundStyle.swift in Sources */,
 				634C470B27FABC3A00FC591D /* DiscussionViewController.swift in Sources */,
+				63EABDB9283C8B1400A21BE4 /* ReplyListView.swift in Sources */,
 				635FF1C42803028D00C7CDBF /* ToastConfiguration.swift in Sources */,
 				6365778227F19C52008AD10E /* FontAwesome+Extension.swift in Sources */,
 				63706E1727F6BC9C00BE3A48 /* NavigationViwe+BackGesture+Extension.swift in Sources */,

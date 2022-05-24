@@ -272,7 +272,7 @@ class DiscussionViewController: NoNavigationBarViewController, NoOverlayViewCont
         switch post {
         case let .comment(post):
             let cell = tableView.dequeueReusableCell(withIdentifier: PostCommentCell.identifier, for: indexPath) as! PostCommentCell
-            cell.configure(post: post, viewController: self) {
+            cell.configure(discussion: discussion, post: post, viewController: self) {
                 DispatchQueue.main.async {
                     UIView.performWithoutAnimation {
                         tableView.reconfigureRows(at: [indexPath])

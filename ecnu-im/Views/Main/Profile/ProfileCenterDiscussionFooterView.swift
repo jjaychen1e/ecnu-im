@@ -20,25 +20,6 @@ struct ProfileCenterDiscussionFooterView: View {
         repliedPosts = post.wrappedValue?.relationships?.mentionedBy ?? []
     }
 
-    var replyHint: some View {
-        Group {
-            if repliedPosts.count > 0 {
-                let threshold = 3
-                let likesUserName = Set(repliedPosts.compactMap { $0.author?.attributes.displayName }).prefix(threshold).joined(separator: ", ")
-                    + "\(repliedPosts.count > 3 ? "等\(repliedPosts.count)人" : "")"
-                Group {
-                    (Text(Image(systemName: "message.fill")) + Text(" \(likesUserName)回复了此贴"))
-                        .font(.system(size: 13, weight: .medium, design: .rounded))
-                        .foregroundColor(.primary.opacity(0.8))
-                }
-                .padding(.horizontal, 6)
-                .padding(.vertical, 4)
-                .background(Color.primary.opacity(0.1))
-                .cornerRadius(4)
-            }
-        }
-    }
-
     var likeHint: some View {
         Group {
             if likedUsers.count > 0 {
@@ -56,8 +37,21 @@ struct ProfileCenterDiscussionFooterView: View {
                 .padding(.vertical, 4)
                 .background(Color.primary.opacity(0.1))
                 .cornerRadius(4)
+                .onTapGesture {
+                    UIApplication.shared.presentOnTop(LikeListViewController(users: likedUsers))
+                }
             }
         }
+        .onChange(of: post, perform: { newValue in
+            if let post = newValue {
+                Task {
+                    if let id = Int(post.id),
+                       let likedUsers = try? await flarumProvider.request(.postsById(id: id, includes: [.likes])).flarumResponse().data.posts.first?.relationships?.likes {
+                        self.likedUsers = likedUsers
+                    }
+                }
+            }
+        })
     }
 
     var buttons: some View {
@@ -75,7 +69,6 @@ struct ProfileCenterDiscussionFooterView: View {
             HStack(alignment: .bottom, spacing: 12) {
                 VStack(alignment: .leading, spacing: 4) {
                     likeHint
-                    replyHint
                 }
                 Spacer(minLength: 0)
                 buttons

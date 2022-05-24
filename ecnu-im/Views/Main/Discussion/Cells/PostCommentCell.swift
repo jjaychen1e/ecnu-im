@@ -49,12 +49,13 @@ private struct PostCommentCellFooterViewWrapper: View {
         environmentView
     }
 
-    func update(post: FlarumPost,
+    func update(discussion: FlarumDiscussion,
+                post: FlarumPost,
                 replyAction: @escaping () -> Void,
                 editAction: @escaping () -> Void,
                 hidePostAction: @escaping (Bool) -> Void,
                 deletePostAction: @escaping () -> Void) {
-        view.update(post: post, replyAction: replyAction, editAction: editAction, hidePostAction: hidePostAction, deletePostAction: deletePostAction)
+        view.update(discussion: discussion, post: post, replyAction: replyAction, editAction: editAction, hidePostAction: hidePostAction, deletePostAction: deletePostAction)
     }
 
     func update(vc: UIViewController?) {
@@ -67,6 +68,7 @@ final class PostCommentCell: UITableViewCell {
 
     private var subscriptions: Set<AnyCancellable> = []
 
+    private var discussion: FlarumDiscussion?
     private var post: FlarumPost?
     private var postContentItemsUIView: PostContentItemsUIView?
     private var headerViewHostingVC: UIHostingController<PostCommentCellHeaderViewWrapper>!
@@ -101,7 +103,7 @@ final class PostCommentCell: UITableViewCell {
         footerViewHostingVC = UIHostingController(
             rootView:
             PostCommentCellFooterViewWrapper(
-                PostCommentCellFooterView(post: .init(id: ""), replyAction: {}, editAction: {}, hidePostAction: { _ in }, deletePostAction: {}),
+                PostCommentCellFooterView(discussion: .init(id: ""), post: .init(id: ""), replyAction: {}, editAction: {}, hidePostAction: { _ in }, deletePostAction: {}),
                 splitVC: nil,
                 nvc: nil,
                 vc: nil
@@ -123,7 +125,8 @@ final class PostCommentCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func configure(post: FlarumPost,
+    func configure(discussion: FlarumDiscussion,
+                   post: FlarumPost,
                    viewController: UIViewController,
                    updateLayout: (() -> Void)?,
                    replyPostAction: @escaping () -> Void,
@@ -164,7 +167,7 @@ final class PostCommentCell: UITableViewCell {
 
             headerViewHostingVC.rootView.update(post: post)
             headerViewHostingVC.rootView.update(vc: viewController)
-            footerViewHostingVC.rootView.update(post: post, replyAction: replyPostAction, editAction: editAction, hidePostAction: hidePostAction, deletePostAction: deletePostAction)
+            footerViewHostingVC.rootView.update(discussion: discussion, post: post, replyAction: replyPostAction, editAction: editAction, hidePostAction: hidePostAction, deletePostAction: deletePostAction)
             footerViewHostingVC.rootView.update(vc: viewController)
 
             AppGlobalState.shared.$ignoredUserIds.sink { [weak self] change in

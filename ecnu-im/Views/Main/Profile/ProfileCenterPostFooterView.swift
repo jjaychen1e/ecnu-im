@@ -8,11 +8,13 @@
 import SwiftUI
 
 class ProfileCenterPostFooterViewModel: ObservableObject {
+    @Published var discussion: FlarumDiscussion
     @Published var post: FlarumPost
     @Published var likedUsers: [FlarumUser]
     @Published var repliedPosts: [FlarumPost]
 
-    init(post: FlarumPost) {
+    init(discussion: FlarumDiscussion, post: FlarumPost) {
+        self.discussion = discussion
         self.post = post
         let likesUsers = post.relationships?.likes ?? []
         likedUsers = likesUsers
@@ -23,8 +25,8 @@ class ProfileCenterPostFooterViewModel: ObservableObject {
 struct ProfileCenterPostFooterView: View {
     @ObservedObject private var viewModel: ProfileCenterPostFooterViewModel
 
-    init(post: FlarumPost) {
-        viewModel = .init(post: post)
+    init(discussion: FlarumDiscussion, post: FlarumPost) {
+        viewModel = .init(discussion: discussion, post: post)
     }
 
     var replyHint: some View {
@@ -42,6 +44,9 @@ struct ProfileCenterPostFooterView: View {
                 .padding(.vertical, 4)
                 .background(Color.primary.opacity(0.1))
                 .cornerRadius(4)
+                .onTapGesture {
+                    UIApplication.shared.presentOnTop(ReplyListViewController(discussion: viewModel.discussion, originalPost: viewModel.post, posts: viewModel.repliedPosts))
+                }
             }
         }
     }
@@ -63,6 +68,9 @@ struct ProfileCenterPostFooterView: View {
                 .padding(.vertical, 4)
                 .background(Color.primary.opacity(0.1))
                 .cornerRadius(4)
+                .onTapGesture {
+                    UIApplication.shared.presentOnTop(LikeListViewController(users: viewModel.likedUsers))
+                }
             }
         }
     }

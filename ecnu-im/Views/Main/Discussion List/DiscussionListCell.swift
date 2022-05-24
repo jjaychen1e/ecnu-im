@@ -144,6 +144,9 @@ struct DiscussionListCell: View {
                 .padding(.vertical, 4)
                 .background(Color.primary.opacity(0.1))
                 .cornerRadius(4)
+                .onTapGesture {
+                    UIApplication.shared.presentOnTop(LikeListViewController(users: likesUsers))
+                }
             }
         }
     }
@@ -251,6 +254,11 @@ private struct FirstPostCell: View {
                 .padding(.vertical, 4)
                 .background(Color.primary.opacity(0.1))
                 .cornerRadius(4)
+                .onTapGesture {
+                    if let originalPost = viewModel.discussion.lastPost {
+                        UIApplication.shared.presentOnTop(ReplyListViewController(discussion: viewModel.discussion, originalPost: originalPost, posts: repliedPosts))
+                    }
+                }
             }
         }
     }
@@ -273,6 +281,9 @@ private struct FirstPostCell: View {
                 .padding(.vertical, 4)
                 .background(Color.primary.opacity(0.1))
                 .cornerRadius(4)
+                .onTapGesture {
+                    UIApplication.shared.presentOnTop(LikeListViewController(users: likesUsers))
+                }
             }
         }
     }

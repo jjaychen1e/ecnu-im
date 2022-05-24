@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SearchResultUser: View {
     @Binding var user: FlarumUser
+    @State var fetchedUser: FlarumUser?
 
     var body: some View {
         HStack {
@@ -31,7 +32,7 @@ struct SearchResultUser: View {
                         Circle()
                             .fill(.gray)
                             .frame(width: 8, height: 8)
-                        Text("\(user.lastSeenAtDateDescription)在线")
+                        Text("\(fetchedUser?.lastSeenAtDateDescription ?? user.lastSeenAtDateDescription)在线")
                             .font(.system(size: 12, weight: .regular, design: .rounded))
                             .foregroundColor(.primary.opacity(0.7))
                     }
@@ -40,6 +41,14 @@ struct SearchResultUser: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .background(Color.primary.opacity(0.0001))
+        .onLoad {
+            Task {
+                if let id = Int(user.id),
+                   let user = try? await flarumProvider.request(.user(id: id)).flarumResponse().data.users.first {
+                    self.fetchedUser = user
+                }
+            }
+        }
         .onTapGesture {
             UIApplication.shared.presentOnTop(ProfileCenterViewController(userId: user.id), animated: true)
         }
