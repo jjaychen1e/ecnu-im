@@ -133,6 +133,19 @@ class ContentItemLinkPreview: UIView & ContentBlockUIView {
         }
     }
 
+    @objc func tapped(tapGestureRecognizer: UITapGestureRecognizer) {
+        if link.absoluteString.hasPrefix(URLService.scheme) {
+            // Our scheme
+            UIApplication.shared.open(link)
+        } else {
+            // As a normal link
+            if let escapedURL = link.absoluteString.addingPercentEncoding(withAllowedCharacters: .alphanumerics),
+               let url = URLService.link(href: escapedURL).url.url {
+                UIApplication.shared.open(url)
+            }
+        }
+    }
+
     init(link: URL, updateLayout: (() -> Void)?) {
         self.link = link
         self.updateLayout = updateLayout
@@ -140,7 +153,12 @@ class ContentItemLinkPreview: UIView & ContentBlockUIView {
         super.init(frame: .zero)
         let lpView = LPLinkView(url: link)
         self.lpView = lpView
+        lpView.isUserInteractionEnabled = false
         addSubview(lpView)
+
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(tapped(tapGestureRecognizer:)))
+        isUserInteractionEnabled = true
+        addGestureRecognizer(tapGestureRecognizer)
 
         metadataStorage.metadata(for: link) { [weak self] metadata in
             if let self = self {
