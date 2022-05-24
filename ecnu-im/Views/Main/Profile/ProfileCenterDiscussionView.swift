@@ -112,7 +112,7 @@ struct ProfileCenterDiscussionView: View {
         }
         .navigationBarHidden(true)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.primary.opacity(.leastNonzeroMagnitude))
+        .background(Color.primary.opacity(0.0001))
         .onTapGesture {
             if let vc = uiKitEnvironment.vc {
                 let targetNumber = lastPost?.attributes?.number ?? 1
