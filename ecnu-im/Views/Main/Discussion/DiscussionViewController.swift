@@ -359,6 +359,7 @@ class DiscussionViewController: NoNavigationBarViewController, NoOverlayViewCont
     }
 
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        print(indexPath.row)
         if initialized {
             checkAndLoadMoreData(index: indexPath.row)
         }
@@ -377,13 +378,15 @@ extension DiscussionViewController {
         case let .normal(prev: prev, next: next):
             if let prevOffset = prev {
                 Task {
-                    await loadData(offset: prevOffset, completionHandler: {})
-                    loadMoreStates[index] = .finished
+                    if await loadData(offset: prevOffset, completionHandler: {}) {
+                        loadMoreStates[index] = .finished
+                    }
                 }
             } else if let nextOffset = next {
                 Task {
-                    await loadData(offset: nextOffset, completionHandler: {})
-                    loadMoreStates[index] = .finished
+                    if await loadData(offset: nextOffset, completionHandler: {}) {
+                        loadMoreStates[index] = .finished
+                    }
                 }
             }
         case .placeholder:
@@ -398,8 +401,9 @@ extension DiscussionViewController {
             let remain = (index - pivot) % limit
             let offset = max(0, remain > 0 ? index - remain : index - (limit + remain))
             Task {
-                await loadData(offset: offset, completionHandler: {})
-                loadMoreStates[index] = .finished
+                if await loadData(offset: offset, completionHandler: {}) {
+                    loadMoreStates[index] = .finished
+                }
             }
         case .finished:
             break
@@ -440,10 +444,13 @@ extension DiscussionViewController {
         initialized = true
     }
 
-    private func loadData(offset: Int, completionHandler: @escaping () -> Void) async {
+    private func loadData(offset: Int, completionHandler: @escaping () -> Void) async -> Bool {
         if let loadedResult = await loader.loadData(offset: offset) {
             process(offset: offset, loadedData: loadedResult.posts, loadMoreState: loadedResult.loadMoreState, completionHandler: completionHandler)
+            return true
         }
+
+        return false
     }
 
     private func loadData(nearNumber: Int, completionHandler: @escaping () -> Void) async {
@@ -492,11 +499,17 @@ extension DiscussionViewController {
             var rangeLeft = minIndex
             var rangeRight = maxIndex
             if let offset = offset {
-                if let lastSectionRange = numberRangeRecordMap[max(0, offset - limit)] {
-                    rangeLeft = min(rangeLeft, lastSectionRange.1 + 1)
+                let prevRange = (max(0, offset - limit) ..< offset).reversed()
+                for prevOffset in prevRange {
+                    if let lastSectionRange = numberRangeRecordMap[prevOffset] {
+                        rangeLeft = min(rangeLeft, lastSectionRange.1 + 1)
+                    }
                 }
-                if let nextSectionRange = numberRangeRecordMap[offset + limit] {
-                    rangeRight = max(rangeRight, nextSectionRange.0 - 1)
+                let nextRange = (offset ..< offset + limit)
+                for nextOffset in nextRange {
+                    if let nextSectionRange = numberRangeRecordMap[nextOffset] {
+                        rangeRight = max(rangeRight, nextSectionRange.0 - 1)
+                    }
                 }
             }
             if offset == 0 {
@@ -585,7 +598,7 @@ private class DiscussionPostsLoader: ObservableObject {
         }
 
         func shouldLoad(offset: Int) -> Bool {
-            let should = !(isPaused || loadedOffset.contains(offset) || isOffsetLoading.contains(offset) || isOffsetLoading.count > 0)
+            let should = !(isPaused || loadedOffset.contains(offset) || isOffsetLoading.contains(offset))
             if should {
                 isOffsetLoading.insert(offset)
             }
