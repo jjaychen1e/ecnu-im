@@ -84,6 +84,22 @@ class DiscussionViewController: NoNavigationBarViewController, NoOverlayViewCont
         return true
     }
 
+    static let discussionTargetPostNumber = "discussionTargetDiscussionNumber"
+
+    func shouldReactTo(nvc: UINavigationController?, ext: [String: Any]) -> Bool {
+        if let top = nvc?.topViewController,
+           let another = top as? DiscussionViewController {
+            if discussion == another.discussion {
+                if let targetPostNumber = ext[Self.discussionTargetPostNumber] as? String {
+                    return true
+                } else if let targetPostNumber = ext[Self.discussionTargetPostNumber] as? Int {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = Asset.DynamicColors.dynamicWhite.color
@@ -281,7 +297,7 @@ class DiscussionViewController: NoNavigationBarViewController, NoOverlayViewCont
             } replyPostAction: { [weak self] in
                 self?.addReply(post: post)
             } editAction: { [weak self] in
-                
+
             } hidePostAction: { [weak self] isHidden in
                 if let self = self {
                     if let id = Int(post.id) {

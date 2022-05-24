@@ -67,6 +67,10 @@ class ProfileCenterViewController: NoNavigationBarViewController, NoOverlayViewC
         return true
     }
 
+    func shouldReactTo(nvc: UINavigationController?, ext: [String: Any]) -> Bool {
+        false
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         let vc = UIHostingController(rootView: ProfileCenterViewWrapper(ProfileCenterView(userId: userId, withNavigationBar: withNavigationBar),

@@ -24,10 +24,10 @@ extension UISplitViewController {
         return nil
     }
 
-    func push(viewController: UIViewController, column: UISplitViewController.Column, animated: Bool = true, toRoot: Bool = false) {
+    func push(viewController: UIViewController, column: UISplitViewController.Column, animated: Bool = true, toRoot: Bool = false, ext: [String: Any] = [:]) {
         if let nvc = self.viewController(for: column) as? UINavigationController {
             if let noOverlayVC = viewController as? NoOverlayViewController {
-                guard noOverlayVC.shouldPushTo(nvc: nvc) else { return }
+                if !noOverlayVC.shouldPushTo(nvc: nvc), noOverlayVC.shouldReactTo(nvc: nvc, ext: ext) { return }
             }
 
             if let hasNavigationPermission = viewController as? HasNavigationPermission {

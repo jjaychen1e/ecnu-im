@@ -151,6 +151,7 @@ struct ProfileCenterView: View {
             NavigationView {
                 if let user = viewModel.user {
                     mainBody
+                        .navigationBarHidden(false)
                         .navigationTitle("\(user.attributes.displayName)的个人资料")
                         .navigationBarTitleDisplayMode(.inline)
                         .toolbar {
