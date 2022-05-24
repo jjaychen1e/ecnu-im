@@ -54,21 +54,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         guard let url = URLContexts.first?.url else { return }
 
-        guard let components = NSURLComponents(url: url, resolvingAgainstBaseURL: true),
-              let scheme = components.scheme,
-              let host = components.host,
-              let path = components.path,
-              let params = components.queryItems
-        else { return }
-
-        if let urlService = URLServiceType(rawValue: host) {
+        if let urlService = url.urlService {
             switch urlService {
-            case .link:
-                if let href = params.first(where: { $0.name == "href" })?.value,
-                   let url = URL(string: href) {
-                    printDebug(url.absoluteString)
+            case let .link(href):
+                if let url = URL(string: href) {
                     CommonWebViewController.show(url: url)
                 }
+            case .safari:
+                // Never, never happened
+                fatalErrorDebug()
+                UIApplication.shared.open(url)
             }
         }
     }
@@ -76,12 +71,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 enum URLServiceType: String, RawRepresentable {
     case link
+    case safari
 }
 
 enum URLService {
     static let scheme = "ecnu-im"
 
     case link(href: String)
+    case safari(href: String)
 
     var schemePrefix: String {
         Self.scheme + "://"
@@ -91,6 +88,36 @@ enum URLService {
         switch self {
         case let .link(href):
             return schemePrefix + "link?" + "href=\(href)"
+        case let .safari(href):
+            return schemePrefix + "safari?" + "href=\(href)"
         }
+    }
+}
+
+extension URL {
+    var urlService: URLService? {
+        guard let components = NSURLComponents(url: self, resolvingAgainstBaseURL: true),
+              let scheme = components.scheme,
+              let host = components.host,
+              let path = components.path,
+              let params = components.queryItems
+        else { return nil }
+
+        if let urlService = URLServiceType(rawValue: host) {
+            switch urlService {
+            case .link:
+                if let href = params.first(where: { $0.name == "href" })?.value,
+                   let url = URL(string: href) {
+                    return .link(href: href)
+                }
+            case .safari:
+                if let href = params.first(where: { $0.name == "href" })?.value,
+                   let url = URL(string: href) {
+                    return .safari(href: href)
+                }
+            }
+        }
+
+        return nil
     }
 }

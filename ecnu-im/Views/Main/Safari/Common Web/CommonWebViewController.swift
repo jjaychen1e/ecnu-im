@@ -39,10 +39,22 @@ class CommonWebViewController: UIViewController, WebControllerDelegate {
         webController.progressView.trackTintColor = .white
         webController.progressView.progressTintColor = .black
         webController.indicatorView.color = .white
-        webController.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "完成", style: .done, target: self, action: #selector(done))
+        webController.navigationItem.rightBarButtonItems = [
+            UIBarButtonItem(title: "完成", style: .done, target: self, action: #selector(done)),
+            UIBarButtonItem(image: UIImage(systemName: "safari"), style: .plain, target: self, action: #selector(openInSafari)),
+        ]
         webController.load(startURL)
         let nvc = UINavigationController(rootViewController: webController)
         addChildViewController(nvc, addConstrains: true)
+    }
+
+    @objc
+    func openInSafari() {
+        if let url = webController.webView.url {
+            if let url = URLService.safari(href: url.absoluteString).url.url {
+                UIApplication.shared.open(url)
+            }
+        }
     }
 
     @objc

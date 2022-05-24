@@ -10,8 +10,17 @@ import UIKit
 class MyApplication: UIApplication {
     override func open(_ url: URL, options: [UIApplication.OpenExternalURLOptionsKey: Any] = [:], completionHandler completion: ((Bool) -> Void)? = nil) {
         if url.absoluteString.hasPrefix(URLService.scheme) {
-            // Our scheme
-            super.open(url, options: options, completionHandler: completion)
+            if let urlService = url.urlService {
+                switch urlService {
+                case let .safari(href):
+                    // Open in Safari:
+                    if let url = URL(string: href) {
+                        super.open(url, options: options, completionHandler: completion)
+                    }
+                default:
+                    super.open(url, options: options, completionHandler: completion)
+                }
+            }
         } else {
             if !["http", "https"].contains(URLComponents(url: url, resolvingAgainstBaseURL: true)?.scheme) {
                 super.open(url, options: options, completionHandler: completion)
