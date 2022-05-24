@@ -538,9 +538,9 @@ struct HomeView: View {
                             .opacity(appGlobalState.ignoredUserIds.contains(viewModel.discussion.starter?.id ?? "") == true ? 0.3 : 1.0)
                         }
                     }
-                    .padding(.all, 24)
+                    .padding(.all, 36)
                 }
-                .padding(.all, -24)
+                .padding(.all, -36)
                 .safeAreaInset(edge: .leading) {
                     Color.clear.frame(width: 8, height: 0)
                 }
