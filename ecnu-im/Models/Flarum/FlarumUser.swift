@@ -118,14 +118,18 @@ extension FlarumUser {
     var discussionCount: Int {
         attributes.discussionCount ?? 0
     }
-    
+
     var isEmailConfirmed: Bool {
         attributes.isEmailConfirmed ?? false
     }
 }
 
-extension FlarumUser: Equatable {
+extension FlarumUser: Hashable {
     static func == (lhs: FlarumUser, rhs: FlarumUser) -> Bool {
         lhs.id == rhs.id
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }

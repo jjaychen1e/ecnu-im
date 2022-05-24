@@ -94,6 +94,10 @@ struct FlarumResponse {
                                         if let postId = dic["lastPost"]?["data"]["id"].string {
                                             relationships.lastPost = includedData.posts.first(where: { $0.id == postId })
                                         }
+                                    case .mostRelevantPost:
+                                        if let postId = dic["mostRelevantPost"]?["data"]["id"].string {
+                                            relationships.mostRelevantPost = includedData.posts.first(where: { $0.id == postId })
+                                        }
                                     case .tags:
                                         if let tagIds = dic["tags"]?["data"].array?.compactMap({ $0["id"].string }) {
                                             relationships.tags = includedData.tags.filter { tagIds.contains($0.id) }

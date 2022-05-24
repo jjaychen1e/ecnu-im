@@ -78,6 +78,7 @@ struct FlarumDiscussionRelationships {
         case lastPostedUser
         case firstPost
         case lastPost
+        case mostRelevantPost
         case tags
     }
 
@@ -85,6 +86,7 @@ struct FlarumDiscussionRelationships {
     var lastPostedUser: FlarumUser?
     var firstPost: FlarumPost?
     var lastPost: FlarumPost?
+    var mostRelevantPost: FlarumPost?
     var tags: [FlarumTag]?
 }
 
@@ -138,6 +140,14 @@ extension FlarumDiscussion {
     var lastPost: FlarumPost? {
         relationships?.lastPost
     }
+    
+    var mostRelevantPost: FlarumPost? {
+        relationships?.mostRelevantPost
+    }
+    
+    var mostRelevantPostUser: FlarumUser? {
+        mostRelevantPost?.author
+    }
 
     var lastPostedUser: FlarumUser? {
         relationships?.lastPostedUser
@@ -172,6 +182,17 @@ extension FlarumDiscussion {
 
     var lastPostedUserAvatarURL: URL? {
         if let urlString = lastPostedUser?.attributes.avatarUrl {
+            return URL(string: urlString)
+        }
+        return nil
+    }
+    
+    var mostRelevantPostedUserName: String {
+        "@" + (mostRelevantPostUser?.attributes.displayName ?? "Unkown")
+    }
+
+    var mostRelevantPostUserAvatarURL: URL? {
+        if let urlString = mostRelevantPostUser?.attributes.avatarUrl {
             return URL(string: urlString)
         }
         return nil

@@ -36,16 +36,7 @@ struct PostCommentCellHeaderView: View {
             PostAuthorAvatarView(name: viewModel.post.authorName, url: viewModel.post.authorAvatarURL, size: 40)
                 .onTapGesture {
                     if let id = viewModel.post.author?.id {
-                        if let vc = uiKitEnvironment.vc {
-                            if vc.presentingViewController != nil {
-                                vc.present(ProfileCenterViewController(userId: id),
-                                           animated: true)
-                            } else {
-                                UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: id), animated: true)
-                            }
-                        } else {
-                            fatalErrorDebug()
-                        }
+                        UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: id), animated: true)
                     }
                 }
             VStack(alignment: .leading, spacing: 4) {

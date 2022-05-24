@@ -322,6 +322,7 @@ struct NewDiscussionView: View {
                 }
             }
         }
+        .navigationViewStyle(.stack)
     }
 }
 

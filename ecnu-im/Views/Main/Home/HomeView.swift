@@ -438,12 +438,16 @@ struct HomeView: View {
                 .padding(.top, 20)
 
             HStack(spacing: 16) {
-                Image(systemName: "magnifyingglass")
-                    .font(.body.weight(.bold))
-                    .frame(width: 36, height: 36)
-                    .foregroundColor(.secondary)
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    .modifier(OutlineOverlay(cornerRadius: 14))
+                Button {
+                    UIApplication.shared.topController()?.present(SearchViewController(), animated: true)
+                } label: {
+                    Image(systemName: "magnifyingglass")
+                        .font(.body.weight(.bold))
+                        .frame(width: 36, height: 36)
+                        .foregroundColor(.secondary)
+                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .modifier(OutlineOverlay(cornerRadius: 14))
+                }
 
                 Button {
                     UIApplication.shared.topController()?.present(NewDiscussionViewController(), animated: true)
@@ -634,16 +638,7 @@ private struct HomePostCardView: View {
                                                     if let targetId = viewModel.discussion.lastPostedUser?.id {
                                                         if let account = AppGlobalState.shared.account,
                                                            targetId != account.userIdString {
-                                                            if let vc = uiKitEnvironment.vc {
-                                                                if vc.presentingViewController != nil {
-                                                                    vc.present(ProfileCenterViewController(userId: targetId),
-                                                                               animated: true)
-                                                                } else {
-                                                                    UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: targetId), animated: true)
-                                                                }
-                                                            } else {
-                                                                fatalErrorDebug()
-                                                            }
+                                                            UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: targetId), animated: true)
                                                         } else {
                                                             let number = viewModel.discussion.attributes?.lastPostNumber ?? 1
                                                             uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: number),
@@ -662,16 +657,7 @@ private struct HomePostCardView: View {
                             if let account = AppGlobalState.shared.account,
                                let targetId = viewModel.discussion.starter?.id,
                                targetId != account.userIdString {
-                                if let vc = uiKitEnvironment.vc {
-                                    if vc.presentingViewController != nil {
-                                        vc.present(ProfileCenterViewController(userId: targetId),
-                                                   animated: true)
-                                    } else {
-                                        UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: targetId), animated: true)
-                                    }
-                                } else {
-                                    fatalErrorDebug()
-                                }
+                                UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: targetId), animated: true)
                             }
                         }
                     VStack(alignment: .leading, spacing: 2) {
@@ -769,16 +755,7 @@ struct HomePostCardViewLarge: View {
                                                     if let targetId = viewModel.discussion.lastPostedUser?.id {
                                                         if let account = AppGlobalState.shared.account,
                                                            targetId != account.userIdString {
-                                                            if let vc = uiKitEnvironment.vc {
-                                                                if vc.presentingViewController != nil {
-                                                                    vc.present(ProfileCenterViewController(userId: targetId),
-                                                                               animated: true)
-                                                                } else {
-                                                                    UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: targetId), animated: true)
-                                                                }
-                                                            } else {
-                                                                fatalErrorDebug()
-                                                            }
+                                                            UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: targetId), animated: true)
                                                         } else {
                                                             let number = viewModel.discussion.attributes?.lastPostNumber ?? 1
                                                             uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: number),
@@ -797,16 +774,7 @@ struct HomePostCardViewLarge: View {
                             if let targetId = viewModel.discussion.starter?.id {
                                 if let account = AppGlobalState.shared.account,
                                    targetId != account.userIdString {
-                                    if let vc = uiKitEnvironment.vc {
-                                        if vc.presentingViewController != nil {
-                                            vc.present(ProfileCenterViewController(userId: targetId),
-                                                       animated: true)
-                                        } else {
-                                            UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: targetId), animated: true)
-                                        }
-                                    } else {
-                                        fatalErrorDebug()
-                                    }
+                                    UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: targetId), animated: true)
                                 } else {
                                     let number = viewModel.discussion.attributes?.lastPostNumber ?? 1
                                     uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: number),

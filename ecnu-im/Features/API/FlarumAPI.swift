@@ -17,16 +17,18 @@ enum DiscussionIncludeOption: String, RawRepresentable {
     case firstPost
     case lastPost
     case tags
-    case tagsParent = "tags.parent"
+    case tags_Parent = "tags.parent"
     case recipientUsers
     case recipientGroups
+    case mostRelevantPost
+    case mostRelevantPost_User = "mostRelevantPost.user"
 
     static let homeDiscussionIncludeOptionSet: Set<Self> = {
-        [.user, .lastPostedUser, .firstPost, .lastPost, .tags, .tagsParent, .recipientUsers, .recipientGroups]
+        [.user, .lastPostedUser, .firstPost, .lastPost, .tags, .tags_Parent, .recipientUsers, .recipientGroups]
     }()
 
     static let profileDiscussionIncludeOptionSet: Set<Self> = {
-        [.user, .lastPostedUser, .lastPost, .tags, .tagsParent]
+        [.user, .lastPostedUser, .lastPost, .tags, .tags_Parent]
     }()
 }
 
@@ -50,6 +52,7 @@ enum Flarum {
     case allTags
     case newDiscussion(title: String, content: String, tagIds: [String])
     case discussionInfo(discussionID: Int)
+    case discussionSearch(q: String, offset: Int = 0, limit: Int = 20)
     case allDiscussions(includes: Set<DiscussionIncludeOption> = DiscussionIncludeOption.homeDiscussionIncludeOptionSet,
                         pageOffset: Int = 0,
                         pageItemLimit: Int = 20)
@@ -67,8 +70,10 @@ enum Flarum {
     case newPost(discussionID: String, content: String)
     case editPost(postID: Int, content: String)
     case notification(offset: Int, limit: Int)
+    case readNotifications
     case lastSeenUsers(limit: Int)
     case user(id: Int)
+    case userSearch(q: String, offset: Int = 0, limit: Int = 20)
     case ignoreUser(id: Int, ignored: Bool)
     case allBadgeCategories
     case allBadges
@@ -91,6 +96,8 @@ extension Flarum: TargetType {
             return "/api/discussions"
         case let .discussionInfo(discussionID):
             return "/api/discussions/\(discussionID)"
+        case .discussionSearch:
+            return "/api/discussions"
         case .allDiscussions:
             return "/api/discussions"
         case .discussionByUserAccount:
@@ -119,13 +126,16 @@ extension Flarum: TargetType {
             return "api/posts/\(postID)"
         case .notification:
             return "api/notifications"
+        case .readNotifications:
+            return "api/notifications/read"
         case .lastSeenUsers:
             return "api/users"
         case let .user(id):
             return "api/users/\(id)"
+        case .userSearch:
+            return "api/users"
         case let .ignoreUser(id, _):
             return "api/users/\(id)"
-
         case .allBadgeCategories:
             return "api/badge_categories"
         case .allBadges:
@@ -144,6 +154,8 @@ extension Flarum: TargetType {
         case .newDiscussion:
             return .post
         case .discussionInfo:
+            return .get
+        case .discussionSearch:
             return .get
         case .allDiscussions:
             return .get
@@ -173,9 +185,13 @@ extension Flarum: TargetType {
             return .patch
         case .notification:
             return .get
+        case .readNotifications:
+            return .post
         case .lastSeenUsers:
             return .get
         case .user:
+            return .get
+        case .userSearch:
             return .get
         case .ignoreUser:
             return .patch
@@ -223,6 +239,14 @@ extension Flarum: TargetType {
             return .requestParameters(parameters: [
                 "page[offset]": 0,
                 "page[limit]": 1,
+            ], encoding: URLEncoding.default)
+        case let .discussionSearch(q, offset, limit):
+            let includes: [DiscussionIncludeOption] = [.mostRelevantPost, .mostRelevantPost_User, .user, .tags, .firstPost]
+            return .requestParameters(parameters: [
+                "filter[q]": q,
+                "page[offset]": offset,
+                "page[limit]": limit,
+                "include": includes.map { $0.rawValue }.joined(separator: ","),
             ], encoding: URLEncoding.default)
         case let .allDiscussions(includes, pageOffset, pageLimit):
             return .requestParameters(parameters: [
@@ -331,6 +355,8 @@ extension Flarum: TargetType {
                 "page[offset]": max(0, offset),
                 "page[limit]": limit,
             ], encoding: URLEncoding.default)
+        case .readNotifications:
+            return .requestPlain
         case let .lastSeenUsers(limit):
             return .requestParameters(parameters: [
                 "sort": "-lastSeenAt",
@@ -339,6 +365,12 @@ extension Flarum: TargetType {
             ], encoding: URLEncoding.default)
         case .user:
             return .requestPlain
+        case let .userSearch(q, offset, limit):
+            return .requestParameters(parameters: [
+                "filter[q]": q,
+                "page[offset]": offset,
+                "page[limit]": limit,
+            ], encoding: URLEncoding.default)
         case let .ignoreUser(id, ignored):
             return .requestParameters(parameters: [
                 "data": [

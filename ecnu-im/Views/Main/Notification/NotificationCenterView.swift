@@ -137,7 +137,13 @@ struct NotificationCenterView: View {
                 .padding(.leading)
                 .padding(.top, 20)
 
-            Button {} label: {
+            Button {
+                Task {
+                    if let response = try? await flarumProvider.request(.readNotifications) {
+                        load(isRefresh: true)
+                    }
+                }
+            } label: {
                 HStack(spacing: 16) {
                     Image(systemName: "checkmark")
                         .font(.body.weight(.bold))
