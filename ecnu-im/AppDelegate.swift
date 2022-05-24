@@ -7,7 +7,25 @@
 
 import UIKit
 
-@main
+class MyApplication: UIApplication {
+    override func open(_ url: URL, options: [UIApplication.OpenExternalURLOptionsKey: Any] = [:], completionHandler completion: ((Bool) -> Void)? = nil) {
+        if url.absoluteString.hasPrefix(URLService.scheme) {
+            // Our scheme
+            super.open(url, options: options, completionHandler: completion)
+        } else {
+            if URLComponents(url: url, resolvingAgainstBaseURL: true)?.scheme != nil {
+                super.open(url, options: options, completionHandler: completion)
+            } else {
+                // As a normal link
+                if let escapedURL = url.absoluteString.addingPercentEncoding(withAllowedCharacters: .alphanumerics),
+                   let url = URLService.link(href: escapedURL).url.url {
+                    super.open(url, options: options, completionHandler: completion)
+                }
+            }
+        }
+    }
+}
+
 class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
