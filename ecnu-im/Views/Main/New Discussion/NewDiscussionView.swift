@@ -167,7 +167,7 @@ struct NewDiscussionTagChooseView: View {
                         dismiss()
                     } label: {
                         Text("完成")
-                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                            .font(.system(size: 17, weight: .medium, design: .rounded))
                     }
                 }
             }
@@ -284,7 +284,7 @@ struct NewDiscussionView: View {
                         dismiss()
                     } label: {
                         Text("取消")
-                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                            .font(.system(size: 17, weight: .regular, design: .rounded))
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {

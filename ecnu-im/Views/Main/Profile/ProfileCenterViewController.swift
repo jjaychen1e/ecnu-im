@@ -45,10 +45,12 @@ class ProfileCenterViewController: NoNavigationBarViewController, NoOverlayViewC
     fileprivate var userId: String
     fileprivate var hostingVC: UIHostingController<ProfileCenterViewWrapper>!
 
+    private var withNavigationBar: Bool = true
     private var initSelectedCategory: ProfileCategory?
 
-    init(userId: String) {
+    init(userId: String, withNavigationBar: Bool = true) {
         self.userId = userId
+        self.withNavigationBar = withNavigationBar
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -67,7 +69,7 @@ class ProfileCenterViewController: NoNavigationBarViewController, NoOverlayViewC
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        let vc = UIHostingController(rootView: ProfileCenterViewWrapper(ProfileCenterView(userId: userId),
+        let vc = UIHostingController(rootView: ProfileCenterViewWrapper(ProfileCenterView(userId: userId, withNavigationBar: withNavigationBar),
                                                                         splitVC: splitViewController ?? splitVC,
                                                                         nvc: navigationController ?? nvc,
                                                                         vc: self)
@@ -98,7 +100,7 @@ class MyProfileCenterViewController: ProfileCenterViewController, CanSelectWithI
     private var subscriptions: Set<AnyCancellable> = []
 
     init() {
-        super.init(userId: AppGlobalState.shared.account?.userIdString ?? "")
+        super.init(userId: AppGlobalState.shared.account?.userIdString ?? "", withNavigationBar: false)
     }
 
     override func viewDidLoad() {

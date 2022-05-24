@@ -49,31 +49,34 @@ private class ProfileCenterViewLoadInfo {
     var isLoading = false
 }
 
+private struct DiscussionWithMode: Hashable {
+    private let mode: ProfileCategory = .discussion
+    var discussion: FlarumDiscussion
+}
+
+private struct PostWithMode: Hashable {
+    private let mode: ProfileCategory = .reply
+    var post: FlarumPost
+}
+
+private struct BadgeCategoryWithMode: Hashable {
+    private let mode: ProfileCategory = .badge
+    var badgeCategory: FlarumBadgeCategory
+}
+
 struct ProfileCenterView: View {
-    struct DiscussionWithMode: Hashable {
-        private let mode: ProfileCategory = .discussion
-        var discussion: FlarumDiscussion
-    }
-
-    struct PostWithMode: Hashable {
-        private let mode: ProfileCategory = .reply
-        var post: FlarumPost
-    }
-
-    struct BadgeCategoryWithMode: Hashable {
-        private let mode: ProfileCategory = .badge
-        var badgeCategory: FlarumBadgeCategory
-    }
-
     @ObservedObject private var viewModel: ProfileCenterViewModel
     @ObservedObject var appGlobalState = AppGlobalState.shared
+    @State private var withNavigationBar: Bool
     @State private var userFetchTask: Task<Void, Never>?
     @State private var loadInfo = ProfileCenterViewLoadInfo()
-
     @State private var sequenceQueue = DispatchQueue(label: "ProfileCenterViewLoadQueue")
+    
+    @Environment(\.dismiss) var dismiss
 
-    init(userId: String) {
-        viewModel = .init(userId: "")
+    init(userId: String, withNavigationBar: Bool = true) {
+        self.viewModel = .init(userId: "")
+        _withNavigationBar = State(initialValue: withNavigationBar)
         update(userId: userId)
     }
 
@@ -84,6 +87,88 @@ struct ProfileCenterView: View {
 
     func update(selectedCategory: ProfileCategory) {
         viewModel.selectedCategory = selectedCategory
+    }
+
+    var mainBody: some View {
+        Group {
+            if let user = viewModel.user {
+                List {
+                    ProfileCenterViewHeader(user: user, selectedCategory: $viewModel.selectedCategory)
+                        .padding(.bottom, 8)
+                        .listRowSeparatorTint(.clear) // `listRowSeparator` will cause other row **randomly** lost separator
+                        .buttonStyle(PlainButtonStyle())
+
+                    switch viewModel.selectedCategory {
+                    case .reply:
+                        let postWithModeList = viewModel.posts.map { PostWithMode(post: $0) }
+                        ForEach(Array(zip(postWithModeList.indices, postWithModeList)), id: \.1) { index, postWithMode in
+                            let post = postWithMode.post
+                            let ignored = appGlobalState.ignoredUserIds.contains(user.id)
+                            ProfileCenterPostView(user: user, post: post)
+                                .buttonStyle(PlainButtonStyle())
+                                .dimmedOverlay(ignored: .constant(ignored), isHidden: .constant(post.isHidden))
+                                .onAppear {
+                                    checkLoadMore(index)
+                                }
+                        }
+                    case .discussion:
+                        let discussionWithModeList = viewModel.discussions.map { DiscussionWithMode(discussion: $0) }
+                        ForEach(Array(zip(discussionWithModeList.indices, discussionWithModeList)), id: \.1) { index, discussionWithMode in
+                            let discussion = discussionWithMode.discussion
+                            let ignored = appGlobalState.ignoredUserIds.contains(user.id)
+                            ProfileCenterDiscussionView(user: user, discussion: discussion)
+                                .buttonStyle(PlainButtonStyle())
+                                .dimmedOverlay(ignored: .constant(ignored), isHidden: .constant(discussion.isHidden))
+                                .onAppear {
+                                    checkLoadMore(index)
+                                }
+                        }
+                    case .badge:
+                        let groupedData = Dictionary(grouping: viewModel.userBadges.filter { $0.relationships?.badge.relationships?.category != nil },
+                                                     by: { $0.relationships!.badge.relationships!.category })
+                        let categories = Array(groupedData.keys).sorted(by: { $0.id < $1.id })
+                        let badgeCategoryWithModeList = categories.map { BadgeCategoryWithMode(badgeCategory: $0) }
+                        ForEach(Array(zip(badgeCategoryWithModeList.indices, badgeCategoryWithModeList)), id: \.1) { index, badgeCategoryWithMode in
+                            let category = badgeCategoryWithMode.badgeCategory
+                            let userBadges = groupedData[category] ?? []
+                            if userBadges.count > 0 {
+                                ProfileCenterBadgeCategoryView(badgeCategory: category, userBadges: userBadges)
+                                    .buttonStyle(PlainButtonStyle())
+                            }
+                        }
+                    }
+                }
+                .listStyle(.plain)
+                .refreshable {
+                    fetch(isRefresh: true)
+                }
+            }
+        }
+    }
+
+    var body: some View {
+        if withNavigationBar {
+            NavigationView {
+                if let user = viewModel.user {
+                    mainBody
+                        .navigationTitle("\(user.attributes.displayName)的个人资料")
+                        .navigationBarTitleDisplayMode(.inline)
+                        .toolbar {
+                            ToolbarItem(placement: .navigationBarTrailing) {
+                                Button {
+                                    dismiss()
+                                } label: {
+                                    Text("完成")
+                                        .font(.system(size: 17, weight: .medium, design: .rounded))
+                                }
+                            }
+                        }
+                }
+            }
+            .navigationViewStyle(.stack)
+        } else {
+            mainBody
+        }
     }
 
     private func checkLoadMore(_ i: Int) {
@@ -207,63 +292,6 @@ struct ProfileCenterView: View {
                     DispatchQueue.main.sync {
                         viewModel.discussions.append(contentsOf: response.data.discussions)
                     }
-                }
-            }
-        }
-    }
-
-    var body: some View {
-        Group {
-            if let user = viewModel.user {
-                List {
-                    ProfileCenterViewHeader(user: user, selectedCategory: $viewModel.selectedCategory)
-                        .padding(.bottom, 8)
-                        .listRowSeparatorTint(.clear) // `listRowSeparator` will cause other row **randomly** lost separator
-                        .buttonStyle(PlainButtonStyle())
-
-                    switch viewModel.selectedCategory {
-                    case .reply:
-                        let postWithModeList = viewModel.posts.map { PostWithMode(post: $0) }
-                        ForEach(Array(zip(postWithModeList.indices, postWithModeList)), id: \.1) { index, postWithMode in
-                            let post = postWithMode.post
-                            let ignored = appGlobalState.ignoredUserIds.contains(user.id)
-                            ProfileCenterPostView(user: user, post: post)
-                                .buttonStyle(PlainButtonStyle())
-                                .dimmedOverlay(ignored: .constant(ignored), isHidden: .constant(post.isHidden))
-                                .onAppear {
-                                    checkLoadMore(index)
-                                }
-                        }
-                    case .discussion:
-                        let discussionWithModeList = viewModel.discussions.map { DiscussionWithMode(discussion: $0) }
-                        ForEach(Array(zip(discussionWithModeList.indices, discussionWithModeList)), id: \.1) { index, discussionWithMode in
-                            let discussion = discussionWithMode.discussion
-                            let ignored = appGlobalState.ignoredUserIds.contains(user.id)
-                            ProfileCenterDiscussionView(user: user, discussion: discussion)
-                                .buttonStyle(PlainButtonStyle())
-                                .dimmedOverlay(ignored: .constant(ignored), isHidden: .constant(discussion.isHidden))
-                                .onAppear {
-                                    checkLoadMore(index)
-                                }
-                        }
-                    case .badge:
-                        let groupedData = Dictionary(grouping: viewModel.userBadges.filter { $0.relationships?.badge.relationships?.category != nil },
-                                                     by: { $0.relationships!.badge.relationships!.category })
-                        let categories = Array(groupedData.keys).sorted(by: { $0.id < $1.id })
-                        let badgeCategoryWithModeList = categories.map { BadgeCategoryWithMode(badgeCategory: $0) }
-                        ForEach(Array(zip(badgeCategoryWithModeList.indices, badgeCategoryWithModeList)), id: \.1) { index, badgeCategoryWithMode in
-                            let category = badgeCategoryWithMode.badgeCategory
-                            let userBadges = groupedData[category] ?? []
-                            if userBadges.count > 0 {
-                                ProfileCenterBadgeCategoryView(badgeCategory: category, userBadges: userBadges)
-                                    .buttonStyle(PlainButtonStyle())
-                            }
-                        }
-                    }
-                }
-                .listStyle(.plain)
-                .refreshable {
-                    fetch(isRefresh: true)
                 }
             }
         }

@@ -35,7 +35,9 @@ struct SearchView: View {
     @ObservedObject var viewModel = SearchViewModel()
     @State private var subscriptions: Set<AnyCancellable> = []
     @State var task: Task<Void, Never>?
-
+    
+    @Environment(\.dismiss) var dismiss
+    
     var body: some View {
         NavigationView {
             List {
@@ -67,6 +69,15 @@ struct SearchView: View {
                     .pickerStyle(SegmentedPickerStyle())
                     .fixedSize()
                     .padding(.trailing, 8)
+                }
+                
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Text("取消")
+                            .font(.system(size: 17, weight: .regular, design: .rounded))
+                    }
                 }
             }
         }

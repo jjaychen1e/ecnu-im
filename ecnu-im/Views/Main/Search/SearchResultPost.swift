@@ -53,48 +53,6 @@ struct SearchResultPost: View {
             }
     }
 
-    var replyHint: some View {
-        Group {
-            let repliedPosts: [FlarumPost] = discussion.mostRelevantPost?.relationships?.mentionedBy ?? []
-            if repliedPosts.count > 0 {
-                let threshold = 3
-                let likesUserName = Set(repliedPosts.compactMap { $0.author?.attributes.displayName }).prefix(threshold).joined(separator: ", ")
-                    + "\(repliedPosts.count > 3 ? "等\(repliedPosts.count)人" : "")"
-                Group {
-                    (Text(Image(systemName: "message.fill")) + Text(" \(likesUserName)回复了此贴"))
-                        .font(.system(size: 13, weight: .medium, design: .rounded))
-                        .foregroundColor(.primary.opacity(0.8))
-                }
-                .padding(.horizontal, 6)
-                .padding(.vertical, 4)
-                .background(Color.primary.opacity(0.1))
-                .cornerRadius(4)
-            }
-        }
-    }
-
-    var likeHint: some View {
-        Group {
-            let likedUsers: [FlarumUser] = discussion.mostRelevantPost?.relationships?.likes ?? []
-            if likedUsers.count > 0 {
-                let threshold = 3
-                let likesUserName = likedUsers.prefix(threshold).map { $0.attributes.displayName }.joined(separator: ", ")
-                    + "\(likedUsers.count > 3 ? "等\(likedUsers.count)人" : "")"
-                Group {
-                    (Text(Image(systemName: "heart.fill")) + Text(" \(likesUserName)觉得很赞"))
-                        .font(.system(size: 13, weight: .medium, design: .rounded))
-                        .foregroundColor(.primary.opacity(0.8))
-                }
-                .font(.system(size: 13, weight: .medium, design: .rounded))
-                .foregroundColor(.primary.opacity(0.8))
-                .padding(.horizontal, 6)
-                .padding(.vertical, 4)
-                .background(Color.primary.opacity(0.1))
-                .cornerRadius(4)
-            }
-        }
-    }
-
     var body: some View {
         VStack {
             HStack {
