@@ -65,7 +65,7 @@ extension UIApplication {
                 }
             }
         } else {
-            presentOnTop(viewController, animated: animated)
+            topController()?.present(viewController, animated: animated)
         }
     }
 }
