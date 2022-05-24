@@ -41,7 +41,7 @@ struct DiscussionListCardCell: View {
                                                         if let targetId = viewModel.discussion.lastPostedUser?.id {
                                                             if let account = AppGlobalState.shared.account,
                                                                targetId != account.userIdString {
-                                                                UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: targetId), animated: true)
+                                                                UIApplication.shared.presentOnTop(ProfileCenterViewController(userId: targetId), animated: true)
                                                             } else {
                                                                 let number = viewModel.discussion.attributes?.lastPostNumber ?? 1
                                                                 uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: number),
@@ -60,7 +60,7 @@ struct DiscussionListCardCell: View {
                                 if let account = AppGlobalState.shared.account,
                                    let targetId = viewModel.discussion.starter?.id,
                                    targetId != account.userIdString {
-                                    UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: targetId), animated: true)
+                                    UIApplication.shared.presentOnTop(ProfileCenterViewController(userId: targetId), animated: true)
                                 }
                             }
                         VStack(alignment: .leading, spacing: 2) {

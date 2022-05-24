@@ -255,7 +255,7 @@ struct SignUpView: View {
                                     }))
                                     alertController.addAction(UIAlertAction(title: "取消", style: .cancel, handler: { action in
                                     }))
-                                    UIApplication.shared.topController()?.present(alertController, animated: true)
+                                    UIApplication.shared.presentOnTop(alertController, animated: true)
                                 }
                             }
                         } else {

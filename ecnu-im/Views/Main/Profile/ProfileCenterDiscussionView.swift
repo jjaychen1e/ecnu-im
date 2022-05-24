@@ -40,7 +40,7 @@ struct ProfileCenterDiscussionView: View {
                                                     if let targetId = discussion.lastPostedUser?.id {
                                                         if let account = AppGlobalState.shared.account,
                                                            targetId != account.userIdString {
-                                                            UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: targetId), animated: true)
+                                                            UIApplication.shared.presentOnTop(ProfileCenterViewController(userId: targetId), animated: true)
                                                         } else {
                                                             let number = lastPost.attributes?.number ?? 1
                                                             uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearNumber: number),

@@ -41,7 +41,7 @@ struct SearchResultUser: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .background(Color.primary.opacity(0.0001))
         .onTapGesture {
-            UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: user.id), animated: true)
+            UIApplication.shared.presentOnTop(ProfileCenterViewController(userId: user.id), animated: true)
         }
     }
 }

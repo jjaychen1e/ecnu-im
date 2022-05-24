@@ -42,7 +42,7 @@ struct NotificationView: View {
                 if let user = user {
                     PostAuthorAvatarView(name: user.attributes.displayName, url: user.avatarURL, size: 30)
                         .onTapGesture {
-                            UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: user.id), animated: true)
+                            UIApplication.shared.presentOnTop(ProfileCenterViewController(userId: user.id), animated: true)
                         }
                     (Text(user.attributes.displayName) + Text(" \(type.actionDescription)"))
                         .font(.system(size: 15, weight: .medium, design: .rounded))

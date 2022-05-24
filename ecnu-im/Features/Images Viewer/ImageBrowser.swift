@@ -21,6 +21,6 @@ class ImageBrowser {
         let controller = LightboxController(images: images, startIndex: startedIndex)
         controller.dynamicBackground = true
         controller.modalPresentationStyle = .fullScreen
-        UIApplication.shared.topController()?.present(controller, animated: true)
+        UIApplication.shared.presentOnTop(controller, animated: true)
     }
 }

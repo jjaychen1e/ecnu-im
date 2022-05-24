@@ -241,8 +241,8 @@ struct MiniEditor: View {
                     .opacity(0.3)
 
                     Button {
-                        UIApplication.shared.topController()?
-                            .present(UIHostingController(rootView: EditorView(model: contentViewModel)), animated: true)
+                        UIApplication.shared
+                            .presentOnTop(UIHostingController(rootView: EditorView(model: contentViewModel)), animated: true)
                     } label: {
                         ZStack {
                             Color.clear

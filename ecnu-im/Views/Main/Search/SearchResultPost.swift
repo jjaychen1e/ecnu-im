@@ -27,10 +27,10 @@ struct SearchResultPost: View {
                                         if let targetId = discussion.mostRelevantPostUser?.id {
                                             if let account = AppGlobalState.shared.account,
                                                targetId != account.userIdString {
-                                                UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: targetId), animated: true)
+                                                UIApplication.shared.presentOnTop(ProfileCenterViewController(userId: targetId), animated: true)
                                             } else {
                                                 let number = discussion.mostRelevantPost?.attributes?.number ?? 1
-                                                UIApplication.shared.topController()?.present(DiscussionViewController(discussion: discussion, nearNumber: number), animated: true)
+                                                UIApplication.shared.presentOnTop(DiscussionViewController(discussion: discussion, nearNumber: number), animated: true)
                                             }
                                         }
                                     }
@@ -44,10 +44,10 @@ struct SearchResultPost: View {
                 if let targetId = discussion.starter?.id {
                     if let account = AppGlobalState.shared.account,
                        targetId != account.userIdString {
-                        UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: targetId), animated: true)
+                        UIApplication.shared.presentOnTop(ProfileCenterViewController(userId: targetId), animated: true)
                     } else {
                         let number = discussion.mostRelevantPost?.attributes?.number ?? 1
-                        UIApplication.shared.topController()?.present(DiscussionViewController(discussion: discussion, nearNumber: number), animated: true)
+                        UIApplication.shared.presentOnTop(DiscussionViewController(discussion: discussion, nearNumber: number), animated: true)
                     }
                 }
             }
@@ -91,7 +91,7 @@ struct SearchResultPost: View {
         .background(Color.primary.opacity(0.0001))
         .onTapGesture {
             let number = discussion.mostRelevantPost?.attributes?.number ?? 1
-            UIApplication.shared.topController()?.present(DiscussionViewController(discussion: discussion, nearNumber: number), animated: true)
+            UIApplication.shared.presentOnTop(DiscussionViewController(discussion: discussion, nearNumber: number), animated: true)
         }
     }
 }

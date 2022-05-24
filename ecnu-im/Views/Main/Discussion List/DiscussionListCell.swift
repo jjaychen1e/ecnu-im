@@ -170,7 +170,7 @@ private struct FirstPostCell: View {
                         if let targetId = viewModel.discussion.starter?.id {
                             if let account = AppGlobalState.shared.account,
                                targetId != account.userIdString {
-                                UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: targetId), animated: true)
+                                UIApplication.shared.presentOnTop(ProfileCenterViewController(userId: targetId), animated: true)
                             } else {
                                 let number = viewModel.discussion.attributes?.lastPostNumber ?? 1
                                 uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: number),
@@ -298,7 +298,7 @@ private struct LastPostCell: View {
                         if let targetId = viewModel.discussion.starter?.id {
                             if let account = AppGlobalState.shared.account,
                                targetId != account.userIdString {
-                                UIApplication.shared.topController()?.present(ProfileCenterViewController(userId: targetId), animated: true)
+                                UIApplication.shared.presentOnTop(ProfileCenterViewController(userId: targetId), animated: true)
                             } else {
                                 let number = viewModel.discussion.attributes?.lastPostNumber ?? 1
                                 uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: number),

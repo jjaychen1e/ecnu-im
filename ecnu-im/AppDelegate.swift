@@ -54,4 +54,18 @@ extension UIApplication {
             .first(where: { $0 is UIWindowScene })
             .flatMap { $0 as? UIWindowScene }?.windows ?? []
     }
+
+    func presentOnTop(_ viewController: UIViewController, animated: Bool = true) {
+        if let hasNavigationPermission = viewController as? HasNavigationPermission {
+            switch hasNavigationPermission.navigationPermission() {
+            case .login:
+                if !AppGlobalState.shared.tokenPrepared {
+                    topController()?.presentSignView()
+                    return
+                }
+            }
+        } else {
+            presentOnTop(viewController, animated: animated)
+        }
+    }
 }

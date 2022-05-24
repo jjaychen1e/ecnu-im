@@ -43,7 +43,7 @@ class EmailVerificationViewController: UIViewController, WebControllerDelegate {
     static func show() {
         let emailVerificationViewController = EmailVerificationViewController()
         emailVerificationViewController.modalPresentationStyle = .fullScreen
-        UIApplication.shared.topController()?.present(emailVerificationViewController, animated: true)
+        UIApplication.shared.presentOnTop(emailVerificationViewController, animated: true)
     }
 
     func webController(_ webController: WebController, error: Error) {

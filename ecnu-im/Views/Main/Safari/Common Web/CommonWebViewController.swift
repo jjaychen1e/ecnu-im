@@ -53,7 +53,7 @@ class CommonWebViewController: UIViewController, WebControllerDelegate {
     static func show(url: URL) {
         let commonWebViewController = CommonWebViewController(url: url)
         commonWebViewController.modalPresentationStyle = .fullScreen
-        UIApplication.shared.topController()?.present(commonWebViewController, animated: true)
+        UIApplication.shared.presentOnTop(commonWebViewController, animated: true)
     }
 
     func webController(_ webController: WebController, title: String?) -> String? {
