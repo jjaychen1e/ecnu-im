@@ -49,8 +49,8 @@ class AppGlobalState: ObservableObject {
     @Published var token: String? = nil
     @Published var tokenPrepared = false
 
-    var loginEvent = PassthroughSubject<Void, Never>()
     var emailVerificationEvent = PassthroughSubject<Void, Never>()
+    var clearNotificationEvent = PassthroughSubject<Void, Never>()
 
     private var subscriptions: Set<AnyCancellable> = []
 
@@ -134,7 +134,6 @@ class AppGlobalState: ObservableObject {
                 }
             }
         }
-        loginEvent.send()
         hasTriedToLogin = true
         return false
     }

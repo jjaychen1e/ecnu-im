@@ -102,6 +102,7 @@ struct NotificationCenterView: View {
                     withAnimation {
                         self.notifications.append(contentsOf: response.data.notifications)
                     }
+                    guard !Task.isCancelled else { return }
                     sequenceQueue.async {
                         guard !Task.isCancelled else { return }
                         loadInfo.loadingOffset += loadInfo.limit
@@ -139,7 +140,9 @@ struct NotificationCenterView: View {
 
             Button {
                 Task {
-                    if let response = try? await flarumProvider.request(.readNotifications) {
+                    if let _ = try? await flarumProvider.request(.readNotifications) {
+                        appGlobalState.unreadNotificationCount = 0
+                        appGlobalState.clearNotificationEvent.send()
                         load(isRefresh: true)
                     }
                 }

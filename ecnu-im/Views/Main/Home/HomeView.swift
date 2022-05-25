@@ -336,6 +336,11 @@ struct HomeView: View {
                     load()
                 }
             }.store(in: &subscriptions)
+            
+            state.clearNotificationEvent.sink { _ in
+                viewModel.hideNotification = true
+            }
+            .store(in: &subscriptions)
         }
     }
 
