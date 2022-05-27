@@ -141,9 +141,11 @@ struct NotificationCenterView: View {
             Button {
                 Task {
                     if let _ = try? await flarumProvider.request(.readNotifications) {
-                        appGlobalState.unreadNotificationCount = 0
-                        appGlobalState.clearNotificationEvent.send()
-                        load(isRefresh: true)
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            appGlobalState.unreadNotificationCount = 0
+                            appGlobalState.clearNotificationEvent.send()
+                            load(isRefresh: true)
+                        }
                     }
                 }
             } label: {
