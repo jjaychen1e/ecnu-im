@@ -18,7 +18,7 @@ struct SearchResultUser: View {
                 Text("@" + user.attributes.displayName).font(.system(size: 15, weight: .medium, design: .rounded)) +
                     Text(" (\(user.attributes.username))").font(.system(size: 15, weight: .regular, design: .rounded))
 
-                if user.isOnline {
+                if fetchedUser?.isOnline == true {
                     HStack(spacing: 4) {
                         Circle()
                             .fill(Color(rgba: "#7FBA00"))
