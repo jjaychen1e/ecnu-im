@@ -51,7 +51,7 @@ class CommonWebViewController: UIViewController, WebControllerDelegate {
     @objc
     func openInSafari() {
         if let url = webController.webView.url,
-           let urlWithPercentEncoding = url.absoluteString.addingPercentEncoding(withAllowedCharacters: .alphanumerics) {
+           let urlWithPercentEncoding = url.absoluteString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
             if let url = URLService.safari(href: urlWithPercentEncoding).url.url {
                 UIApplication.shared.open(url)
             }

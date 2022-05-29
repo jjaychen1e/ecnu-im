@@ -57,8 +57,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         if let urlService = url.urlService {
             switch urlService {
             case let .link(href):
-                if let urlWithoutPercentEncoding = href.removingPercentEncoding,
-                   let url = URL(string: urlWithoutPercentEncoding) {
+                if let url = URL(string: href) {
                     CommonWebViewController.show(url: url)
                 }
             case .safari:
@@ -97,13 +96,13 @@ enum URLService {
 
 extension URL {
     var urlService: URLService? {
-        guard let components = NSURLComponents(url: self, resolvingAgainstBaseURL: true),
+        guard let components = URLComponents(url: self, resolvingAgainstBaseURL: true),
               let scheme = components.scheme,
               let host = components.host,
-              let path = components.path,
               let params = components.queryItems
         else { return nil }
 
+        // URLComponents already decode url once
         if let urlService = URLServiceType(rawValue: host) {
             switch urlService {
             case .link:

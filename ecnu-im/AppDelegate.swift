@@ -15,8 +15,7 @@ class MyApplication: UIApplication {
                 switch urlService {
                 case let .safari(href):
                     // Open in Safari:
-                    if let urlWithoutPercentEncoding = href.removingPercentEncoding,
-                       let url = URL(string: urlWithoutPercentEncoding) {
+                    if let url = URL(string: href) {
                         super.open(url, options: options, completionHandler: completion)
                     }
                 default:
@@ -28,7 +27,7 @@ class MyApplication: UIApplication {
                 super.open(url, options: options, completionHandler: completion)
             } else {
                 // As a normal link
-                if let escapedURL = url.absoluteString.addingPercentEncoding(withAllowedCharacters: .alphanumerics),
+                if let escapedURL = url.absoluteString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
                    let url = URLService.link(href: escapedURL).url.url {
                     super.open(url, options: options, completionHandler: completion)
                 }
