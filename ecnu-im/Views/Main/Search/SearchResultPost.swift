@@ -82,7 +82,7 @@ struct SearchResultPost: View {
                             .lineLimit(3)
                             .truncationMode(.tail)
                             .font(.system(size: 12, weight: .regular, design: .rounded))
-                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                            .frame(maxWidth: .infinity, alignment: .topLeading)
                     }
                 }
             }

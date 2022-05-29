@@ -691,7 +691,7 @@ private struct HomePostCardView: View {
                     .lineLimit(Int.max)
                     .truncationMode(.tail)
                     .font(.system(size: 12, weight: .regular, design: .rounded))
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .frame(maxWidth: .infinity, alignment: .topLeading)
 
                 HStack(spacing: 4) {
                     Spacer(minLength: 0)
@@ -721,7 +721,7 @@ private struct HomePostCardView: View {
                     }
                 }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .frame(maxWidth: .infinity, alignment: .topLeading)
             .padding(.horizontal, 12)
             .padding(.top, 12)
             .padding(.bottom, 6)
@@ -812,7 +812,7 @@ struct HomePostCardViewLarge: View {
                     .lineLimit(4)
                     .truncationMode(.tail)
                     .font(.system(size: 12, weight: .regular, design: .rounded))
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .frame(maxWidth: .infinity, alignment: .topLeading)
 
                 HStack(spacing: 4) {
                     likeHint

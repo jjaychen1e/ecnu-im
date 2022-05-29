@@ -90,7 +90,7 @@ struct DiscussionListCardCell: View {
                                 .lineLimit(4)
                                 .truncationMode(.tail)
                                 .font(.system(size: 12, weight: .regular, design: .rounded))
-                                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                                .frame(maxWidth: .infinity, alignment: .topLeading)
                         }
                     }
 

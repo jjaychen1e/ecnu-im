@@ -62,9 +62,6 @@ private struct ReplyPostView: View {
                         Text(post.createdDateDescription)
                             .font(.system(size: 14, weight: .light, design: .rounded))
                         Spacer(minLength: 0)
-                        if let fetchedDiscussion = fetchedDiscussion {
-                            DiscussionTagsView(tags: .constant(fetchedDiscussion.tags.mappedTagViewModels), fontSize: 14)
-                        }
                     }
                 }
             }
@@ -79,7 +76,7 @@ private struct ReplyPostView: View {
                             .lineLimit(3)
                             .truncationMode(.tail)
                             .font(.system(size: 13, weight: .regular, design: .rounded))
-                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                            .frame(maxWidth: .infinity, alignment: .topLeading)
                     }
                 }
             }
@@ -95,7 +92,9 @@ private struct ReplyPostView: View {
             Task {
                 if let id = Int(discussion.id),
                    let discussion = try? await flarumProvider.request(.discussionInfo(discussionID: id)).flarumResponse().data.discussions.first {
-                    self.fetchedDiscussion = discussion
+                    withAnimation {
+                        self.fetchedDiscussion = discussion
+                    }
                 }
             }
         }

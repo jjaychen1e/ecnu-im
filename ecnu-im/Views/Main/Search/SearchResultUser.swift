@@ -45,7 +45,9 @@ struct SearchResultUser: View {
             Task {
                 if let id = Int(user.id),
                    let user = try? await flarumProvider.request(.user(id: id)).flarumResponse().data.users.first {
-                    self.fetchedUser = user
+                    withAnimation {
+                        self.fetchedUser = user
+                    }
                 }
             }
         }
