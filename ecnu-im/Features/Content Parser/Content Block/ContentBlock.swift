@@ -263,7 +263,7 @@ extension ContentBlock {
         var content = content
 
         // A strong regex to match urls(and possible alt text)
-        let _us = "(https?:\\/\\/)(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&\\/\\/=]*)"
+        let _us = "(https?:\\/\\/)(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&,\\/\\/=]*)"
 
         // Remove possible alt text
         let markdownURLWithAltText = "\\[(.*?)\\]\\((\(_us))(\\s+.*?)?\\)"
