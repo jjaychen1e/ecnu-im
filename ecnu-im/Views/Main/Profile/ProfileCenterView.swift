@@ -71,11 +71,11 @@ struct ProfileCenterView: View {
     @State private var userFetchTask: Task<Void, Never>?
     @State private var loadInfo = ProfileCenterViewLoadInfo()
     @State private var sequenceQueue = DispatchQueue(label: "ProfileCenterViewLoadQueue")
-    
+
     @Environment(\.dismiss) var dismiss
 
     init(userId: String, withNavigationBar: Bool = true) {
-        self.viewModel = .init(userId: "")
+        viewModel = .init(userId: "")
         _withNavigationBar = State(initialValue: withNavigationBar)
         update(userId: userId)
     }
@@ -430,7 +430,7 @@ private struct ProfileCenterViewHeader: View {
                                 }))
                                 UIApplication.shared.presentOnTop(alertController, animated: true)
                             })
-                        } else if user.attributes.ignored == false {
+                        } else {
                             PopoverMenuItem(title: "屏蔽", systemImage: "person.crop.circle.fill.badge.minus", titleColor: .red, iconColor: .red, action: {
                                 let alertController = UIAlertController(title: "注意", message: "你确定要屏蔽该用户吗？", preferredStyle: .alert)
                                 alertController.addAction(UIAlertAction(title: "确定", style: .destructive, handler: { action in

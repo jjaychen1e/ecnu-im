@@ -10,7 +10,6 @@ import Foundation
 import SwiftUI
 import SwiftyJSON
 import UIColorHexSwift
-import SwiftSoup
 
 class TagViewModel {
     var id: String

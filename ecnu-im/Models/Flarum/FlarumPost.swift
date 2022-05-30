@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import SwiftSoup
 import UIKit
 
 struct FlarumPostAttributes: Decodable {
@@ -120,25 +119,6 @@ class FlarumPost: Hashable {
         let post = FlarumPost(id: UUID().uuidString)
         post.isDeleted = true
         return post
-    }
-
-    // Rendering
-    var contentHtmlElements: Elements? {
-        if let html = attributes?.contentHtml {
-            let parser = ContentHtmlParser()
-            return parser.parse(html)
-        }
-        return nil
-    }
-
-    // Extension can not have stored property
-    var postContentViews: [Any] {
-        if let elements = contentHtmlElements {
-            let converter = ContentHtmlViewConverter()
-            return converter.convert(elements)
-        }
-
-        return []
     }
 
     // Excerpt Text

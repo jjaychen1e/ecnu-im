@@ -112,7 +112,7 @@ final class PostCommentCell: UITableViewCell {
         )
         footerViewHostingVC.view.backgroundColor = .clear
         contentView.addSubview(footerViewHostingVC.view)
-        
+
         contentView.addSubview(dimmedReasonView)
         dimmedReasonView.font = .systemFont(ofSize: 14, weight: .bold)
         dimmedReasonView.snp.makeConstraints { make in
@@ -170,15 +170,14 @@ final class PostCommentCell: UITableViewCell {
             footerViewHostingVC.rootView.update(discussion: discussion, post: post, replyAction: replyPostAction, editAction: editAction, hidePostAction: hidePostAction, deletePostAction: deletePostAction)
             footerViewHostingVC.rootView.update(vc: viewController)
 
-            AppGlobalState.shared.$ignoredUserIds.sink { [weak self] change in
+            AppGlobalState.shared.$ignoredUserIds.combineLatest(AppGlobalState.shared.$blockCompletely).sink { [weak self] ignoredUserIds, blockCompletely in
                 if let self = self {
                     let ignored: Bool
-                    if let authorId = self.post?.author?.id, change.contains(authorId) {
+                    if let authorId = self.post?.author?.id, ignoredUserIds.contains(authorId) {
                         ignored = true
                     } else {
                         ignored = false
                     }
-                    let isDimmed = post.isHidden || ignored
                     let color: UIColor = ignored ? .red : Asset.DynamicColors.dynamicBlack.color.withAlphaComponent(0.7)
                     let overlayText: String = {
                         var overlayTexts: [String] = []
@@ -192,9 +191,22 @@ final class PostCommentCell: UITableViewCell {
                     }()
                     self.dimmedReasonView.text = overlayText
                     self.dimmedReasonView.textColor = color
-                    self.postContentItemsUIView?.alpha = isDimmed ? 0.3 : 1.0
-                    self.headerViewHostingVC.view.alpha = isDimmed ? 0.3 : 1.0
-                    self.footerViewHostingVC.view.alpha = isDimmed ? 0.3 : 1.0
+
+                    let opacity: CGFloat = {
+                        if !post.isHidden, !ignored {
+                            return 1.0
+                        }
+
+                        if ignored, blockCompletely {
+                            return 0.0
+                        }
+
+                        return 0.3
+                    }()
+
+                    self.postContentItemsUIView?.alpha = opacity
+                    self.headerViewHostingVC.view.alpha = opacity
+                    self.footerViewHostingVC.view.alpha = opacity
                 }
             }
             .store(in: &subscriptions)

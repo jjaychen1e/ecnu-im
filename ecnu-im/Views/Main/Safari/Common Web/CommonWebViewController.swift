@@ -22,9 +22,14 @@ class CommonWebViewController: UIViewController, WebControllerDelegate {
     }
 
     private var webController: WebController!
-
+    
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        .lightContent
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .black
         let webController = WebController()
         self.webController = webController
         webController.delegate = self

@@ -100,32 +100,6 @@ class FlarumDiscussion {
     var id: String
     var attributes: FlarumDiscussionAttributes?
     var relationships: FlarumDiscussionRelationships?
-
-    // Extension can not have stored property
-    var firstPostContentExcerptViews: [Any] {
-        if let html = firstPost?.attributes?.contentHtml {
-            let parser = ContentHtmlParser()
-            if let elements = parser.parse(html) {
-                let converter = ContentHtmlViewConverter(elementCountLimit: 5, textLengthLimit: 100, mode: .excerpt)
-                return converter.convert(elements)
-            }
-        }
-
-        return []
-    }
-
-    // Extension can not have stored property
-    var lastPostContentExcerptViews: [Any] {
-        if let html = lastPost?.attributes?.contentHtml {
-            let parser = ContentHtmlParser()
-            if let elements = parser.parse(html) {
-                let converter = ContentHtmlViewConverter(elementCountLimit: 5, textLengthLimit: 100, mode: .excerpt)
-                return converter.convert(elements)
-            }
-        }
-
-        return []
-    }
 }
 
 extension FlarumDiscussion {
@@ -140,11 +114,11 @@ extension FlarumDiscussion {
     var lastPost: FlarumPost? {
         relationships?.lastPost
     }
-    
+
     var mostRelevantPost: FlarumPost? {
         relationships?.mostRelevantPost
     }
-    
+
     var mostRelevantPostUser: FlarumUser? {
         mostRelevantPost?.author
     }
@@ -186,7 +160,7 @@ extension FlarumDiscussion {
         }
         return nil
     }
-    
+
     var mostRelevantPostedUserName: String {
         "@" + (mostRelevantPostUser?.attributes.displayName ?? "Unkown")
     }

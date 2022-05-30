@@ -10,9 +10,21 @@ import SwiftUI
 private struct DimmedOverlay: ViewModifier {
     @Binding var ignored: Bool
     @Binding var isHidden: Bool
+    @ObservedObject var appGlobalState = AppGlobalState.shared
+
+    var opacity: CGFloat {
+        if !isHidden, !ignored {
+            return 1.0
+        }
+
+        if ignored, appGlobalState.blockCompletely {
+            return 0.0
+        }
+        
+        return 0.3
+    }
 
     func body(content: Content) -> some View {
-        let isDimmed = isHidden || ignored
         let color: Color = ignored ? .red : .primary.opacity(0.7)
         let overlayText: String = {
             var overlayTexts: [String] = []
@@ -25,7 +37,7 @@ private struct DimmedOverlay: ViewModifier {
             return overlayTexts.joined(separator: ", ")
         }()
         content
-            .opacity(isDimmed ? 0.3 : 1.0)
+            .opacity(opacity)
             .overlay(
                 Text(overlayText)
                     .font(.system(size: 14, weight: .bold, design: .rounded))
@@ -36,6 +48,6 @@ private struct DimmedOverlay: ViewModifier {
 
 extension View {
     func dimmedOverlay(ignored: Binding<Bool>, isHidden: Binding<Bool>) -> some View {
-        self.modifier(DimmedOverlay(ignored: ignored, isHidden: isHidden))
+        modifier(DimmedOverlay(ignored: ignored, isHidden: isHidden))
     }
 }

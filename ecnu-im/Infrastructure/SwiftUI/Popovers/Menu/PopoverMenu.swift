@@ -57,6 +57,8 @@ private struct _PopoverMenu<Label>: View where Label: View {
             operatePopoverMenu(true) {}
         } label: {
             label()
+                .frame(minWidth: 24, minHeight: 24)
+                .background(Color.primary.opacity(0.0001))
         }
     }
 }

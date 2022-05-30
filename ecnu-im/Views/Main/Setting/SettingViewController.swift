@@ -22,7 +22,7 @@ private struct HeaderItem: Hashable {
 
 private enum RowType {
     case navigation(action: () -> Void)
-    case action(textColor: UIColor? = nil, action: (_ sender: UIView) -> Void)
+    case action(action: (_ sender: UIView) -> Void)
     case toggle(action: (Bool) -> Void)
     case segmentedControl(actions: [UIAction])
 
@@ -30,18 +30,18 @@ private enum RowType {
 }
 
 private enum RowIcon {
-    case system(name: String)
-    case uiImage(uiImage: UIImage)
-    case image(name: String)
+    case system(name: String, color: UIColor? = nil)
+    case uiImage(uiImage: UIImage, color: UIColor? = nil)
+    case image(name: String, color: UIColor? = nil)
 
     func toUIImage() -> UIImage? {
         switch self {
-        case let .image(name):
-            return UIImage(named: name)?.withRenderingMode(.alwaysTemplate)
-        case let .system(name):
-            return UIImage(systemName: name)?.withRenderingMode(.alwaysTemplate)
-        case let .uiImage(uiImage):
-            return uiImage.withRenderingMode(.alwaysTemplate)
+        case let .image(name, color):
+            return UIImage(named: name)?.withTintColor(color ?? Asset.DynamicColors.dynamicBlack.color).withRenderingMode(.alwaysOriginal)
+        case let .system(name, color):
+            return UIImage(systemName: name)?.withTintColor(color ?? Asset.DynamicColors.dynamicBlack.color).withRenderingMode(.alwaysOriginal)
+        case let .uiImage(uiImage, color):
+            return uiImage.withTintColor(color ?? Asset.DynamicColors.dynamicBlack.color).withRenderingMode(.alwaysOriginal)
         }
     }
 }
@@ -51,11 +51,15 @@ private struct RowItem: Hashable {
     let type: RowType
     let icon: RowIcon?
     let label: String
+    let fontWeight: UIFont.Weight
+    let textColor: UIColor?
 
-    init(type: RowType, icon: RowIcon? = nil, label: String) {
+    init(type: RowType, icon: RowIcon? = nil, label: String, fontWeight: UIFont.Weight = .regular, textColor: UIColor? = nil) {
         self.type = type
         self.icon = icon
         self.label = label
+        self.fontWeight = fontWeight
+        self.textColor = textColor
     }
 
     func hash(into hasher: inout Hasher) {
@@ -87,23 +91,11 @@ class SettingViewController: UIViewController {
         super.viewDidLoad()
         setCollectionView()
         applyInitialSnapshots()
-        selectDefaultCell()
         title = ""
     }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-    }
-
-    func selectDefaultCell() {
-        if let indexPath = dataSource.indexPath(for: ListItem.rowItem(modelObjects[0].rowItems[0])) {
-            collectionView.selectItem(at: .init(row: 1, section: 0), animated: true, scrollPosition: .top)
-            if let item = dataSource.itemIdentifier(for: indexPath) {
-                if case let .rowItem(rowItem) = item, case let .navigation(action) = rowItem.type {
-                    action()
-                }
-            }
-        }
     }
 
     private func setCollectionView() {
@@ -126,7 +118,7 @@ class SettingViewController: UIViewController {
             var content = cell.defaultContentConfiguration()
             content.text = headerItem.title
             content.textProperties.color = Asset.DynamicColors.dynamicBlack.color
-            content.textProperties.font = .systemFont(ofSize: 20, weight: .bold)
+            content.textProperties.font = .rounded(ofSize: 20, weight: .bold)
             cell.contentConfiguration = content
 
             let headerDisclosureOption = UICellAccessory.OutlineDisclosureOptions(style: .header)
@@ -137,6 +129,8 @@ class SettingViewController: UIViewController {
             cell, _, item in
             var configuration = cell.defaultContentConfiguration()
             configuration.text = item.label
+            configuration.textProperties.font = .rounded(ofSize: 17, weight: item.fontWeight)
+            configuration.textProperties.color = item.textColor ?? Asset.DynamicColors.dynamicBlack.color
             if let icon = item.icon {
                 configuration.image = icon.toUIImage()
                 configuration.imageProperties.tintColor = .tintColor
@@ -150,11 +144,8 @@ class SettingViewController: UIViewController {
             cell, _, item in
             var configuration = cell.defaultContentConfiguration()
             configuration.text = item.label
-            if case let .action(textColor, _) = item.type, let textColor = textColor {
-                configuration.textProperties.color = textColor
-            } else {
-                configuration.textProperties.color = .tintColor
-            }
+            configuration.textProperties.font = .rounded(ofSize: 17, weight: item.fontWeight)
+            configuration.textProperties.color = item.textColor ?? Asset.DynamicColors.dynamicBlack.color
             if let icon = item.icon {
                 configuration.image = icon.toUIImage()
                 configuration.imageProperties.tintColor = .tintColor
@@ -167,6 +158,8 @@ class SettingViewController: UIViewController {
             cell, _, item in
             var configuration = cell.defaultContentConfiguration()
             configuration.text = item.label
+            configuration.textProperties.font = .rounded(ofSize: 17, weight: item.fontWeight)
+            configuration.textProperties.color = item.textColor ?? Asset.DynamicColors.dynamicBlack.color
             if let icon = item.icon {
                 configuration.image = icon.toUIImage()
                 configuration.imageProperties.tintColor = .tintColor
@@ -187,6 +180,8 @@ class SettingViewController: UIViewController {
             cell, _, item in
             var configuration = cell.defaultContentConfiguration()
             configuration.text = item.label
+            configuration.textProperties.font = .rounded(ofSize: 17, weight: item.fontWeight)
+            configuration.textProperties.color = item.textColor ?? Asset.DynamicColors.dynamicBlack.color
             if let icon = item.icon {
                 configuration.image = icon.toUIImage()
                 configuration.imageProperties.tintColor = .tintColor
@@ -240,60 +235,12 @@ class SettingViewController: UIViewController {
 
     private func applyInitialSnapshots() {
         modelObjects = [
-            HeaderItem(title: "讨论", rowItems: [
-                RowItem(type: .navigation(action: {
-                    self.splitViewController?.push(viewController: self.allDiscussionViewController,
-                                                   column: .secondary,
-                                                   toRoot: true)
-                }),
-                icon: .system(name: "text.bubble"),
-                label: "最新话题"),
+            HeaderItem(title: "论坛", rowItems: [
+                RowItem(type: .toggle(action: { value in
+                    AppGlobalState.shared.blockCompletely = value
+                }), icon: .system(name: "person.crop.circle.badge.minus"), label: "完全屏蔽"),
             ]),
-            HeaderItem(title: "通知中心", rowItems: [
-                RowItem(type: .navigation(action: {
-                    self.splitViewController?.push(viewController: UIHostingController(rootView: Text("未读通知")),
-                                                   column: .secondary,
-                                                   toRoot: true)
-                }),
-                icon: .system(name: "bell.badge"),
-                label: "未读通知"),
-                RowItem(type: .navigation(action: {
-                    self.splitViewController?.push(viewController: UIHostingController(rootView: Text("所有通知")),
-                                                   column: .secondary,
-                                                   toRoot: true)
-
-                }),
-                icon: .system(name: "bell"),
-                label: "所有通知"),
-            ]),
-            HeaderItem(title: "账户", rowItems: [
-                RowItem(type: .navigation(action: { self.splitViewController?.push(viewController: UIHostingController(rootView: Text("个人资料")),
-                                                                                   column: .secondary,
-                                                                                   toRoot: true) }),
-                icon: .system(name: "person.crop.circle"),
-                label: "个人资料"),
-                RowItem(type: .action(textColor: .systemRed,
-                                      action: { sender in
-                                          let alertController = UIAlertController(title: "你确定要退出登录吗", message: nil, preferredStyle: .actionSheet)
-                                          alertController.addAction(.init(title: "退出登录", style: .destructive, handler: { _ in
-                                              AppGlobalState.shared.logout()
-                                          }))
-                                          alertController.addAction(.init(title: "取消", style: .cancel, handler: { _ in
-                                              alertController.dismiss(animated: true)
-                                          }))
-                                          if let popoverController = alertController.popoverPresentationController {
-                                              popoverController.sourceView = sender // to set the source of your alert
-                                          }
-                                          self.present(alertController, animated: true)
-                                      }),
-                        label: "退出登录"),
-            ]),
-            HeaderItem(title: "设置", rowItems: [
-                RowItem(type: .toggle(action: { isOn in
-                    print(isOn)
-                }),
-                icon: .system(name: "gearshape"),
-                label: "开关例子"),
+            HeaderItem(title: "样式", rowItems: [
                 RowItem(type: .segmentedControl(actions: ThemeOption.allCases.map { option in
                     UIAction(title: option.rawValue) { _ in
                         switch option {
@@ -312,8 +259,34 @@ class SettingViewController: UIViewController {
                         }
                     }
                 }),
-                icon: .uiImage(uiImage: Asset.Icons.darkTheme.image),
+                icon: .system(name: "moon.stars"),
                 label: "主题颜色"),
+            ]),
+            HeaderItem(title: "其他", rowItems: [
+                RowItem(type: .action(action: { sender in
+                    if let url = URL(string: URLService.link(href: "https://github.com/JJAYCHEN1e/ecnu-im").url) {
+                        UIApplication.shared.open(url)
+                    }
+                }), icon: .system(name: "chevron.left.forwardslash.chevron.right"), label: "GitHub 仓库"),
+                RowItem(type: .action(action: { sender in
+                    UIApplication.shared.presentOnTop(UIHostingController(rootView: AcknowledgementView()))
+                }), icon: .system(name: "list.bullet.rectangle"), label: "致谢"),
+            ]),
+            HeaderItem(title: "账户", rowItems: [
+                RowItem(type: .action(action: { sender in
+                    let alertController = UIAlertController(title: "你确定要退出登录吗", message: nil, preferredStyle: .actionSheet)
+                    alertController.addAction(.init(title: "退出登录", style: .destructive, handler: { _ in
+                        AppGlobalState.shared.logout()
+                    }))
+                    alertController.addAction(.init(title: "取消", style: .cancel, handler: { _ in
+                        alertController.dismiss(animated: true)
+                    }))
+                    if let popoverController = alertController.popoverPresentationController {
+                        popoverController.sourceView = sender // to set the source of your alert
+                    }
+                    self.present(alertController, animated: true)
+                }),
+                label: "退出登录", textColor: .systemRed),
             ]),
         ]
 
@@ -356,7 +329,7 @@ extension SettingViewController: UICollectionViewDelegate {
                 switch rowItem.type {
                 case let .navigation(action):
                     action()
-                case let .action(_, action):
+                case let .action(action):
                     if let cell = collectionView.cellForItem(at: indexPath) {
                         action(cell)
                     }

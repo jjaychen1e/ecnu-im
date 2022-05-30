@@ -42,6 +42,20 @@ extension Optional: RawRepresentable where Wrapped: Codable {
 
 class AppGlobalState: ObservableObject {
     @AppStorage("account") private(set) var account: Account? = nil
+    @AppStorage("blockCompletely") private var internalBlockCompletely = false {
+        didSet {
+            blockCompletely = internalBlockCompletely
+        }
+    }
+
+    @Published var blockCompletely = false {
+        didSet {
+            if blockCompletely != internalBlockCompletely {
+                internalBlockCompletely = blockCompletely
+            }
+        }
+    }
+
     @Published var unreadNotificationCount = 0
     @Published var userInfo: FlarumUser?
     @Published var ignoredUserIds: Set<String> = []
