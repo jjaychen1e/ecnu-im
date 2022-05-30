@@ -27,8 +27,7 @@ class MyApplication: UIApplication {
                 super.open(url, options: options, completionHandler: completion)
             } else {
                 // As a normal link
-                if let escapedURL = url.absoluteString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-                   let url = URLService.link(href: escapedURL).url.url {
+                if let url = URLService.link(href: url.absoluteString).url.url {
                     super.open(url, options: options, completionHandler: completion)
                 }
             }

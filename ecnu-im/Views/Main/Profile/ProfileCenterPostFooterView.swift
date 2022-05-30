@@ -76,14 +76,23 @@ struct ProfileCenterPostFooterView: View {
     }
 
     var buttons: some View {
-        HStack(spacing: 12) {
-            Button {} label: {
-                Image(systemName: "ellipsis")
-                    .font(.system(size: 20, weight: .regular, design: .rounded))
+        PopoverMenu {
+            PopoverMenuItem(title: "App 问题反馈", systemImage: "exclamationmark.bubble", action: {})
+                .disabled(true)
+            PopoverMenuItem(title: "分享", systemImage: "square.and.arrow.up", action: {})
+                .disabled(true)
+
+            if let number = viewModel.post.attributes?.number,
+               let url = URL(string: URLService.link(href: "https://ecnu.im/d/\(viewModel.discussion.id)/\(number)").url) {
+                PopoverMenuItem(title: "打开网页版", systemImage: "safari", action: {
+                    UIApplication.shared.open(url)
+                })
             }
-            .disabled(true)
+        } label: {
+            Image(systemName: "ellipsis")
+                .font(.system(size: 20, weight: .regular, design: .rounded))
+                .foregroundColor(.primary.opacity(0.7))
         }
-        .foregroundColor(.primary.opacity(0.7))
     }
 
     var body: some View {

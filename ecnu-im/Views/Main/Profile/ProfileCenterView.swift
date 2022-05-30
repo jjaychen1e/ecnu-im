@@ -402,8 +402,17 @@ private struct ProfileCenterViewHeader: View {
             .frame(maxWidth: .infinity)
             .overlay(
                 PopoverMenu {
+                    PopoverMenuItem(title: "App 问题反馈", systemImage: "exclamationmark.bubble", action: {})
+                        .disabled(true)
                     PopoverMenuItem(title: "分享", systemImage: "square.and.arrow.up", action: {})
                         .disabled(true)
+
+                    if let url = URL(string: URLService.link(href: "https://ecnu.im/u/\(user.attributes.username)").url) {
+                        PopoverMenuItem(title: "打开网页版", systemImage: "safari", action: {
+                            UIApplication.shared.open(url)
+                        })
+                    }
+
                     if user.attributes.canBeIgnored == true {
                         if user.attributes.ignored == true {
                             PopoverMenuItem(title: "取消屏蔽", systemImage: "person.crop.circle.fill.badge.checkmark", titleColor: .primary, iconColor: .primary, action: {
@@ -460,6 +469,7 @@ private struct ProfileCenterViewHeader: View {
                 } label: {
                     Image(systemName: "ellipsis")
                         .font(.system(size: 20, weight: .regular, design: .rounded))
+                        .foregroundColor(.primary.opacity(0.7))
                 },
                 alignment: .bottomTrailing
             )

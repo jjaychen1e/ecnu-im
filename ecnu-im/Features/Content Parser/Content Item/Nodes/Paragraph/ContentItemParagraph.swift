@@ -69,8 +69,7 @@ extension ContentItemParagraphUIView: UITextViewDelegate {
             UIApplication.shared.open(url)
         } else {
             // As a normal link
-            if let escapedURL = url.absoluteString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-               let url = URLService.link(href: escapedURL).url.url {
+            if let url = URLService.link(href: url.absoluteString).url.url {
                 UIApplication.shared.open(url)
             }
         }

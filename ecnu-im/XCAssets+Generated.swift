@@ -49,7 +49,7 @@ internal enum Asset {
   }
   internal static let emptyChatDark = ImageAsset(name: "emptyChatDark")
   internal enum Icons {
-    internal static let darkTheme = ImageAsset(name: "DarkTheme")
+    internal static let discord = ImageAsset(name: "discord")
   }
   internal enum SpecialColors {
     internal static let background = ColorAsset(name: "background")

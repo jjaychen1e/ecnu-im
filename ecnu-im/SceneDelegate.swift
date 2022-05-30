@@ -87,9 +87,9 @@ enum URLService {
     var url: String {
         switch self {
         case let .link(href):
-            return schemePrefix + "link?" + "href=\(href)"
+            return schemePrefix + "link?" + "href=\(href.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
         case let .safari(href):
-            return schemePrefix + "safari?" + "href=\(href)"
+            return schemePrefix + "safari?" + "href=\(href.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
         }
     }
 }

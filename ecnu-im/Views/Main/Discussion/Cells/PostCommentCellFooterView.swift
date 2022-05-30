@@ -200,6 +200,14 @@ struct PostCommentCellFooterView: View {
                 }
                 PopoverMenuItem(title: "分享", systemImage: "square.and.arrow.up", action: {})
                     .disabled(true)
+
+                if let number = viewModel.post.attributes?.number,
+                   let url = URL(string: URLService.link(href: "https://ecnu.im/d/\(viewModel.discussion.id)/\(number)").url) {
+                    PopoverMenuItem(title: "打开网页版", systemImage: "safari", action: {
+                        UIApplication.shared.open(url)
+                    })
+                }
+
                 if viewModel.post.attributes?.canHide == true {
                     if viewModel.post.attributes?.isHidden == true {
                         PopoverMenuItem(title: "取消隐藏", systemImage: "eye", action: {

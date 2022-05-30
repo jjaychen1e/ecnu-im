@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "Discord-Logo-Black.svg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

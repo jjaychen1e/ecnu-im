@@ -41,7 +41,7 @@ private enum RowIcon {
         case let .system(name, color):
             return UIImage(systemName: name)?.withTintColor(color ?? Asset.DynamicColors.dynamicBlack.color).withRenderingMode(.alwaysOriginal)
         case let .uiImage(uiImage, color):
-            return uiImage.withTintColor(color ?? Asset.DynamicColors.dynamicBlack.color).withRenderingMode(.alwaysOriginal)
+            return uiImage.withTintColor(color ?? Asset.DynamicColors.dynamicBlack.color)
         }
     }
 }
@@ -238,7 +238,27 @@ class SettingViewController: UIViewController {
             HeaderItem(title: "论坛", rowItems: [
                 RowItem(type: .toggle(action: { value in
                     AppGlobalState.shared.blockCompletely = value
-                }), icon: .system(name: "person.crop.circle.badge.minus"), label: "完全屏蔽"),
+                }), icon: .system(name: "person.crop.circle.badge.minus"), label: "完全隐藏屏蔽用户"),
+                RowItem(type: .action(action: { sender in
+                    if let url = URL(string: URLService.link(href: "https://ecnu.im/p/2-FAQ").url) {
+                        UIApplication.shared.open(url)
+                    }
+                }), icon: .system(name: "questionmark.circle"), label: "论坛常见问题"),
+                RowItem(type: .action(action: { sender in
+                    if let url = URL(string: URLService.link(href: "https://ecnu.im/d/287").url) {
+                        UIApplication.shared.open(url)
+                    }
+                }), icon: .system(name: "newspaper"), label: "论坛守则"),
+                RowItem(type: .action(action: { sender in
+                    if let url = URL(string: URLService.link(href: "https://discord.gg/a9NBjHwBEQ").url) {
+                        UIApplication.shared.open(url)
+                    }
+                }), icon: .uiImage(uiImage: Asset.Icons.discord.image), label: "Discord 小组"),
+                RowItem(type: .action(action: { sender in
+                    if let url = URL(string: URLService.link(href: "https://ecnu.im").url) {
+                        UIApplication.shared.open(url)
+                    }
+                }), icon: .system(name: "safari"), label: "网页版论坛"),
             ]),
             HeaderItem(title: "样式", rowItems: [
                 RowItem(type: .segmentedControl(actions: ThemeOption.allCases.map { option in
@@ -260,7 +280,22 @@ class SettingViewController: UIViewController {
                     }
                 }),
                 icon: .system(name: "moon.stars"),
-                label: "主题颜色"),
+                label: "主题"),
+            ]),
+            HeaderItem(title: "小功能", rowItems: [
+                RowItem(type: .action(action: { sender in
+                    if let url = URL(string: URLService.link(href: "https://u-office.ecnu.edu.cn/xiaoli/").url) {
+                        UIApplication.shared.open(url)
+                    }
+                }), icon: .system(name: "calendar"), label: "校历"),
+                RowItem(type: .action(action: { sender in
+                    if let url = URL(string: URLService.link(href: "http://www.ecard.ecnu.edu.cn/").url) {
+                        UIApplication.shared.open(url)
+                    }
+                }), icon: .system(name: "creditcard"), label: "校园卡中心"),
+                RowItem(type: .action(action: { sender in
+                    Toast.default(icon: .emoji("👀"), title: "尚未支持").show()
+                }), icon: .system(name: "calendar.badge.plus"), label: "导入课表至日历"),
             ]),
             HeaderItem(title: "其他", rowItems: [
                 RowItem(type: .action(action: { sender in
@@ -273,6 +308,11 @@ class SettingViewController: UIViewController {
                 }), icon: .system(name: "list.bullet.rectangle"), label: "致谢"),
             ]),
             HeaderItem(title: "账户", rowItems: [
+                RowItem(type: .action(action: { sender in
+                    if let url = URL(string: URLService.link(href: "https://ecnu.im/settings").url) {
+                        UIApplication.shared.open(url)
+                    }
+                }), icon: .system(name: "person.crop.circle"), label: "修改资料"),
                 RowItem(type: .action(action: { sender in
                     let alertController = UIAlertController(title: "你确定要退出登录吗", message: nil, preferredStyle: .actionSheet)
                     alertController.addAction(.init(title: "退出登录", style: .destructive, handler: { _ in
