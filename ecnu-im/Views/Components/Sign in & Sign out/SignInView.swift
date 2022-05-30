@@ -36,7 +36,7 @@ struct SignInView: View {
         .backgroundColor(opacity: 0.4)
         .cornerRadius(30)
         .modifier(OutlineModifier(cornerRadius: 30))
-        .onAppear { animate() }
+        .onLoad { animate() }
     }
 
     var form: some View {

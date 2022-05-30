@@ -8,7 +8,7 @@
 import SwiftUI
 import UIKit
 
-class ReplyListViewController: UIViewController {
+class ReplyListViewController: UIViewController, HasNavigationPermission {
     private var hostingViewController: UIHostingController<EnvironmentWrapperView<ReplyListView>>!
 
     private var discussion: FlarumDiscussion

@@ -79,7 +79,7 @@ private enum ThemeOption: String, CaseIterable {
 
 private typealias DataSource = UICollectionViewDiffableDataSource<HeaderItem, ListItem>
 
-class SettingViewController: UIViewController {
+class SettingViewController: UIViewController, HasNavigationPermission {
     private var modelObjects: [HeaderItem]!
     private var collectionView: UICollectionView!
     private lazy var dataSource = makeDataSource()

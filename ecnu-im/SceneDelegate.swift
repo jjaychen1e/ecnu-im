@@ -56,9 +56,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         if let urlService = url.urlService {
             switch urlService {
-            case let .link(href):
+            case let .link(href, jsAction):
                 if let url = URL(string: href) {
-                    CommonWebViewController.show(url: url)
+                    CommonWebViewController.show(url: url, jsActionOnLoad: jsAction)
                 }
             case .safari:
                 // Never, never happened
@@ -77,7 +77,7 @@ enum URLServiceType: String, RawRepresentable {
 enum URLService {
     static let scheme = "ecnu-im"
 
-    case link(href: String)
+    case link(href: String, jsAction: String? = nil)
     case safari(href: String)
 
     var schemePrefix: String {
@@ -86,8 +86,9 @@ enum URLService {
 
     var url: String {
         switch self {
-        case let .link(href):
-            return schemePrefix + "link?" + "href=\(href.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
+        case let .link(href, jsAction):
+            return schemePrefix + "link?" + "href=\(href.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")" +
+                "&jsAction=\(jsAction?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
         case let .safari(href):
             return schemePrefix + "safari?" + "href=\(href.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
         }
@@ -108,7 +109,8 @@ extension URL {
             case .link:
                 if let href = params.first(where: { $0.name == "href" })?.value,
                    let url = URL(string: href) {
-                    return .link(href: href)
+                    let jsAction = params.first(where: { $0.name == "jsAction" })?.value
+                    return .link(href: href, jsAction: jsAction)
                 }
             case .safari:
                 if let href = params.first(where: { $0.name == "href" })?.value,

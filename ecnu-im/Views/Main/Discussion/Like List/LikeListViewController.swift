@@ -8,7 +8,7 @@
 import SwiftUI
 import UIKit
 
-class LikeListViewController: UIViewController {
+class LikeListViewController: UIViewController, HasNavigationPermission {
     private var hostingViewController: UIHostingController<EnvironmentWrapperView<LikeListView>>!
 
     private var users: [FlarumUser]

@@ -59,7 +59,7 @@ struct SignUpView: View {
         .backgroundColor(opacity: 0.4)
         .cornerRadius(30)
         .modifier(OutlineModifier(cornerRadius: 30))
-        .onAppear { animate() }
+        .onLoad { animate() }
     }
 
     var form: some View {
@@ -142,6 +142,18 @@ struct SignUpView: View {
                 .onTapGesture {
                     withAnimation {
                         model.selectedPanel = .signIn
+                    }
+                }
+            Text("注册遇到问题? **点击此处从浏览器注册**")
+                .font(.footnote)
+                .foregroundColor(.primary.opacity(0.7))
+                .accentColor(.primary.opacity(0.7))
+                .onTapGesture {
+                    let selectSignUpButtonJS = """
+                    document.querySelector('#header-secondary > ul > li.item-signUp > button').click();
+                    """
+                    if let url = URL(string: URLService.link(href: "https://ecnu.im/", jsAction: selectSignUpButtonJS).url) {
+                        UIApplication.shared.open(url)
                     }
                 }
         }

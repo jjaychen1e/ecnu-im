@@ -8,7 +8,7 @@
 import SwiftUI
 import UIKit
 
-class SearchViewController: UIViewController {
+class SearchViewController: UIViewController, HasNavigationPermission {
     private var hostingViewController: UIHostingController<EnvironmentWrapperView<SearchView>>!
 
     override func viewDidLoad() {

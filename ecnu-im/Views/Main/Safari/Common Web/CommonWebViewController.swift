@@ -10,9 +10,11 @@ import WebController
 
 class CommonWebViewController: UIViewController, WebControllerDelegate {
     private var startURL: URL
+    private var jsAction: String?
 
-    init(url: URL) {
+    init(url: URL, jsActionOnLoad: String? = nil) {
         startURL = url
+        jsAction = jsActionOnLoad
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -22,11 +24,11 @@ class CommonWebViewController: UIViewController, WebControllerDelegate {
     }
 
     private var webController: WebController!
-    
+
     override var preferredStatusBarStyle: UIStatusBarStyle {
         .lightContent
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .black
@@ -68,13 +70,19 @@ class CommonWebViewController: UIViewController, WebControllerDelegate {
         dismiss(animated: true)
     }
 
-    static func show(url: URL) {
-        let commonWebViewController = CommonWebViewController(url: url)
+    static func show(url: URL, jsActionOnLoad: String? = nil) {
+        let commonWebViewController = CommonWebViewController(url: url, jsActionOnLoad: jsActionOnLoad)
         commonWebViewController.modalPresentationStyle = .fullScreen
         UIApplication.shared.presentOnTop(commonWebViewController, animated: true)
     }
 
     func webController(_ webController: WebController, title: String?) -> String? {
         return title?.appending(" ❤️")
+    }
+
+    func webController(_ webController: WebController, didFinish url: URL) {
+        if url.absoluteURL == startURL.absoluteURL, let jsAction = jsAction {
+            webController.evaluateJavaScript(jsAction, completionHandler: { _, _ in })
+        }
     }
 }

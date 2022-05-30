@@ -307,9 +307,8 @@ struct HomeView: View {
                               }) {
             scrollDetector
             LazyVStack {
-                if !viewModel.hideNotification {
-                    notification()
-                }
+                emailConfirmNotification()
+                notification()
                 lastSeenSection()
                 stickySection()
                 latestSection()
@@ -336,7 +335,7 @@ struct HomeView: View {
                     load()
                 }
             }.store(in: &subscriptions)
-            
+
             state.clearNotificationEvent.sink { _ in
                 viewModel.hideNotification = true
             }
@@ -361,74 +360,109 @@ struct HomeView: View {
     }
 
     @ViewBuilder
-    func notification() -> some View {
-        if let (count, notifications) = viewModel.unreadNotifications {
-            let users = notifications
-                .compactMap { $0.relationships?.fromUser }
-                .prefix(5)
-
-            let latestNotificationCreatedDateDescription = notifications.first?.createdDateDescription ?? "Unkown"
-
+    func emailConfirmNotification() -> some View {
+        if appGlobalState.userInfo?.isEmailConfirmed == false {
             Button {
-                uiKitEnvironment.vc?.tabController?.select(tab: .notifications)
+                EmailVerificationViewController.show()
             } label: {
                 HStack {
-                    Image(systemName: "bell.badge")
+                    Image(systemName: "envelope.badge")
                         .font(.system(size: 20, weight: .medium, design: .rounded))
                         .foregroundColor(Color(rgba: "#265A9A"))
                     VStack(alignment: .leading, spacing: 4) {
                         VStack(alignment: .leading, spacing: 2) {
-                            HStack(spacing: 2) {
-                                Text("共\(count)条新通知")
-                                    .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                HStack(spacing: -3) {
-                                    ForEach(0 ..< users.count, id: \.self) { index in
-                                        let user = users[index]
-                                        PostAuthorAvatarView(name: user.attributes.displayName, url: user.avatarURL, size: 18)
-                                            .mask(Circle())
-                                            .overlay(Circle().stroke(Color.white, lineWidth: 0.5))
-                                    }
-                                }
-                            }
-                            HStack {
-                                Text(viewModel.latestNotificationTitle ?? "暂无通知标题")
-                                    .lineLimit(1)
-                                    .font(.system(size: 12, weight: .semibold, design: .rounded))
-                                Text(latestNotificationCreatedDateDescription)
-                                    .font(.system(size: 12, weight: .semibold, design: .rounded))
-                                    .fixedSize(horizontal: true, vertical: true)
-                            }
+                            Text("邮箱尚未验证")
+                                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                            Text("点击此处打开腾讯企业邮箱")
+                                .font(.system(size: 14, weight: .regular, design: .rounded))
                         }
-                        .foregroundColor(Color(rgba: "#045FA1"))
-                        if notifications.first?.attributes.contentType != .badgeReceived {
-                            Text(viewModel.latestNotificationExcerpt ?? "暂无内容预览")
-                                .animation(nil)
-                                .font(.system(size: 12, weight: .regular, design: .rounded))
-                                .lineLimit(3)
-                                .foregroundColor(.black)
-                                .multilineTextAlignment(.leading)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                        }
+                        .foregroundColor(.primary)
                     }
                     Spacer(minLength: 0)
-                    Button {
-                        withAnimation {
-                            viewModel.hideNotification = true
-                        }
-                    } label: {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 15, weight: .medium, design: .rounded))
-                            .foregroundColor(Color(rgba: "#265A9A"))
-                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.vertical, 12)
                 .padding(.horizontal, 8)
                 .background(
-                    Color(rgba: "#C8E0F2")
+                    Asset.DynamicColors.dynamicWhite.swiftUIColor.opacity(0.7)
                 )
                 .mask(RoundedRectangle(cornerRadius: 8, style: .continuous))
                 .padding(.horizontal)
+            }
+        }
+    }
+
+    @ViewBuilder
+    func notification() -> some View {
+        if !viewModel.hideNotification {
+            if let (count, notifications) = viewModel.unreadNotifications {
+                let users = notifications
+                    .compactMap { $0.relationships?.fromUser }
+                    .prefix(5)
+
+                let latestNotificationCreatedDateDescription = notifications.first?.createdDateDescription ?? "Unkown"
+
+                Button {
+                    uiKitEnvironment.vc?.tabController?.select(tab: .notifications)
+                } label: {
+                    HStack {
+                        Image(systemName: "bell.badge")
+                            .font(.system(size: 20, weight: .medium, design: .rounded))
+                            .foregroundColor(Color(rgba: "#265A9A"))
+                        VStack(alignment: .leading, spacing: 4) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                HStack(spacing: 2) {
+                                    Text("共\(count)条新通知")
+                                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                    HStack(spacing: -3) {
+                                        ForEach(0 ..< users.count, id: \.self) { index in
+                                            let user = users[index]
+                                            PostAuthorAvatarView(name: user.attributes.displayName, url: user.avatarURL, size: 18)
+                                                .mask(Circle())
+                                                .overlay(Circle().stroke(Color.white, lineWidth: 0.5))
+                                        }
+                                    }
+                                }
+                                HStack {
+                                    Text(viewModel.latestNotificationTitle ?? "暂无通知标题")
+                                        .lineLimit(1)
+                                        .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                    Text(latestNotificationCreatedDateDescription)
+                                        .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                        .fixedSize(horizontal: true, vertical: true)
+                                }
+                            }
+                            .foregroundColor(Color(rgba: "#045FA1"))
+                            if notifications.first?.attributes.contentType != .badgeReceived {
+                                Text(viewModel.latestNotificationExcerpt ?? "暂无内容预览")
+                                    .animation(nil)
+                                    .font(.system(size: 12, weight: .regular, design: .rounded))
+                                    .lineLimit(3)
+                                    .foregroundColor(.black)
+                                    .multilineTextAlignment(.leading)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                        }
+                        Spacer(minLength: 0)
+                        Button {
+                            withAnimation {
+                                viewModel.hideNotification = true
+                            }
+                        } label: {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 15, weight: .medium, design: .rounded))
+                                .foregroundColor(Color(rgba: "#265A9A"))
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 8)
+                    .background(
+                        Color(rgba: "#C8E0F2")
+                    )
+                    .mask(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    .padding(.horizontal)
+                }
             }
         }
     }
@@ -691,7 +725,7 @@ private struct HomePostCardView: View {
                     .lineLimit(Int.max)
                     .truncationMode(.tail)
                     .font(.system(size: 12, weight: .regular, design: .rounded))
-                    .frame(maxWidth: .infinity, alignment: .topLeading)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
 
                 HStack(spacing: 4) {
                     Spacer(minLength: 0)
