@@ -50,7 +50,7 @@ struct ProfileCenterPostView: View {
                                 Circle()
                                     .fill(.gray)
                                     .frame(width: 8, height: 8)
-                                Text("\(user.lastSeenAtDateDescription)在线")
+                                Text(user.lastSeenAtDateDescription)
                                     .font(.system(size: 12, weight: .regular, design: .rounded))
                                     .foregroundColor(.primary.opacity(0.7))
                             }

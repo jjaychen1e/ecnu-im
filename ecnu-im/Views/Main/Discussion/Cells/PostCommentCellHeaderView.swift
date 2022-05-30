@@ -65,7 +65,7 @@ struct PostCommentCellHeaderView: View {
                                 Circle()
                                     .fill(.gray)
                                     .frame(width: 8, height: 8)
-                                Text("\(author.lastSeenAtDateDescription)在线")
+                                Text(author.lastSeenAtDateDescription)
                                     .font(.system(size: 12, weight: .regular, design: .rounded))
                                     .foregroundColor(.primary.opacity(0.7))
                             }

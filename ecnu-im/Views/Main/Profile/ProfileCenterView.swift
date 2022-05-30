@@ -380,7 +380,7 @@ private struct ProfileCenterViewHeader: View {
                             Circle()
                                 .fill(.gray)
                                 .frame(width: 12, height: 12)
-                            Text("\(user.lastSeenAtDateDescription)在线")
+                            Text(user.lastSeenAtDateDescription)
                                 .font(.system(size: 13, weight: .medium, design: .rounded))
                                 .foregroundColor(.primary.opacity(0.7))
                         }

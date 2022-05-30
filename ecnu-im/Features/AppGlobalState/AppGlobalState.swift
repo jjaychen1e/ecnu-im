@@ -141,6 +141,8 @@ class AppGlobalState: ObservableObject {
                     }
                 }
                 return true
+            } else if let error = try? result.map(FlarumAPIErrorModel.self) {
+                debugPrint(error)
             } else {
                 debugExecution {
                     print(String(data: result.data, encoding: .utf8) ?? "failed")
@@ -148,7 +150,9 @@ class AppGlobalState: ObservableObject {
                 }
             }
         }
-        hasTriedToLogin = true
+        DispatchQueue.main.async {
+            self.hasTriedToLogin = true
+        }
         return false
     }
 

@@ -84,9 +84,9 @@ extension FlarumUser {
 
     var lastSeenAtDateDescription: String {
         if let date = attributes.lastSeenAtDate {
-            return date.localeDescription
+            return "\(date.localeDescription)在线"
         } else {
-            return "Unknown"
+            return "未公布在线状态"
         }
     }
 
