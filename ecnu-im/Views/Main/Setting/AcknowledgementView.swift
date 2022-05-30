@@ -45,7 +45,7 @@ struct AcknowledgementView: View {
                         HrefLabel(href: "https://github.com/Alamofire/Alamofire", text: "@Alamofire/Alamofire")
                         HrefLabel(href: "https://github.com/SwiftyJSON/SwiftyJSON", text: "@SwiftJSON/SwiftyJSON")
                         HrefLabel(href: "https://github.com/yeahdongcn/UIColor-Hex-Swift", text: "@yeahdongcn/UIColor-Hex-Swift")
-                        HrefLabel(href: "https://github.com/thii/FontAwesome.swift", text: "@thii/Alamofire")
+                        HrefLabel(href: "https://github.com/thii/FontAwesome.swift", text: "@thii/FontAwesome")
                         HrefLabel(href: "https://github.com/onevcat/Kingfisher", text: "@onevcat/Kingfisher")
                         HrefLabel(href: "https://github.com/globulus/swiftui-pull-to-refresh", text: "@globulus/swiftui-pull-to-refresh")
                         HrefLabel(href: "https://github.com/sharplet/Regex", text: "@sharplet/Regex")
