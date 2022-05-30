@@ -42,19 +42,9 @@ extension Optional: RawRepresentable where Wrapped: Codable {
 
 class AppGlobalState: ObservableObject {
     @AppStorage("account") private(set) var account: Account? = nil
-    @AppStorage("blockCompletely") private var internalBlockCompletely = false {
-        didSet {
-            blockCompletely = internalBlockCompletely
-        }
-    }
 
-    @Published var blockCompletely = false {
-        didSet {
-            if blockCompletely != internalBlockCompletely {
-                internalBlockCompletely = blockCompletely
-            }
-        }
-    }
+    public var blockCompletely: CurrentValueSubject<Bool, Never>
+    public var themeStyleOption: CurrentValueSubject<ThemeStyleOption, Never>
 
     @Published var unreadNotificationCount = 0
     @Published var userInfo: FlarumUser?
@@ -90,6 +80,41 @@ class AppGlobalState: ObservableObject {
     static let shared = AppGlobalState()
 
     init() {
+        blockCompletely = CurrentValueSubject<Bool, Never>(UserDefaults.standard.bool(forKey: "blockCompletely"))
+        themeStyleOption = {
+            if let rawString = UserDefaults.standard.string(forKey: "themeStyleOption"),
+               let themeStyleOption = ThemeStyleOption(rawValue: rawString) {
+                return CurrentValueSubject<ThemeStyleOption, Never>(themeStyleOption)
+            } else {
+                return CurrentValueSubject<ThemeStyleOption, Never>(.auto)
+            }
+        }()
+
+        blockCompletely.sink { value in
+            UserDefaults.standard.set(value, forKey: "blockCompletely")
+            self.objectWillChange.send()
+        }
+        .store(in: &subscriptions)
+        themeStyleOption.sink { value in
+            switch value {
+            case .auto:
+                UIApplication.shared.sceneWindows.forEach { window in
+                    window.overrideUserInterfaceStyle = .unspecified
+                }
+            case .light:
+                UIApplication.shared.sceneWindows.forEach { window in
+                    window.overrideUserInterfaceStyle = .light
+                }
+            case .dark:
+                UIApplication.shared.sceneWindows.forEach { window in
+                    window.overrideUserInterfaceStyle = .dark
+                }
+            }
+            UserDefaults.standard.set(value.rawValue, forKey: "themeStyleOption")
+            self.objectWillChange.send()
+        }
+        .store(in: &subscriptions)
+
         emailVerificationEvent.sink { _ in
             Task {
                 await self.tryToLoginWithStoredAccount()

@@ -170,7 +170,7 @@ final class PostCommentCell: UITableViewCell {
             footerViewHostingVC.rootView.update(discussion: discussion, post: post, replyAction: replyPostAction, editAction: editAction, hidePostAction: hidePostAction, deletePostAction: deletePostAction)
             footerViewHostingVC.rootView.update(vc: viewController)
 
-            AppGlobalState.shared.$ignoredUserIds.combineLatest(AppGlobalState.shared.$blockCompletely).sink { [weak self] ignoredUserIds, blockCompletely in
+            AppGlobalState.shared.$ignoredUserIds.combineLatest(AppGlobalState.shared.blockCompletely).sink { [weak self] ignoredUserIds, blockCompletely in
                 if let self = self {
                     let ignored: Bool
                     if let authorId = self.post?.author?.id, ignoredUserIds.contains(authorId) {

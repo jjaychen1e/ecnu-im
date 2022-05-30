@@ -17,7 +17,7 @@ private struct DimmedOverlay: ViewModifier {
             return 1.0
         }
 
-        if ignored, appGlobalState.blockCompletely {
+        if ignored, appGlobalState.blockCompletely.value {
             return 0.0
         }
         

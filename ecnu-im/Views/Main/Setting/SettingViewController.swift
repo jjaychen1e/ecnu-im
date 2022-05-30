@@ -5,6 +5,7 @@
 //  Created by 陈俊杰 on 2022/4/3.
 //
 
+import Combine
 import SnapKit
 import SwiftUI
 import UIKit
@@ -23,8 +24,8 @@ private struct HeaderItem: Hashable {
 private enum RowType {
     case navigation(action: () -> Void)
     case action(action: (_ sender: UIView) -> Void)
-    case toggle(action: (Bool) -> Void)
-    case segmentedControl(actions: [UIAction])
+    case toggle(action: (Bool) -> Void, publisher: AnyPublisher<Bool, Never>)
+    case segmentedControl(actions: [UIAction], publisher: AnyPublisher<Int, Never>)
 
     // TODO: drop down
 }
@@ -71,10 +72,55 @@ private struct RowItem: Hashable {
     }
 }
 
-private enum ThemeOption: String, CaseIterable {
+enum ThemeStyleOption: String, CaseIterable, RawRepresentable {
     case auto = "自动"
     case light = "浅色"
     case dark = "深色"
+}
+
+private class MyUISwitch: UISwitch {
+    var subscriptions: Set<AnyCancellable> = []
+
+    convenience init(action: @escaping (Bool) -> Void, publisher: AnyPublisher<Bool, Never>) {
+        self.init(frame: .zero, primaryAction: .init(handler: { uiAction in
+            if let uiSwitch = uiAction.sender as? UISwitch {
+                action(uiSwitch.isOn)
+            }
+        }))
+
+        publisher.sink { [weak self] value in
+            if let self = self {
+                if self.isOn != value {
+                    self.isOn = value
+                    self.enumerateEventHandlers { action, _, _, _ in
+                        if let action = action {
+                            self.sendAction(action)
+                        }
+                    }
+                }
+            }
+        }
+        .store(in: &subscriptions)
+    }
+}
+
+private class MyUISegmentedControl: UISegmentedControl {
+    var subscriptions: Set<AnyCancellable> = []
+
+    convenience init(actions: [UIAction], publisher: AnyPublisher<Int, Never>) {
+        self.init(frame: .zero, actions: actions)
+
+        publisher.sink { [weak self] value in
+            if let self = self {
+                if self.selectedSegmentIndex != value,
+                   let action = self.actionForSegment(at: value) {
+                    self.selectedSegmentIndex = value
+                    self.sendAction(action)
+                }
+            }
+        }
+        .store(in: &subscriptions)
+    }
 }
 
 private typealias DataSource = UICollectionViewDiffableDataSource<HeaderItem, ListItem>
@@ -165,14 +211,10 @@ class SettingViewController: UIViewController, HasNavigationPermission {
                 configuration.imageProperties.tintColor = .tintColor
                 configuration.imageProperties.maximumSize = .init(width: Self.iconImageSize, height: Self.iconImageSize)
             }
-            let switchView = UISwitch(frame: .zero, primaryAction: .init(handler: { action in
-                if let uiSwitch = action.sender as? UISwitch {
-                    if case let .toggle(action) = item.type {
-                        action(uiSwitch.isOn)
-                    }
-                }
-            }))
-            cell.accessories = [.customView(configuration: .init(customView: switchView, placement: .trailing()))]
+            if case let .toggle(action, publisher) = item.type {
+                let switchView = MyUISwitch(action: action, publisher: publisher)
+                cell.accessories = [.customView(configuration: .init(customView: switchView, placement: .trailing()))]
+            }
             cell.contentConfiguration = configuration
         }
 
@@ -187,12 +229,8 @@ class SettingViewController: UIViewController, HasNavigationPermission {
                 configuration.imageProperties.tintColor = .tintColor
                 configuration.imageProperties.maximumSize = .init(width: Self.iconImageSize, height: Self.iconImageSize)
             }
-            if case let .segmentedControl(actions) = item.type {
-                let segmentedControl: UISegmentedControl = .init(
-                    frame: .zero,
-                    actions: actions
-                )
-                segmentedControl.selectedSegmentIndex = 0
+            if case let .segmentedControl(actions, publisher) = item.type {
+                let segmentedControl = MyUISegmentedControl(actions: actions, publisher: publisher)
                 segmentedControl.sizeToFit()
                 cell.accessories = [.customView(configuration: .init(customView: segmentedControl, placement: .trailing(), reservedLayoutWidth: .actual))]
             }
@@ -237,8 +275,10 @@ class SettingViewController: UIViewController, HasNavigationPermission {
         modelObjects = [
             HeaderItem(title: "论坛", rowItems: [
                 RowItem(type: .toggle(action: { value in
-                    AppGlobalState.shared.blockCompletely = value
-                }), icon: .system(name: "person.crop.circle.badge.minus"), label: "完全隐藏屏蔽用户"),
+                                          AppGlobalState.shared.blockCompletely.send(value)
+                                      },
+                                      publisher: AppGlobalState.shared.blockCompletely.eraseToAnyPublisher()),
+                        icon: .system(name: "person.crop.circle.badge.minus"), label: "完全隐藏屏蔽用户"),
                 RowItem(type: .action(action: { sender in
                     if let url = URL(string: URLService.link(href: "https://ecnu.im/p/2-FAQ").url) {
                         UIApplication.shared.open(url)
@@ -261,26 +301,16 @@ class SettingViewController: UIViewController, HasNavigationPermission {
                 }), icon: .system(name: "safari"), label: "网页版论坛"),
             ]),
             HeaderItem(title: "样式", rowItems: [
-                RowItem(type: .segmentedControl(actions: ThemeOption.allCases.map { option in
-                    UIAction(title: option.rawValue) { _ in
-                        switch option {
-                        case .auto:
-                            UIApplication.shared.sceneWindows.forEach { window in
-                                window.overrideUserInterfaceStyle = .unspecified
+                RowItem(type: .segmentedControl(actions: ThemeStyleOption.allCases.map { option in
+                            UIAction(title: option.rawValue) { _ in
+                                AppGlobalState.shared.themeStyleOption.send(option)
                             }
-                        case .light:
-                            UIApplication.shared.sceneWindows.forEach { window in
-                                window.overrideUserInterfaceStyle = .light
-                            }
-                        case .dark:
-                            UIApplication.shared.sceneWindows.forEach { window in
-                                window.overrideUserInterfaceStyle = .dark
-                            }
-                        }
-                    }
-                }),
-                icon: .system(name: "moon.stars"),
-                label: "主题"),
+                        },
+                        publisher: AppGlobalState.shared.themeStyleOption
+                            .map { value -> Int in ThemeStyleOption.allCases.firstIndex(of: value)! }
+                            .eraseToAnyPublisher()),
+                        icon: .system(name: "moon.stars"),
+                        label: "主题"),
             ]),
             HeaderItem(title: "小功能", rowItems: [
                 RowItem(type: .action(action: { sender in
