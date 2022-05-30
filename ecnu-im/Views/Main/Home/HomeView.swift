@@ -59,6 +59,8 @@ struct HomeView: View {
     @State private var loadTasks: [Task<Void, Never>] = []
 
     @State var hasScrolled = false
+    
+    @State var isSendingEmail = false
 
     @ObservedObject var appGlobalState = AppGlobalState.shared
 
@@ -361,22 +363,69 @@ struct HomeView: View {
 
     @ViewBuilder
     func emailConfirmNotification() -> some View {
-        if appGlobalState.userInfo?.isEmailConfirmed == false {
+        if appGlobalState.userInfo?.isEmailConfirmed == false, let email = appGlobalState.userInfo?.attributes.email {
             Button {
                 EmailVerificationViewController.show()
             } label: {
                 HStack {
                     Image(systemName: "envelope.badge")
-                        .font(.system(size: 20, weight: .medium, design: .rounded))
+                        .font(.system(size: 20, weight: .semibold, design: .rounded))
                         .foregroundColor(Color(rgba: "#265A9A"))
-                    VStack(alignment: .leading, spacing: 4) {
+                    VStack(alignment: .trailing, spacing: 4) {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("邮箱尚未验证")
                                 .font(.system(size: 14, weight: .semibold, design: .rounded))
-                            Text("点击此处打开腾讯企业邮箱")
+                            Text("账号激活邮件已发送至\(email)(若未收到请检查垃圾箱)。")
                                 .font(.system(size: 14, weight: .regular, design: .rounded))
+                                .multilineTextAlignment(.leading)
                         }
                         .foregroundColor(.primary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        HStack {
+                            Text("打开腾讯企业邮箱")
+                                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                .foregroundColor(.primary)
+                            Spacer(minLength: 0)
+                            Button {
+                                if let idStr = appGlobalState.userInfo?.id,
+                                   let id = Int(idStr) {
+                                    Task {
+                                        isSendingEmail = true
+                                        if let response = try? await flarumProvider.request(.sendEmailConfirmation(userId: id)) {
+                                            isSendingEmail = false
+                                            if response.statusCode == 204 {
+                                                DispatchQueue.main.async {
+                                                    let toast = Toast.default(
+                                                        icon: .emoji("🎉"),
+                                                        title: "重新发送成功"
+                                                    )
+                                                    toast.show()
+                                                    DispatchQueue.main.asyncAfter(deadline: .now()) {
+                                                        let alertController = UIAlertController(title: "注意", message: "激活邮件重新发送成功，请登录校园邮箱以激活账号。您想要现在打开腾讯企业邮箱吗？", preferredStyle: .alert)
+                                                        alertController.addAction(UIAlertAction(title: "确定", style: .destructive, handler: { action in
+                                                            EmailVerificationViewController.show()
+                                                        }))
+                                                        alertController.addAction(UIAlertAction(title: "取消", style: .cancel, handler: { action in
+                                                        }))
+                                                        UIApplication.shared.presentOnTop(alertController, animated: true)
+                                                    }
+                                                }
+                                            } else {
+                                                let toast = Toast.default(
+                                                    icon: .emoji("😮"),
+                                                    title: "重新发送失败"
+                                                )
+                                                toast.show()
+                                            }
+                                        }
+                                    }
+                                }
+                            } label: {
+                                Text("重新发送邮件")
+                                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                    .foregroundColor(.primary)
+                            }
+                        }
                     }
                     Spacer(minLength: 0)
                 }
@@ -389,6 +438,16 @@ struct HomeView: View {
                 .mask(RoundedRectangle(cornerRadius: 8, style: .continuous))
                 .padding(.horizontal)
             }
+            .disabled(isSendingEmail)
+            .opacity(isSendingEmail ? 0.5 : 1)
+            .overlay(
+                Group {
+                    if isSendingEmail {
+                        ProgressView()
+                    }
+                },
+                alignment: .center
+            )
         }
     }
 

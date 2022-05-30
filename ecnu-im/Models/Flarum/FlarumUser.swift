@@ -21,6 +21,7 @@ struct FlarumUserAttributes: Codable {
     var discussionCount: Int?
     var ignored: Bool?
     var canBeIgnored: Bool?
+    var email: String?
     var isEmailConfirmed: Bool?
 
     var lastSeenAtDate: Date? {

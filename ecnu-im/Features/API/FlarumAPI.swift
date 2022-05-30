@@ -77,6 +77,7 @@ enum Flarum {
     case ignoreUser(id: Int, ignored: Bool)
     case allBadgeCategories
     case allBadges
+    case sendEmailConfirmation(userId: Int)
 }
 
 extension Flarum: TargetType {
@@ -140,6 +141,8 @@ extension Flarum: TargetType {
             return "api/badge_categories"
         case .allBadges:
             return "api/badges"
+        case let .sendEmailConfirmation(userId):
+            return "api/users/\(userId)/send-confirmation"
         }
     }
 
@@ -199,6 +202,8 @@ extension Flarum: TargetType {
             return .get
         case .allBadges:
             return .get
+        case .sendEmailConfirmation:
+            return .post
         }
     }
 
@@ -384,6 +389,8 @@ extension Flarum: TargetType {
         case .allBadgeCategories:
             return .requestPlain
         case .allBadges:
+            return .requestPlain
+        case .sendEmailConfirmation:
             return .requestPlain
         }
     }
