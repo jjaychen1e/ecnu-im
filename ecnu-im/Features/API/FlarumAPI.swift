@@ -58,6 +58,7 @@ enum Flarum {
                         pageItemLimit: Int = 20)
     case discussionByUserAccount(includes: Set<DiscussionIncludeOption> = DiscussionIncludeOption.profileDiscussionIncludeOptionSet,
                                  account: String, offset: Int, limit: Int, sort: DiscussionSortOption = .newest)
+    case discussionLastRead(discussionId: Int, postNumber: Int)
     case hidePost(id: Int, isHidden: Bool)
     case deletePost(id: Int)
     case posts(discussionID: Int, offset: Int, limit: Int)
@@ -103,6 +104,8 @@ extension Flarum: TargetType {
             return "/api/discussions"
         case .discussionByUserAccount:
             return "/api/discussions"
+        case let .discussionLastRead(discussionId, _):
+            return "/api/discussions/\(discussionId)"
         case let .hidePost(id, _):
             return "/api/posts/\(id)"
         case let .deletePost(id):
@@ -164,6 +167,8 @@ extension Flarum: TargetType {
             return .get
         case .discussionByUserAccount:
             return .get
+        case .discussionLastRead:
+            return .patch
         case .hidePost:
             return .patch
         case .deletePost:
@@ -267,6 +272,16 @@ extension Flarum: TargetType {
                 "page[limit]": limit,
                 "sort": sort.rawValue,
             ], encoding: URLEncoding.default)
+        case let .discussionLastRead(discussionId, postNumber):
+            return .requestParameters(parameters: [
+                "data": [
+                    "type": "discussions",
+                    "attributes": [
+                        "lastReadPostNumber": postNumber,
+                    ],
+                    "id": "\(discussionId)",
+                ],
+            ], encoding: JSONEncoding.default)
         case let .hidePost(id, isHidden):
             return .requestParameters(parameters: [
                 "data": [

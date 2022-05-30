@@ -106,6 +106,12 @@ class DiscussionViewController: UIViewController, NoOverlayViewController, HasNa
             setViewHierarchy()
             await loadData(initState: initState)
         }
+        Task {
+            if let id = Int(discussion.id),
+               let lastPostNumber = discussion.lastPost?.attributes?.number {
+                let _ = try? await flarumProvider.request(.discussionLastRead(discussionId: id, postNumber: lastPostNumber))
+            }
+        }
     }
 
     private func setViewHierarchy() {
