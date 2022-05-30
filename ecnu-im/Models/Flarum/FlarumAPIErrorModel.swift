@@ -10,7 +10,7 @@ import Foundation
 struct FlarumAPIErrorDetail: Decodable {
     let status: String
     let code: String
-    let detail: String
+    let detail: String?
 }
 
 struct FlarumAPIErrorModel: Decodable {

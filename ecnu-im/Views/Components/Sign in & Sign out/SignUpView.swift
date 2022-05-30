@@ -236,7 +236,7 @@ struct SignUpView: View {
                                                                                 password: signUpViewModel.password,
                                                                                 recaptcha: next)) {
                         if let error = try? result.map(FlarumAPIErrorModel.self) {
-                            let errorDetail = error.errors.map { $0.detail }.joined(separator: "")
+                            let errorDetail = error.errors.compactMap { $0.detail }.joined(separator: "")
                                 .replacingOccurrences(of: "username ", with: "帐号")
                                 .replacingOccurrences(of: "email ", with: "邮箱")
                                 .replacingOccurrences(of: "nickname ", with: "昵称")
