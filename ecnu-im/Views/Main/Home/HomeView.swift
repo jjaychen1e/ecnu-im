@@ -30,6 +30,8 @@ private class FlarumDiscussionPreviewViewModel: ObservableObject {
 
 private class HomeViewViewModel: ObservableObject {
     @Published var lastSeenUsers: [FlarumUser] = []
+    @Published var recentActiveUsers: [FlarumUser] = []
+    @Published var recentRegisteredUsers: [FlarumUser] = []
     @Published var stickyDiscussions: [FlarumDiscussionPreviewViewModel] = []
     @Published var newestDiscussions: [FlarumDiscussionPreviewViewModel] = []
     @Published var unreadNotifications: (unreadCount: Int, notifications: [FlarumNotification])?
@@ -41,6 +43,8 @@ private class HomeViewViewModel: ObservableObject {
         DispatchQueue.main.async { [weak self] in
             if let self = self {
                 self.lastSeenUsers = []
+                self.recentActiveUsers = []
+                self.recentRegisteredUsers = []
                 self.stickyDiscussions = []
                 self.newestDiscussions = []
                 self.unreadNotifications = nil
@@ -180,6 +184,32 @@ struct HomeView: View {
 
         loadTasks.append(
             Task {
+                if let response = try? await flarumProvider.request(.latestPosts(offset: 30, limit: 0)).flarumResponse() {
+                    guard !Task.isCancelled else { return }
+
+                    let users = response.included.users.unique { $0.id }
+                    withAnimation {
+                        viewModel.recentActiveUsers = users
+                    }
+                }
+            }
+        )
+
+        loadTasks.append(
+            Task {
+                if let response = try? await flarumProvider.request(.recentRegisteredUsers(limit: 20)).flarumResponse() {
+                    guard !Task.isCancelled else { return }
+
+                    let users = response.data.users.unique { $0.id }
+                    withAnimation {
+                        viewModel.recentRegisteredUsers = users
+                    }
+                }
+            }
+        )
+
+        loadTasks.append(
+            Task {
                 if let response = try? await flarumProvider.request(.home),
                    let string = String(data: response.data, encoding: .utf8) {
                     guard !Task.isCancelled else { return }
@@ -311,6 +341,8 @@ struct HomeView: View {
             LazyVStack {
                 emailConfirmNotification()
                 notification()
+                recentRegisteredSection()
+                recentActiveSection()
                 lastSeenSection()
                 stickySection()
                 latestSection()
@@ -557,7 +589,7 @@ struct HomeView: View {
                         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                         .modifier(OutlineOverlay(cornerRadius: 14))
                 }
-                
+
                 Button {
                     if let _ = appGlobalState.userInfo {
                         uiKitEnvironment.vc?.tabController?.select(tab: .profile)
@@ -609,6 +641,66 @@ struct HomeView: View {
                     HStack(spacing: -10) {
                         ForEach(0 ..< viewModel.lastSeenUsers.count, id: \.self) { index in
                             let user = viewModel.lastSeenUsers[index]
+                            PostAuthorAvatarView(name: user.attributes.displayName, url: user.avatarURL, size: 50)
+                                .mask(Circle())
+                                .overlay(Circle().stroke(Color.white, lineWidth: 1))
+                                .onTapGesture {
+                                    UIApplication.shared.presentOnTop(ProfileCenterViewController(userId: user.id), animated: true)
+                                }
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+                }
+                .padding(.vertical, -4)
+            }
+        }
+    }
+
+    @ViewBuilder
+    func recentActiveSection() -> some View {
+        if viewModel.recentActiveUsers.count > 0 {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("最近活跃")
+                    .font(.system(size: 34, weight: .bold, design: .rounded))
+                    .foregroundColor(Asset.SpecialColors.sectionColor.swiftUIColor)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.leading)
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: -10) {
+                        ForEach(0 ..< viewModel.recentActiveUsers.count, id: \.self) { index in
+                            let user = viewModel.recentActiveUsers[index]
+                            PostAuthorAvatarView(name: user.attributes.displayName, url: user.avatarURL, size: 50)
+                                .mask(Circle())
+                                .overlay(Circle().stroke(Color.white, lineWidth: 1))
+                                .onTapGesture {
+                                    UIApplication.shared.presentOnTop(ProfileCenterViewController(userId: user.id), animated: true)
+                                }
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+                }
+                .padding(.vertical, -4)
+            }
+        }
+    }
+
+    @ViewBuilder
+    func recentRegisteredSection() -> some View {
+        if viewModel.recentRegisteredUsers.count > 0 {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("最近注册")
+                    .font(.system(size: 34, weight: .bold, design: .rounded))
+                    .foregroundColor(Asset.SpecialColors.sectionColor.swiftUIColor)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.leading)
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: -10) {
+                        ForEach(0 ..< viewModel.recentRegisteredUsers.count, id: \.self) { index in
+                            let user = viewModel.recentRegisteredUsers[index]
                             PostAuthorAvatarView(name: user.attributes.displayName, url: user.avatarURL, size: 50)
                                 .mask(Circle())
                                 .overlay(Circle().stroke(Color.white, lineWidth: 1))

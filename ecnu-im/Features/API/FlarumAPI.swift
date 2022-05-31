@@ -46,6 +46,11 @@ enum DiscussionSortOption: String, RawRepresentable {
     case mostComment = "-commentCount"
 }
 
+enum PostSortOption: String, RawRepresentable {
+    case newest = "-createdAt"
+    case oldest = "createdAt"
+}
+
 enum Flarum {
     case home
     case token(username: String, password: String)
@@ -61,6 +66,7 @@ enum Flarum {
     case discussionLastRead(discussionId: Int, postNumber: Int)
     case hidePost(id: Int, isHidden: Bool)
     case deletePost(id: Int)
+    case latestPosts(offset: Int, limit: Int)
     case posts(discussionID: Int, offset: Int, limit: Int)
     case postsNearNumber(discussionID: Int, nearNumber: Int, limit: Int)
     case postsById(id: Int, includes: Set<PostIncludeOption> = [.user])
@@ -73,6 +79,7 @@ enum Flarum {
     case notification(offset: Int, limit: Int)
     case readNotifications
     case lastSeenUsers(limit: Int)
+    case recentRegisteredUsers(limit: Int)
     case user(id: Int)
     case userSearch(q: String, offset: Int = 0, limit: Int = 20)
     case ignoreUser(id: Int, ignored: Bool)
@@ -110,6 +117,8 @@ extension Flarum: TargetType {
             return "/api/posts/\(id)"
         case let .deletePost(id):
             return "/api/posts/\(id)"
+        case .latestPosts:
+            return "api/posts"
         case .posts:
             return "/api/posts"
         case .postsNearNumber:
@@ -133,6 +142,8 @@ extension Flarum: TargetType {
         case .readNotifications:
             return "api/notifications/read"
         case .lastSeenUsers:
+            return "api/users"
+        case .recentRegisteredUsers:
             return "api/users"
         case let .user(id):
             return "api/users/\(id)"
@@ -173,6 +184,8 @@ extension Flarum: TargetType {
             return .patch
         case .deletePost:
             return .delete
+        case .latestPosts:
+            return .get
         case .posts:
             return .get
         case .postsNearNumber:
@@ -196,6 +209,8 @@ extension Flarum: TargetType {
         case .readNotifications:
             return .post
         case .lastSeenUsers:
+            return .get
+        case .recentRegisteredUsers:
             return .get
         case .user:
             return .get
@@ -294,6 +309,12 @@ extension Flarum: TargetType {
             ], encoding: JSONEncoding.default)
         case .deletePost:
             return .requestPlain
+        case let .latestPosts(offset, limit):
+            return .requestParameters(parameters: [
+                "page[offset]": max(0, offset),
+                "page[limit]": limit,
+                "sort": PostSortOption.newest.rawValue,
+            ], encoding: URLEncoding.default)
         case let .posts(discussionID, offset, limit):
             return .requestParameters(parameters: [
                 "filter[discussion]": discussionID,
@@ -380,6 +401,12 @@ extension Flarum: TargetType {
         case let .lastSeenUsers(limit):
             return .requestParameters(parameters: [
                 "sort": "-lastSeenAt",
+                "page[offset]": 0,
+                "page[limit]": limit,
+            ], encoding: URLEncoding.default)
+        case let .recentRegisteredUsers(limit):
+            return .requestParameters(parameters: [
+                "sort": "-joinedAt",
                 "page[offset]": 0,
                 "page[limit]": limit,
             ], encoding: URLEncoding.default)
