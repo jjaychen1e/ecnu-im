@@ -132,6 +132,7 @@ struct SignUpView: View {
                 .font(.footnote)
                 .foregroundColor(.primary.opacity(0.7))
                 .accentColor(.primary.opacity(0.7))
+                .padding(.top, 8)
 
             Divider()
 
