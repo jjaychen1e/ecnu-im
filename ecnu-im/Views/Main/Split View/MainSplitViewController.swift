@@ -96,7 +96,12 @@ class MainSplitViewController: UIViewController {
 extension MainSplitViewController {
     func initializeApp() {
         Task {
-            await AppGlobalState.shared.tryToLoginWithStoredAccount()
+            if let _ = AppGlobalState.shared.account {
+                let loadingToast = LoadingToast(hint: "尝试登录中...")
+                loadingToast.show()
+                await AppGlobalState.shared.tryToLoginWithStoredAccount()
+                loadingToast.hide()
+            }
             FlarumBadge.initBadgeInfo()
         }
     }

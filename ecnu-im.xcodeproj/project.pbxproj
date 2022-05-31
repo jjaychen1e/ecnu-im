@@ -87,6 +87,7 @@
 		635FF09627F092B300A0D239 /* GeometryReader+Execute+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 635FF09527F092B300A0D239 /* GeometryReader+Execute+Extension.swift */; };
 		635FF1C42803028D00C7CDBF /* ToastConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 635FF1BC2803028D00C7CDBF /* ToastConfiguration.swift */; };
 		635FF1C92803028D00C7CDBF /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 635FF1C32803028D00C7CDBF /* Toast.swift */; };
+		63618F612845EC2700AA5271 /* LoadingToast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63618F602845EC2700AA5271 /* LoadingToast.swift */; };
 		6365777527F197B5008AD10E /* FontAwesome in Frameworks */ = {isa = PBXBuildFile; productRef = 6365777427F197B5008AD10E /* FontAwesome */; };
 		6365777727F197B5008AD10E /* tools in Frameworks */ = {isa = PBXBuildFile; productRef = 6365777627F197B5008AD10E /* tools */; };
 		6365777C27F19A2F008AD10E /* Font Awesome 5 Brands-Regular-400.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6365777A27F19A2A008AD10E /* Font Awesome 5 Brands-Regular-400.otf */; };
@@ -295,6 +296,7 @@
 		635FF09527F092B300A0D239 /* GeometryReader+Execute+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GeometryReader+Execute+Extension.swift"; sourceTree = "<group>"; };
 		635FF1BC2803028D00C7CDBF /* ToastConfiguration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ToastConfiguration.swift; sourceTree = "<group>"; };
 		635FF1C32803028D00C7CDBF /* Toast.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
+		63618F602845EC2700AA5271 /* LoadingToast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingToast.swift; sourceTree = "<group>"; };
 		6365777927F19A2A008AD10E /* Font Awesome 5 Free-Solid-900.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Font Awesome 5 Free-Solid-900.otf"; sourceTree = "<group>"; };
 		6365777A27F19A2A008AD10E /* Font Awesome 5 Brands-Regular-400.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Font Awesome 5 Brands-Regular-400.otf"; sourceTree = "<group>"; };
 		6365777B27F19A2A008AD10E /* Font Awesome 5 Free-Regular-400.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Font Awesome 5 Free-Regular-400.otf"; sourceTree = "<group>"; };
@@ -670,6 +672,7 @@
 		634C470127F9C17900FC591D /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				63618F5F2845EC0700AA5271 /* Loading Toast */,
 				633A97B42836249C00F9E546 /* Dimmed */,
 				63A6CCCD28156A19000075F7 /* Tag */,
 				63E971FA281185D1003974B6 /* TabBar */,
@@ -819,6 +822,14 @@
 				635FF1C32803028D00C7CDBF /* Toast.swift */,
 			);
 			path = Toast;
+			sourceTree = "<group>";
+		};
+		63618F5F2845EC0700AA5271 /* Loading Toast */ = {
+			isa = PBXGroup;
+			children = (
+				63618F602845EC2700AA5271 /* LoadingToast.swift */,
+			);
+			path = "Loading Toast";
 			sourceTree = "<group>";
 		};
 		6365777827F19A1C008AD10E /* Resources */ = {
@@ -1697,6 +1708,7 @@
 				6349B19127EEABD20002E89A /* APIProvider.swift in Sources */,
 				63C607D7281E4FBB0008E2F3 /* SelfSizingTextView.swift in Sources */,
 				634A57572816EB6E0022B27E /* ContentTextStyleStack.swift in Sources */,
+				63618F612845EC2700AA5271 /* LoadingToast.swift in Sources */,
 				636C450D28276F4200EDE6F5 /* ECNUTextView.swift in Sources */,
 				63E6ED7A283CF0C100E9D01A /* main.swift in Sources */,
 				6380BC09283399B600050AFA /* AlwaysPopoverModifier.swift in Sources */,

@@ -191,6 +191,10 @@ class AppGlobalState: ObservableObject {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     Toast.default(icon: .emoji("🤔"), title: "登录失败", subtitle: "密码可能被修改，请重新登录").show()
                 }
+            } else {
+                DispatchQueue.main.async {
+                    Toast.default(icon: .emoji("🎉"), title: "登录成功").show()
+                }
             }
         }
     }
