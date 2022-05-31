@@ -27,7 +27,10 @@ extension UISplitViewController {
     func push(viewController: UIViewController, column: UISplitViewController.Column, animated: Bool = true, toRoot: Bool = false, ext: [String: Any] = [:]) {
         if let nvc = self.viewController(for: column) as? UINavigationController {
             if let noOverlayVC = viewController as? NoOverlayViewController {
-                if !noOverlayVC.shouldPushTo(nvc: nvc), !noOverlayVC.shouldReactTo(nvc: nvc, ext: ext) { return }
+                if !noOverlayVC.shouldPushTo(nvc: nvc), !noOverlayVC.shouldReactTo(nvc: nvc, ext: ext) {
+                    show(column) // insurance
+                    return
+                }
             }
 
             if let hasNavigationPermission = viewController as? HasNavigationPermission {
@@ -44,7 +47,7 @@ extension UISplitViewController {
                 viewController.navigationItem.scrollEdgeAppearance = UINavigationBarAppearance()
             }
 
-            if traitCollection.horizontalSizeClass == .compact {
+            if isCollapsed {
                 if secondaryNVC == nvc,
                    nvc.viewControllers.count == 0,
                    primaryNVC?.topViewController !== nvc {
@@ -56,7 +59,7 @@ extension UISplitViewController {
             }
 
             if toRoot, nvc === secondaryNVC {
-                if traitCollection.horizontalSizeClass == .compact {
+                if isCollapsed {
                     nvc.viewControllers = [viewController]
                     return
                 } else if let first = nvc.viewControllers.first {
@@ -67,7 +70,7 @@ extension UISplitViewController {
 
             var animated = animated
             if nvc === secondaryNVC,
-               traitCollection.horizontalSizeClass == .regular,
+               !isCollapsed,
                nvc.viewControllers.count == 1 {
                 animated = false
             }
@@ -85,12 +88,11 @@ extension UISplitViewController {
             if nvc === primaryNVC {
                 nvc.popViewController(animated: animated)
             } else if nvc === secondaryNVC {
-                if traitCollection.horizontalSizeClass == .compact,
+                if isCollapsed,
                    nvc.viewControllers.count == 1,
                    let primaryNVC = primaryNVC {
                     // only when in compact mode, since there is no empty view placeholder
                     primaryNVC.popViewController(animated: animated)
-                    nvc.viewControllers = []
                     return
                 }
 
