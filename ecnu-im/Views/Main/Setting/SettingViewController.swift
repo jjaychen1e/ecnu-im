@@ -307,7 +307,7 @@ class SettingViewController: UIViewController, HasNavigationPermission {
                             }
                         },
                         publisher: AppGlobalState.shared.themeStyleOption
-                            .map { value -> Int in ThemeStyleOption.allCases.firstIndex(of: value)! }
+                            .compactMap { value -> Int? in ThemeStyleOption.allCases.firstIndex(of: value) }
                             .eraseToAnyPublisher()),
                         icon: .system(name: "moon.stars"),
                         label: "主题"),
