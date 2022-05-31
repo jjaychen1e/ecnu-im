@@ -59,7 +59,7 @@ struct HomeView: View {
     @State private var loadTasks: [Task<Void, Never>] = []
 
     @State var hasScrolled = false
-    
+
     @State var isSendingEmail = false
 
     @ObservedObject var appGlobalState = AppGlobalState.shared
@@ -90,7 +90,7 @@ struct HomeView: View {
         }
 
         let ids = (viewModel.newestDiscussions + viewModel.stickyDiscussions).compactMap { $0.discussion.lastPost?.id }.compactMap { Int($0) }
-        if let response = try? await flarumProvider.request(.postsByIds(ids: ids)).flarumResponse() {
+        if AppGlobalState.shared.tokenPrepared, let response = try? await flarumProvider.request(.postsByIds(ids: ids)).flarumResponse() {
             let posts = response.data.posts
             for post in posts {
                 if let correspondingDiscussionViewModel = (viewModel.newestDiscussions + viewModel.stickyDiscussions).first(where: { $0.discussion.lastPost?.id == post.id }) {
@@ -535,7 +535,7 @@ struct HomeView: View {
                 .padding(.leading)
                 .padding(.top, 20)
 
-            HStack(spacing: 16) {
+            HStack(spacing: 12) {
                 Button {
                     UIApplication.shared.presentOnTop(SearchViewController(), animated: true)
                 } label: {
@@ -556,6 +556,30 @@ struct HomeView: View {
                         .foregroundColor(.secondary)
                         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                         .modifier(OutlineOverlay(cornerRadius: 14))
+                }
+                
+                Button {
+                    if let _ = appGlobalState.userInfo {
+                        uiKitEnvironment.vc?.tabController?.select(tab: .profile)
+                    } else {
+                        UIApplication.shared.topController()?.presentSignView()
+                    }
+                } label: {
+                    if let user = appGlobalState.userInfo {
+                        PostAuthorAvatarView(name: user.attributes.displayName, url: user.avatarURL, size: 28)
+                            .frame(width: 28, height: 28)
+                            .cornerRadius(10)
+                            .padding(4)
+                            .background(.ultraThinMaterial)
+                            .backgroundStyle(cornerRadius: 18, opacity: 0.4)
+                    } else {
+                        Image(systemName: "person")
+                            .font(.body.weight(.bold))
+                            .frame(width: 36, height: 36)
+                            .foregroundColor(.secondary)
+                            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                            .modifier(OutlineOverlay(cornerRadius: 14))
+                    }
                 }
             }
             .frame(maxWidth: .infinity, alignment: .trailing)

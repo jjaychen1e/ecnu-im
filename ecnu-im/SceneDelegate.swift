@@ -11,6 +11,8 @@ import UIKit
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
 
+    private var lastTimeEnterBackground: Date?
+
     func scene(_ scene: UIScene, willConnectTo _: UISceneSession, options _: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
 
@@ -43,12 +45,27 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneWillEnterForeground(_: UIScene) {
         // Called as the scene transitions from the background to the foreground.
         // Use this method to undo the changes made on entering the background.
+        if let lastTimeEnterBackground = lastTimeEnterBackground {
+            let timeDifferenceInSeconds = Date().timeIntervalSince(lastTimeEnterBackground)
+            self.lastTimeEnterBackground = nil
+            if timeDifferenceInSeconds > 60 * 10 {
+                Task {
+                    if let _ = AppGlobalState.shared.account {
+                        let loadingToast = LoadingToast(hint: "重新登录中...")
+                        loadingToast.show()
+                        await AppGlobalState.shared.tryToLoginWithStoredAccount()
+                        loadingToast.hide()
+                    }
+                }
+            }
+        }
     }
 
     func sceneDidEnterBackground(_: UIScene) {
         // Called as the scene transitions from the foreground to the background.
         // Use this method to save data, release shared resources, and store enough scene-specific state information
         // to restore the scene back to its current state.
+        lastTimeEnterBackground = Date()
     }
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {

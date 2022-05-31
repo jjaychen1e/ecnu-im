@@ -55,12 +55,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
     }
-
-    func applicationWillEnterForeground(_: UIApplication) {
-        Task {
-            await AppGlobalState.shared.tryToLoginWithStoredAccount()
-        }
-    }
 }
 
 extension UIApplication {
@@ -102,7 +96,7 @@ extension UIApplication {
             .interfaceOrientation
             .isLandscape ?? false
     }
-    
+
     var isPortrait: Bool {
         return connectedScenes
             .first(where: { $0 is UIWindowScene })
