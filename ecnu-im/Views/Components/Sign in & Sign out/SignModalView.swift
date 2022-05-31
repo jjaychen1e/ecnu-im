@@ -4,7 +4,7 @@ extension UIViewController {
     func presentSignView() {
         let model = SignViewModel()
         model.selectedPanel = .signIn
-        let hostingVC = UIHostingController(rootView: SignModalView().environmentObject(model))
+        let hostingVC = UIHostingController(rootView: EnvironmentWrapperView(SignModalView().environmentObject(model), splitVC: nil, nvc: nil, vc: self))
         hostingVC.view.isOpaque = false
         hostingVC.view.backgroundColor = .clear
         hostingVC.modalPresentationStyle = .overCurrentContext
