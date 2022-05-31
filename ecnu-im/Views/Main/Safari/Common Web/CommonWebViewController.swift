@@ -31,7 +31,7 @@ class CommonWebViewController: UIViewController, WebControllerDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .black
+        view.backgroundColor = .systemBackground
         let webController = WebController()
         self.webController = webController
         webController.delegate = self
@@ -46,12 +46,21 @@ class CommonWebViewController: UIViewController, WebControllerDelegate {
         webController.progressView.trackTintColor = .white
         webController.progressView.progressTintColor = .black
         webController.indicatorView.color = .white
+        webController.indicatorView.alpha = 0.0
+        webController.webView.isOpaque = false
         webController.navigationItem.rightBarButtonItems = [
             UIBarButtonItem(title: "完成", style: .done, target: self, action: #selector(done)),
             UIBarButtonItem(image: UIImage(systemName: "safari"), style: .plain, target: self, action: #selector(openInSafari)),
         ]
         webController.load(startURL)
         let nvc = UINavigationController(rootViewController: webController)
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = .black
+        nvc.navigationBar.standardAppearance = appearance
+        nvc.navigationBar.scrollEdgeAppearance = appearance
+        nvc.navigationBar.compactAppearance = appearance
+        nvc.navigationBar.compactScrollEdgeAppearance = appearance
         addChildViewController(nvc, addConstrains: true)
     }
 
