@@ -33,7 +33,7 @@ class MainSplitViewController: UIViewController {
     private lazy var primaryViewController = TabController()
 
     private func adjustSplitViewHierarchy() {
-        if UIApplication.shared.statusBarOrientation == .landscapeLeft || UIApplication.shared.statusBarOrientation == .landscapeRight {
+        if UIApplication.shared.isLandscape {
             setOverrideTraitCollection(traitCollection, forChild: mainSplitViewController)
             if traitCollection.horizontalSizeClass == .compact {
                 secondaryNavigationViewController.viewControllers = secondaryNavigationViewController.viewControllers.filter {
@@ -51,7 +51,7 @@ class MainSplitViewController: UIViewController {
                     secondaryNavigationViewController.viewControllers = [emptyViewController] + secondaryNavigationViewController.viewControllers
                 }
             }
-        } else if UIApplication.shared.statusBarOrientation == .portrait || UIApplication.shared.statusBarOrientation == .portraitUpsideDown {
+        } else if UIApplication.shared.isPortrait {
             let tc = UITraitCollection(horizontalSizeClass: .compact)
             setOverrideTraitCollection(tc, forChild: mainSplitViewController)
             secondaryNavigationViewController.viewControllers = secondaryNavigationViewController.viewControllers.filter {

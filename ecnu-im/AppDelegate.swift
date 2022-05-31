@@ -94,4 +94,20 @@ extension UIApplication {
         }
         topController()?.present(viewController, animated: animated)
     }
+
+    var isLandscape: Bool {
+        return connectedScenes
+            .first(where: { $0 is UIWindowScene })
+            .flatMap { $0 as? UIWindowScene }?
+            .interfaceOrientation
+            .isLandscape ?? false
+    }
+    
+    var isPortrait: Bool {
+        return connectedScenes
+            .first(where: { $0 is UIWindowScene })
+            .flatMap { $0 as? UIWindowScene }?
+            .interfaceOrientation
+            .isPortrait ?? false
+    }
 }
