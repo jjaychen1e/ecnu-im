@@ -68,6 +68,7 @@ struct SearchResultPost: View {
                                 .font(.system(size: 13, weight: .light, design: .rounded))
                             Spacer(minLength: 0)
                             DiscussionTagsView(tags: .constant(discussion.tags.mappedTagViewModels), fontSize: 14)
+                                .fixedSize()
                         }
                     }
                 }
