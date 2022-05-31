@@ -184,10 +184,10 @@ struct HomeView: View {
 
         loadTasks.append(
             Task {
-                if let response = try? await flarumProvider.request(.latestPosts(offset: 30, limit: 0)).flarumResponse() {
+                if let response = try? await flarumProvider.request(.latestPosts(offset: 0, limit: 30)).flarumResponse() {
                     guard !Task.isCancelled else { return }
 
-                    let users = response.included.users.unique { $0.id }
+                    let users = response.data.posts.compactMap { $0.relationships?.user }.unique { $0.id }
                     withAnimation {
                         viewModel.recentActiveUsers = users
                     }
