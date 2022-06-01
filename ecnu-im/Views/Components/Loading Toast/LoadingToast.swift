@@ -48,8 +48,10 @@ class LoadingToast {
 private struct LoadingToastView: View {
     @State var hint: String? = nil
 
+    @Environment(\.colorScheme) var colorScheme
+
     var body: some View {
-        Color.primary.opacity(0.3)
+        Color.primary.opacity(colorScheme == .light ? 0.3 : 0.1)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .edgesIgnoringSafeArea(.all)
             .overlay {
@@ -62,7 +64,7 @@ private struct LoadingToastView: View {
                 }
                 .padding(.horizontal, 40)
                 .padding(.vertical, 25)
-                .background(.ultraThinMaterial)
+                .background(.regularMaterial)
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
             .allowsHitTesting(false)
