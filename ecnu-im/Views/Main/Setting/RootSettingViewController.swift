@@ -50,7 +50,7 @@ class RootSettingViewController: SettingViewController {
                         label: "主题"),
                 RowItem(type: .navigation(action: { [weak self] in
                     if let self = self, let splitViewController = self.splitViewController {
-                        splitViewController.push(viewController: HomeConfigureViewController(), column: .secondary)
+                        splitViewController.push(viewController: HomeConfigureViewController(), column: .secondary, toRoot: true)
                     } else {
                         fatalErrorDebug()
                     }
@@ -87,7 +87,7 @@ class RootSettingViewController: SettingViewController {
                         if splitViewController.isCollapsed == true {
                             UIApplication.shared.presentOnTop(vc)
                         } else {
-                            splitViewController.push(viewController: vc, column: .secondary)
+                            splitViewController.push(viewController: vc, column: .secondary, toRoot: true)
                         }
                     } else {
                         fatalErrorDebug()

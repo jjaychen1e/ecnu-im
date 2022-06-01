@@ -312,6 +312,7 @@ class SettingViewController: UIViewController, HasNavigationPermission {
     }
 
     func applyInitialSnapshots() {
+        dataSource.apply(.init())
         for headerItem in modelObjects {
             var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<ListItem>()
 
