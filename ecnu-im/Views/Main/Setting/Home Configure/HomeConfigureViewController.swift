@@ -8,14 +8,27 @@
 import SwiftUI
 import UIKit
 
-class HomeConfigureViewController: SettingViewController, NoOverlayViewController {
+class HomeConfigureViewController: UIViewController, NoOverlayViewController {
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        let vc = NavigationWrappedViewController(viewController: InnerHomeConfigureViewController(), isPresented: isBeingPresented)
+        addChildViewController(vc, addConstrains: true)
+    }
+}
+
+private class InnerHomeConfigureViewController: SettingViewController, NoOverlayViewController {
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        navigationItem.title = "首页模块配置"
+    }
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
         DispatchQueue.main.async { [weak self] in
             if let self = self {
                 self.modelObjects = [
-                    HeaderItem.normal(title: "首页模块配置", rowItems: [
+                    HeaderItem.hidden(rowItems: [
                         RowItem(type: .toggle(action: { value in
                                                   AppGlobalState.shared.showRecentActiveUsers.send(value)
                                               },

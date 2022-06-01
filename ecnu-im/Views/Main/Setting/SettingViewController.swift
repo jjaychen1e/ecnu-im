@@ -32,12 +32,17 @@ struct HeaderItem: Hashable {
     }
 
     static func normal(title: String, rowItems: [RowItem]) -> HeaderItem {
-        HeaderItem(title: title, rowItems: rowItems, type: .normal)
+        HeaderItem(title: title, rowItems: rowItems, type: .title)
+    }
+
+    static func hidden(rowItems: [RowItem]) -> HeaderItem {
+        HeaderItem(title: "", rowItems: rowItems, type: .hidden)
     }
 }
 
 enum HeaderType {
-    case normal
+    case title
+    case hidden
     case collapsible
 }
 
@@ -159,6 +164,7 @@ class SettingViewController: UIViewController, HasNavigationPermission {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .systemGroupedBackground
         setCollectionView()
         applyInitialSnapshots()
         title = ""
@@ -174,6 +180,7 @@ class SettingViewController: UIViewController, HasNavigationPermission {
         listConfiguration.backgroundColor = .systemGroupedBackground
         let layout = UICollectionViewCompositionalLayout.list(using: listConfiguration)
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.backgroundColor = .systemGroupedBackground
         collectionView.delegate = self
         self.collectionView = collectionView
         view.addSubview(collectionView)
@@ -195,12 +202,18 @@ class SettingViewController: UIViewController, HasNavigationPermission {
             cell.accessories = [.outlineDisclosure(options: headerDisclosureOption)]
         }
 
-        let normalHeaderCellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, HeaderItem> {
+        let titleHeaderCellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, HeaderItem> {
             cell, _, headerItem in
             var content = cell.defaultContentConfiguration()
             content.text = headerItem.title
             content.textProperties.color = Asset.DynamicColors.dynamicBlack.color
             content.textProperties.font = .rounded(ofSize: 20, weight: .bold)
+            cell.contentConfiguration = content
+        }
+
+        let hiddenHeaderCellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, HeaderItem> {
+            cell, _, headerItem in
+            let content = UIListContentConfiguration.plainHeader()
             cell.contentConfiguration = content
         }
 
@@ -280,8 +293,12 @@ class SettingViewController: UIViewController, HasNavigationPermission {
                                                                         for: indexPath,
                                                                         item: headerItem)
 
-                case .normal:
-                    cell = collectionView.dequeueConfiguredReusableCell(using: normalHeaderCellRegistration,
+                case .title:
+                    cell = collectionView.dequeueConfiguredReusableCell(using: titleHeaderCellRegistration,
+                                                                        for: indexPath,
+                                                                        item: headerItem)
+                case .hidden:
+                    cell = collectionView.dequeueConfiguredReusableCell(using: hiddenHeaderCellRegistration,
                                                                         for: indexPath,
                                                                         item: headerItem)
                 }

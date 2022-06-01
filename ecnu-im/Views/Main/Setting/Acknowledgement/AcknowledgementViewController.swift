@@ -23,6 +23,7 @@ class AcknowledgementViewController: UIViewController {
             vc: self
         ))
         self.hostingViewController = hostingViewController
-        addChildViewController(hostingViewController, addConstrains: true)
+        let navigationWrappedViewController = NavigationWrappedViewController(viewController: hostingViewController, isPresented: isBeingPresented)
+        addChildViewController(navigationWrappedViewController, addConstrains: true)
     }
 }
