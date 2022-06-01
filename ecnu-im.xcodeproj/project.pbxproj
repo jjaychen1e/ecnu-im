@@ -24,6 +24,11 @@
 		6318B68127F0034500108D49 /* ContentHtmlParserTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6318B68027F0034500108D49 /* ContentHtmlParserTest.swift */; };
 		6318B68827F0113300108D49 /* Date+Description+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6318B68727F0113300108D49 /* Date+Description+Extension.swift */; };
 		6318B68927F0113300108D49 /* Date+Description+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6318B68727F0113300108D49 /* Date+Description+Extension.swift */; };
+		631B9FAD28474114004EE70A /* AcknowledgementViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631B9FAC28474114004EE70A /* AcknowledgementViewController.swift */; };
+		631B9FB328474680004EE70A /* RootSettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631B9FB228474680004EE70A /* RootSettingViewController.swift */; };
+		631B9FB5284746F8004EE70A /* HomeConfigureViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631B9FB4284746F8004EE70A /* HomeConfigureViewController.swift */; };
+		631B9FB728474A9E004EE70A /* View+Snapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631B9FB628474A9E004EE70A /* View+Snapshot.swift */; };
+		631B9FB928475942004EE70A /* UserDefaults+DefaultValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631B9FB828475942004EE70A /* UserDefaults+DefaultValue.swift */; };
 		631BB0342805E4FD007D4138 /* Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631BB0262805E4FD007D4138 /* Storage.swift */; };
 		631BB0352805E4FD007D4138 /* UniversalTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631BB0272805E4FD007D4138 /* UniversalTypes.swift */; };
 		631BB0382805E4FD007D4138 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631BB02C2805E4FD007D4138 /* Extensions.swift */; };
@@ -235,6 +240,11 @@
 		6318B67F27F0034500108D49 /* ecnu.imTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ecnu.imTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		6318B68027F0034500108D49 /* ContentHtmlParserTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentHtmlParserTest.swift; sourceTree = "<group>"; };
 		6318B68727F0113300108D49 /* Date+Description+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Description+Extension.swift"; sourceTree = "<group>"; };
+		631B9FAC28474114004EE70A /* AcknowledgementViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AcknowledgementViewController.swift; sourceTree = "<group>"; };
+		631B9FB228474680004EE70A /* RootSettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootSettingViewController.swift; sourceTree = "<group>"; };
+		631B9FB4284746F8004EE70A /* HomeConfigureViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeConfigureViewController.swift; sourceTree = "<group>"; };
+		631B9FB628474A9E004EE70A /* View+Snapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Snapshot.swift"; sourceTree = "<group>"; };
+		631B9FB828475942004EE70A /* UserDefaults+DefaultValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaults+DefaultValue.swift"; sourceTree = "<group>"; };
 		631BB0262805E4FD007D4138 /* Storage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Storage.swift; sourceTree = "<group>"; };
 		631BB0272805E4FD007D4138 /* UniversalTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UniversalTypes.swift; sourceTree = "<group>"; };
 		631BB02C2805E4FD007D4138 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
@@ -503,6 +513,23 @@
 				6318B68727F0113300108D49 /* Date+Description+Extension.swift */,
 			);
 			path = Extensions;
+			sourceTree = "<group>";
+		};
+		631B9FAE2847447D004EE70A /* Acknowledgement */ = {
+			isa = PBXGroup;
+			children = (
+				63D2A30A28448AF600C48FE8 /* AcknowledgementView.swift */,
+				631B9FAC28474114004EE70A /* AcknowledgementViewController.swift */,
+			);
+			path = Acknowledgement;
+			sourceTree = "<group>";
+		};
+		631B9FAF2847448C004EE70A /* Home Configure */ = {
+			isa = PBXGroup;
+			children = (
+				631B9FB4284746F8004EE70A /* HomeConfigureViewController.swift */,
+			);
+			path = "Home Configure";
 			sourceTree = "<group>";
 		};
 		631BB0252805E4FD007D4138 /* SwiftDown */ = {
@@ -811,6 +838,7 @@
 				63EA3D5828293FD600C774CB /* UIHostingController+sizeThatFits.swift */,
 				63706E1427F6BA9700BE3A48 /* View+ViewDidLoad+Extension.swift */,
 				63B833732836888200BC2EAE /* Color+Dynamic.swift */,
+				631B9FB628474A9E004EE70A /* View+Snapshot.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -870,6 +898,7 @@
 			isa = PBXGroup;
 			children = (
 				6365778527F1D897008AD10E /* UserDefaluts+JSON+Extension.swift */,
+				631B9FB828475942004EE70A /* UserDefaults+DefaultValue.swift */,
 			);
 			path = Extension;
 			sourceTree = "<group>";
@@ -951,8 +980,10 @@
 		637751BB281D15C600A13241 /* Setting */ = {
 			isa = PBXGroup;
 			children = (
+				631B9FAF2847448C004EE70A /* Home Configure */,
+				631B9FAE2847447D004EE70A /* Acknowledgement */,
 				63E8BF0227F9769A0021E4C2 /* SettingViewController.swift */,
-				63D2A30A28448AF600C48FE8 /* AcknowledgementView.swift */,
+				631B9FB228474680004EE70A /* RootSettingViewController.swift */,
 			);
 			path = Setting;
 			sourceTree = "<group>";
@@ -1595,6 +1626,7 @@
 				63EA3D5928293FD600C774CB /* UIHostingController+sizeThatFits.swift in Sources */,
 				6349B19527EEAE2E0002E89A /* String+Network+Extension.swift in Sources */,
 				6380BBFC2833858B00050AFA /* Debug.swift in Sources */,
+				631B9FB928475942004EE70A /* UserDefaults+DefaultValue.swift in Sources */,
 				63706E1527F6BA9700BE3A48 /* View+ViewDidLoad+Extension.swift in Sources */,
 				63EB854E27F2EC1D0064F5A8 /* AvatarView.swift in Sources */,
 				6349B18B27EEAA180002E89A /* TargetType.swift in Sources */,
@@ -1604,6 +1636,7 @@
 				63F6321B2830F76B002623F8 /* KeyboardAppearListener.swift in Sources */,
 				6391FCD52811BB69006E086D /* NoNavigationBarNavigationController.swift in Sources */,
 				63D2A309284489F300C48FE8 /* UIFont+Rounded.swift in Sources */,
+				631B9FAD28474114004EE70A /* AcknowledgementViewController.swift in Sources */,
 				6380BC152833E44500050AFA /* NotificationBadgeView.swift in Sources */,
 				63E8BEFE27F968940021E4C2 /* AppDelegate.swift in Sources */,
 				637751BA281D154700A13241 /* DiscussionHeaderView.swift in Sources */,
@@ -1633,6 +1666,7 @@
 				63DA4FC927F5754300F4FA6E /* ImageBrowser.swift in Sources */,
 				63B3C72F28348F450068701F /* FlarumProfileAnswer.swift in Sources */,
 				63146572282F81CE00484CC9 /* EnvironmentWrapperView.swift in Sources */,
+				631B9FB328474680004EE70A /* RootSettingViewController.swift in Sources */,
 				63E971FE28118AD0003974B6 /* TabController.swift in Sources */,
 				63EABDAF283BE53900A21BE4 /* SearchViewController.swift in Sources */,
 				63B740A12802791700376B94 /* AngularButton.swift in Sources */,
@@ -1642,6 +1676,7 @@
 				637751B8281D145600A13241 /* DiscussionHeaderViewController.swift in Sources */,
 				634A575B2816EC0E0022B27E /* RichText.swift in Sources */,
 				631E59E12813EE7E009A1A94 /* FlarumTag.swift in Sources */,
+				631B9FB5284746F8004EE70A /* HomeConfigureViewController.swift in Sources */,
 				636BE17A27F800DB00283943 /* XCAssets+Generated.swift in Sources */,
 				6314656F282F7E6E00484CC9 /* ProfileCenterViewController.swift in Sources */,
 				63B740AB280279A200376B94 /* BackgroundStyle.swift in Sources */,
@@ -1697,6 +1732,7 @@
 				631BB0342805E4FD007D4138 /* Storage.swift in Sources */,
 				6372548F2805B9F300147D62 /* EditorView.swift in Sources */,
 				635FF09627F092B300A0D239 /* GeometryReader+Execute+Extension.swift in Sources */,
+				631B9FB728474A9E004EE70A /* View+Snapshot.swift in Sources */,
 				632B6249281A32FE0064380C /* ContentItemParagraph.swift in Sources */,
 				633E3F0028129DBC00D6931A /* TabBarContentView.swift in Sources */,
 				63031E242813A5030046F222 /* FlarumResponse.swift in Sources */,

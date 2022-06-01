@@ -45,6 +45,9 @@ class AppGlobalState: ObservableObject {
 
     public var blockCompletely: CurrentValueSubject<Bool, Never>
     public var themeStyleOption: CurrentValueSubject<ThemeStyleOption, Never>
+    public var showRecentActiveUsers: CurrentValueSubject<Bool, Never>
+    public var showRecentOnlineUsers: CurrentValueSubject<Bool, Never>
+    public var showRecentRegisteredUsers: CurrentValueSubject<Bool, Never>
 
     @Published var unreadNotificationCount = 0
     @Published var userInfo: FlarumUser?
@@ -80,6 +83,14 @@ class AppGlobalState: ObservableObject {
     static let shared = AppGlobalState()
 
     init() {
+        UserDefaults.standard.setValuesForKeys([
+            "blockCompletely": false,
+            "themeStyleOption": ThemeStyleOption.auto.rawValue,
+            "showRecentActiveUsers": true,
+            "showRecentOnlineUsers": false,
+            "showRecentRegisteredUsers": false,
+        ])
+
         blockCompletely = CurrentValueSubject<Bool, Never>(UserDefaults.standard.bool(forKey: "blockCompletely"))
         themeStyleOption = {
             if let rawString = UserDefaults.standard.string(forKey: "themeStyleOption"),
@@ -89,13 +100,16 @@ class AppGlobalState: ObservableObject {
                 return CurrentValueSubject<ThemeStyleOption, Never>(.auto)
             }
         }()
+        showRecentActiveUsers = CurrentValueSubject<Bool, Never>(UserDefaults.standard.bool(forKey: "showRecentActiveUsers"))
+        showRecentOnlineUsers = CurrentValueSubject<Bool, Never>(UserDefaults.standard.bool(forKey: "showRecentOnlineUsers"))
+        showRecentRegisteredUsers = CurrentValueSubject<Bool, Never>(UserDefaults.standard.bool(forKey: "showRecentRegisteredUsers"))
 
-        blockCompletely.sink { value in
+        blockCompletely.removeDuplicates().sink { value in
             UserDefaults.standard.set(value, forKey: "blockCompletely")
             self.objectWillChange.send()
         }
         .store(in: &subscriptions)
-        themeStyleOption.sink { value in
+        themeStyleOption.removeDuplicates().sink { value in
             switch value {
             case .auto:
                 UIApplication.shared.sceneWindows.forEach { window in
@@ -111,6 +125,24 @@ class AppGlobalState: ObservableObject {
                 }
             }
             UserDefaults.standard.set(value.rawValue, forKey: "themeStyleOption")
+            self.objectWillChange.send()
+        }
+        .store(in: &subscriptions)
+
+        showRecentActiveUsers.removeDuplicates().sink { value in
+            UserDefaults.standard.set(value, forKey: "showRecentActiveUsers")
+            self.objectWillChange.send()
+        }
+        .store(in: &subscriptions)
+
+        showRecentOnlineUsers.removeDuplicates().sink { value in
+            UserDefaults.standard.set(value, forKey: "showRecentOnlineUsers")
+            self.objectWillChange.send()
+        }
+        .store(in: &subscriptions)
+
+        showRecentRegisteredUsers.removeDuplicates().sink { value in
+            UserDefaults.standard.set(value, forKey: "showRecentRegisteredUsers")
             self.objectWillChange.send()
         }
         .store(in: &subscriptions)

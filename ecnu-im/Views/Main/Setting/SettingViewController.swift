@@ -10,18 +10,38 @@ import SnapKit
 import SwiftUI
 import UIKit
 
-private enum ListItem: Hashable {
+enum ListItem: Hashable {
     case header(HeaderItem)
     case rowItem(RowItem)
 }
 
 // Header cell data type
-private struct HeaderItem: Hashable {
+struct HeaderItem: Hashable {
     let title: String
     let rowItems: [RowItem]
+    let type: HeaderType
+
+    init(title: String, rowItems: [RowItem], type: HeaderType = .collapsible) {
+        self.title = title
+        self.rowItems = rowItems
+        self.type = type
+    }
+
+    static func collapsible(title: String, rowItems: [RowItem]) -> HeaderItem {
+        HeaderItem(title: title, rowItems: rowItems, type: .collapsible)
+    }
+
+    static func normal(title: String, rowItems: [RowItem]) -> HeaderItem {
+        HeaderItem(title: title, rowItems: rowItems, type: .normal)
+    }
 }
 
-private enum RowType {
+enum HeaderType {
+    case normal
+    case collapsible
+}
+
+enum RowType {
     case navigation(action: () -> Void)
     case action(action: (_ sender: UIView) -> Void)
     case toggle(action: (Bool) -> Void, publisher: AnyPublisher<Bool, Never>)
@@ -30,9 +50,9 @@ private enum RowType {
     // TODO: drop down
 }
 
-private enum RowIcon {
+enum RowIcon {
     case system(name: String, color: UIColor? = nil)
-    case uiImage(uiImage: UIImage, color: UIColor? = nil)
+    case uiImage(uiImage: UIImage, color: UIColor? = Asset.DynamicColors.dynamicBlack.color)
     case image(name: String, color: UIColor? = nil)
 
     func toUIImage() -> UIImage? {
@@ -42,12 +62,16 @@ private enum RowIcon {
         case let .system(name, color):
             return UIImage(systemName: name)?.withTintColor(color ?? Asset.DynamicColors.dynamicBlack.color).withRenderingMode(.alwaysOriginal)
         case let .uiImage(uiImage, color):
-            return uiImage.withTintColor(color ?? Asset.DynamicColors.dynamicBlack.color)
+            if let color = color {
+                return uiImage.withTintColor(color)
+            } else {
+                return uiImage
+            }
         }
     }
 }
 
-private struct RowItem: Hashable {
+struct RowItem: Hashable {
     private let id = UUID()
     let type: RowType
     let icon: RowIcon?
@@ -91,7 +115,7 @@ private class MyUISwitch: UISwitch {
         publisher.sink { [weak self] value in
             if let self = self {
                 if self.isOn != value {
-                    self.isOn = value
+                    self.setOn(value, animated: true)
                     self.enumerateEventHandlers { action, _, _, _ in
                         if let action = action {
                             self.sendAction(action)
@@ -126,7 +150,7 @@ private class MyUISegmentedControl: UISegmentedControl {
 private typealias DataSource = UICollectionViewDiffableDataSource<HeaderItem, ListItem>
 
 class SettingViewController: UIViewController, HasNavigationPermission {
-    private var modelObjects: [HeaderItem]!
+    var modelObjects: [HeaderItem] = []
     private var collectionView: UICollectionView!
     private lazy var dataSource = makeDataSource()
     private lazy var allDiscussionViewController = AllDiscussionsViewController()
@@ -159,7 +183,7 @@ class SettingViewController: UIViewController, HasNavigationPermission {
     }
 
     private func makeDataSource() -> DataSource {
-        let headerCellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, HeaderItem> {
+        let collapsibleHeaderCellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, HeaderItem> {
             cell, _, headerItem in
             var content = cell.defaultContentConfiguration()
             content.text = headerItem.title
@@ -169,6 +193,15 @@ class SettingViewController: UIViewController, HasNavigationPermission {
 
             let headerDisclosureOption = UICellAccessory.OutlineDisclosureOptions(style: .header)
             cell.accessories = [.outlineDisclosure(options: headerDisclosureOption)]
+        }
+
+        let normalHeaderCellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, HeaderItem> {
+            cell, _, headerItem in
+            var content = cell.defaultContentConfiguration()
+            content.text = headerItem.title
+            content.textProperties.color = Asset.DynamicColors.dynamicBlack.color
+            content.textProperties.font = .rounded(ofSize: 20, weight: .bold)
+            cell.contentConfiguration = content
         }
 
         let itemNavigationCellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, RowItem> {
@@ -241,10 +274,17 @@ class SettingViewController: UIViewController, HasNavigationPermission {
             var cell: UICollectionViewCell?
             switch listItem {
             case let .header(headerItem):
-                cell = collectionView.dequeueConfiguredReusableCell(using: headerCellRegistration,
-                                                                    for: indexPath,
-                                                                    item: headerItem)
+                switch headerItem.type {
+                case .collapsible:
+                    cell = collectionView.dequeueConfiguredReusableCell(using: collapsibleHeaderCellRegistration,
+                                                                        for: indexPath,
+                                                                        item: headerItem)
 
+                case .normal:
+                    cell = collectionView.dequeueConfiguredReusableCell(using: normalHeaderCellRegistration,
+                                                                        for: indexPath,
+                                                                        item: headerItem)
+                }
             case let .rowItem(item):
                 switch item.type {
                 case .navigation:
@@ -271,98 +311,7 @@ class SettingViewController: UIViewController, HasNavigationPermission {
         }
     }
 
-    private func applyInitialSnapshots() {
-        modelObjects = [
-            HeaderItem(title: "论坛", rowItems: [
-                RowItem(type: .toggle(action: { value in
-                                          AppGlobalState.shared.blockCompletely.send(value)
-                                      },
-                                      publisher: AppGlobalState.shared.blockCompletely.eraseToAnyPublisher()),
-                        icon: .system(name: "person.crop.circle.badge.minus"), label: "完全隐藏屏蔽用户"),
-                RowItem(type: .action(action: { sender in
-                    if let url = URL(string: URLService.link(href: "https://ecnu.im/p/2-FAQ").url) {
-                        UIApplication.shared.open(url)
-                    }
-                }), icon: .system(name: "questionmark.circle"), label: "论坛常见问题"),
-                RowItem(type: .action(action: { sender in
-                    if let url = URL(string: URLService.link(href: "https://ecnu.im/d/287").url) {
-                        UIApplication.shared.open(url)
-                    }
-                }), icon: .system(name: "newspaper"), label: "论坛守则"),
-                RowItem(type: .action(action: { sender in
-                    if let url = URL(string: URLService.link(href: "https://discord.gg/a9NBjHwBEQ").url) {
-                        UIApplication.shared.open(url)
-                    }
-                }), icon: .uiImage(uiImage: Asset.Icons.discord.image), label: "Discord 小组"),
-                RowItem(type: .action(action: { sender in
-                    if let url = URL(string: URLService.link(href: "https://ecnu.im").url) {
-                        UIApplication.shared.open(url)
-                    }
-                }), icon: .system(name: "safari"), label: "网页版论坛"),
-            ]),
-            HeaderItem(title: "样式", rowItems: [
-                RowItem(type: .segmentedControl(actions: ThemeStyleOption.allCases.map { option in
-                            UIAction(title: option.rawValue) { _ in
-                                AppGlobalState.shared.themeStyleOption.send(option)
-                            }
-                        },
-                        publisher: AppGlobalState.shared.themeStyleOption
-                            .compactMap { value -> Int? in ThemeStyleOption.allCases.firstIndex(of: value) }
-                            .eraseToAnyPublisher()),
-                        icon: .system(name: "moon.stars"),
-                        label: "主题"),
-            ]),
-            HeaderItem(title: "小功能", rowItems: [
-                RowItem(type: .action(action: { sender in
-                    if let url = URL(string: URLService.link(href: "https://u-office.ecnu.edu.cn/xiaoli/").url) {
-                        UIApplication.shared.open(url)
-                    }
-                }), icon: .system(name: "calendar"), label: "校历"),
-                RowItem(type: .action(action: { sender in
-                    if let url = URL(string: URLService.link(href: "http://www.ecard.ecnu.edu.cn/").url) {
-                        UIApplication.shared.open(url)
-                    }
-                }), icon: .system(name: "creditcard"), label: "校园卡中心"),
-                RowItem(type: .action(action: { sender in
-                    Toast.default(icon: .emoji("👀"), title: "尚未支持").show()
-                }), icon: .system(name: "calendar.badge.plus"), label: "导入课表至日历"),
-            ]),
-            HeaderItem(title: "其他", rowItems: [
-                RowItem(type: .action(action: { sender in
-                    if let url = URL(string: URLService.link(href: "https://github.com/JJAYCHEN1e/ecnu-im").url) {
-                        UIApplication.shared.open(url)
-                    }
-                }), icon: .system(name: "chevron.left.forwardslash.chevron.right"), label: "GitHub 仓库"),
-                RowItem(type: .action(action: { sender in
-                    UIApplication.shared.presentOnTop(UIHostingController(rootView: AcknowledgementView()))
-                }), icon: .system(name: "list.bullet.rectangle"), label: "致谢"),
-            ]),
-            HeaderItem(title: "账户", rowItems: [
-                RowItem(type: .action(action: { sender in
-                    if let url = URL(string: URLService.link(href: "https://ecnu.im/settings").url) {
-                        UIApplication.shared.open(url)
-                    }
-                }), icon: .system(name: "person.crop.circle"), label: "修改资料"),
-                RowItem(type: .action(action: { sender in
-                    let alertController = UIAlertController(title: "你确定要退出登录吗", message: nil, preferredStyle: .actionSheet)
-                    alertController.addAction(.init(title: "退出登录", style: .destructive, handler: { _ in
-                        AppGlobalState.shared.logout()
-                    }))
-                    alertController.addAction(.init(title: "取消", style: .cancel, handler: { _ in
-                        alertController.dismiss(animated: true)
-                    }))
-                    if let popoverController = alertController.popoverPresentationController {
-                        popoverController.sourceView = sender // to set the source of your alert
-                    }
-                    self.present(alertController, animated: true)
-                }),
-                label: "退出登录", textColor: .systemRed),
-            ]),
-        ]
-
-        var dataSourceSnapshot = NSDiffableDataSourceSnapshot<HeaderItem, ListItem>()
-        dataSourceSnapshot.appendSections(modelObjects)
-
+    func applyInitialSnapshots() {
         for headerItem in modelObjects {
             var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<ListItem>()
 
@@ -399,6 +348,9 @@ extension SettingViewController: UICollectionViewDelegate {
                 switch rowItem.type {
                 case let .navigation(action):
                     action()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                        collectionView.deselectItem(at: indexPath, animated: true)
+                    }
                 case let .action(action):
                     if let cell = collectionView.cellForItem(at: indexPath) {
                         action(cell)

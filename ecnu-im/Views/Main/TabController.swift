@@ -40,16 +40,17 @@ class TabController: UIViewController {
     private var homeViewController = HomeViewController()
     private var notificationCenterViewController = NotificationCenterViewController()
     private var myProfileViewController = MyProfileCenterViewController()
+    private var rootSettingViewController = RootSettingViewController()
     private var tabBarViewModel: TabBarViewModel!
 
     private var tabBarViewController: TabBarViewController!
     private var tabBarHeightConstraint: Constraint?
 
     private lazy var tabBarItems: [TabItem] = [
-        .init(tab: .posts, icon: "message", name: "帖子", color: .teal, viewController: homeViewController),
+        .init(tab: .posts, icon: "house", name: "首页", color: .teal, viewController: homeViewController),
         .init(tab: .notifications, icon: "bell", name: "通知", color: .red, viewController: notificationCenterViewController),
         .init(tab: .profile, icon: "person", name: "个人资料", color: .blue, viewController: myProfileViewController),
-        .init(tab: .setting, icon: "gearshape", name: "设置", color: .gray, viewController: SettingViewController()),
+        .init(tab: .setting, icon: "gearshape", name: "设置", color: .gray, viewController: rootSettingViewController),
     ]
 
     override func viewDidLoad() {

@@ -77,7 +77,7 @@ class DiscussionViewController: UIViewController, NoOverlayViewController, HasNa
 
     func shouldPushTo(nvc: UINavigationController?) -> Bool {
         if let top = nvc?.topViewController,
-           let another = top as? DiscussionViewController {
+           let another = top as? Self {
             return discussion != another.discussion
         }
         return true

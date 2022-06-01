@@ -29,7 +29,7 @@ private class FlarumDiscussionPreviewViewModel: ObservableObject {
 }
 
 private class HomeViewViewModel: ObservableObject {
-    @Published var lastSeenUsers: [FlarumUser] = []
+    @Published var recentOnlineUsers: [FlarumUser] = []
     @Published var recentActiveUsers: [FlarumUser] = []
     @Published var recentRegisteredUsers: [FlarumUser] = []
     @Published var stickyDiscussions: [FlarumDiscussionPreviewViewModel] = []
@@ -42,7 +42,7 @@ private class HomeViewViewModel: ObservableObject {
     func reset() {
         DispatchQueue.main.async { [weak self] in
             if let self = self {
-                self.lastSeenUsers = []
+                self.recentOnlineUsers = []
                 self.recentActiveUsers = []
                 self.recentRegisteredUsers = []
                 self.stickyDiscussions = []
@@ -176,7 +176,7 @@ struct HomeView: View {
 
                     let users = response.data.users.unique { $0.id }
                     withAnimation {
-                        viewModel.lastSeenUsers = users
+                        viewModel.recentOnlineUsers = users
                     }
                 }
             }
@@ -341,9 +341,9 @@ struct HomeView: View {
             LazyVStack {
                 emailConfirmNotification()
                 notification()
-                recentRegisteredSection()
                 recentActiveSection()
-                lastSeenSection()
+                recentOnline()
+                recentRegisteredSection()
                 stickySection()
                 latestSection()
             }
@@ -628,8 +628,8 @@ struct HomeView: View {
     }
 
     @ViewBuilder
-    func lastSeenSection() -> some View {
-        if viewModel.lastSeenUsers.count > 0 {
+    func recentOnline() -> some View {
+        if appGlobalState.showRecentOnlineUsers.value, viewModel.recentOnlineUsers.count > 0 {
             VStack(alignment: .leading, spacing: 4) {
                 Text("最近在线")
                     .font(.system(size: 34, weight: .bold, design: .rounded))
@@ -639,8 +639,8 @@ struct HomeView: View {
 
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: -10) {
-                        ForEach(0 ..< viewModel.lastSeenUsers.count, id: \.self) { index in
-                            let user = viewModel.lastSeenUsers[index]
+                        ForEach(0 ..< viewModel.recentOnlineUsers.count, id: \.self) { index in
+                            let user = viewModel.recentOnlineUsers[index]
                             PostAuthorAvatarView(name: user.attributes.displayName, url: user.avatarURL, size: 50)
                                 .mask(Circle())
                                 .overlay(Circle().stroke(Color.white, lineWidth: 1))
@@ -659,7 +659,7 @@ struct HomeView: View {
 
     @ViewBuilder
     func recentActiveSection() -> some View {
-        if viewModel.recentActiveUsers.count > 0 {
+        if appGlobalState.showRecentActiveUsers.value, viewModel.recentActiveUsers.count > 0 {
             VStack(alignment: .leading, spacing: 4) {
                 Text("最近活跃")
                     .font(.system(size: 34, weight: .bold, design: .rounded))
@@ -689,7 +689,7 @@ struct HomeView: View {
 
     @ViewBuilder
     func recentRegisteredSection() -> some View {
-        if viewModel.recentRegisteredUsers.count > 0 {
+        if appGlobalState.showRecentRegisteredUsers.value, viewModel.recentRegisteredUsers.count > 0 {
             VStack(alignment: .leading, spacing: 4) {
                 Text("最近注册")
                     .font(.system(size: 34, weight: .bold, design: .rounded))

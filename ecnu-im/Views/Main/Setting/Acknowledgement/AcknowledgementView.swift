@@ -29,6 +29,8 @@ private struct HrefLabel: View {
 }
 
 struct AcknowledgementView: View {
+    @EnvironmentObject var uiKitEnvironment: UIKitEnvironment
+
     var body: some View {
         NavigationView {
             List {
@@ -68,6 +70,28 @@ struct AcknowledgementView: View {
             }
             .navigationBarTitleDisplayMode(.large)
             .navigationTitle("致谢")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    if uiKitEnvironment.vc?.presentingViewController == nil {
+                        Button {
+                            uiKitEnvironment.splitVC?.pop(from: uiKitEnvironment.nvc)
+                        } label: {
+                            Image(systemName: "chevron.left")
+                                .foregroundColor(.primary.opacity(0.8))
+                        }
+                    }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    if uiKitEnvironment.vc?.presentingViewController != nil {
+                        Button {
+                            uiKitEnvironment.vc?.dismiss(animated: true)
+                        } label: {
+                            Text("完成")
+                                .font(.system(size: 17, weight: .medium, design: .rounded))
+                        }
+                    }
+                }
+            }
         }
         .navigationViewStyle(.stack)
     }

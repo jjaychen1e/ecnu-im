@@ -61,7 +61,7 @@ class ProfileCenterViewController: UIViewController, NoOverlayViewController, Ha
 
     func shouldPushTo(nvc: UINavigationController?) -> Bool {
         if let top = nvc?.topViewController,
-           let another = top as? ProfileCenterViewController {
+           let another = top as? Self {
             return userId != another.userId
         }
         return true
