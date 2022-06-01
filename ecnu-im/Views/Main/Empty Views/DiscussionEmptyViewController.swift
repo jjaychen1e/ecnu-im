@@ -25,6 +25,8 @@ class DiscussionEmptyViewController: UIViewController {
         self.hostingViewController = hostingViewController
         addChildViewController(hostingViewController, addConstrains: true)
     }
+    
+    static let shared = DiscussionEmptyViewController()
 }
 
 /// https://github.com/GetStream/StreamiOSChatSDKPrototyping/blob/main/StreamiOSChatSDKPrototyping/ChannelList/ChannelListEmptyView.swift

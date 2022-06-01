@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 extension View {
-    func snapshot() -> UIImage {
+    private func snapshotSingle() -> UIImage {
         let controller = UIHostingController(rootView: self, ignoreSafeArea: true)
         if let view = controller.view {
             let targetSize = view.intrinsicContentSize
@@ -23,5 +23,11 @@ extension View {
         }
 
         return UIImage()
+    }
+
+    func snapshot() -> UIImage {
+        let image = snapshotSingle()
+        image.imageAsset?.register(environment(\.colorScheme, .dark).snapshotSingle(), with: .init(userInterfaceStyle: .dark))
+        return image
     }
 }

@@ -35,7 +35,7 @@ protocol CanSelectWithInfo: UIViewController {
 class TabController: UIViewController {
     private let tabBarHeight: CGFloat = 49.0
 
-    private var currentController: UIViewController?
+    private var currentTabItem: TabItem?
     private var allDiscussionsViewController = AllDiscussionsViewController()
     private var homeViewController = HomeViewController()
     private var notificationCenterViewController = NotificationCenterViewController()
@@ -47,7 +47,7 @@ class TabController: UIViewController {
     private var tabBarHeightConstraint: Constraint?
 
     private lazy var tabBarItems: [TabItem] = [
-        .init(tab: .posts, icon: "house", name: "首页", color: .teal, viewController: homeViewController),
+        .init(tab: .home, icon: "house", name: "首页", color: .teal, viewController: homeViewController),
         .init(tab: .notifications, icon: "bell", name: "通知", color: .red, viewController: notificationCenterViewController),
         .init(tab: .profile, icon: "person", name: "个人资料", color: .blue, viewController: myProfileViewController),
         .init(tab: .setting, icon: "gearshape", name: "设置", color: .gray, viewController: rootSettingViewController),
@@ -97,15 +97,35 @@ class TabController: UIViewController {
                     }
                 }
             }
-            if let currentController = currentController {
-                currentController.safelyRemoveFromParent()
+            if let currentTabItem = currentTabItem {
+                currentTabItem.viewController.safelyRemoveFromParent()
+                if let splitViewController = splitViewController,
+                   let originalViewControllers = splitViewController.secondaryNVC?.viewControllers {
+                    if splitViewController.isCollapsed {
+                        currentTabItem.secondaryViewControllers = originalViewControllers
+                    } else {
+                        currentTabItem.secondaryViewControllers = Array(originalViewControllers.dropFirst())
+                    }
+                } else {
+                    fatalErrorDebug()
+                }
             }
             if let _vc = nextVC as? CanSelectWithInfo {
                 _vc.config(info: info)
             }
             insertChildViewController(nextVC, at: 0, addConstrains: true)
+            if let splitViewController = splitViewController,
+               let secondaryNVC = splitViewController.secondaryNVC {
+                if splitViewController.isCollapsed {
+                    secondaryNVC.viewControllers = tabBarItem.secondaryViewControllers
+                } else {
+                    secondaryNVC.viewControllers = [DiscussionEmptyViewController.shared] + tabBarItem.secondaryViewControllers
+                }
+            } else {
+                fatalErrorDebug()
+            }
             nextVC.additionalSafeAreaInsets.bottom = tabBarHeight
-            currentController = nextVC
+            currentTabItem = tabBarItem
 
             tabBarViewModel.selectedIndex = nextVCIndex
         }

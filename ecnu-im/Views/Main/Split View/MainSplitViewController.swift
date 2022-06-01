@@ -17,8 +17,6 @@ class MainSplitViewController: UIViewController {
 
     private var mainSplitViewController: UISplitViewController!
 
-    private lazy var emptyViewController: DiscussionEmptyViewController = .init()
-
     private lazy var primaryNavigationViewController: NoNavigationBarNavigationController = {
         let nvc = NoNavigationBarNavigationController()
         return nvc
@@ -26,7 +24,7 @@ class MainSplitViewController: UIViewController {
 
     private lazy var secondaryNavigationViewController: SecondaryNavigationController = {
         let nvc = SecondaryNavigationController()
-        nvc.viewControllers = [emptyViewController]
+        nvc.viewControllers = [DiscussionEmptyViewController.shared]
         return nvc
     }()
 
@@ -48,7 +46,7 @@ class MainSplitViewController: UIViewController {
                    first is DiscussionEmptyViewController {
                     return
                 } else {
-                    secondaryNavigationViewController.viewControllers = [emptyViewController] + secondaryNavigationViewController.viewControllers
+                    secondaryNavigationViewController.viewControllers = [DiscussionEmptyViewController.shared] + secondaryNavigationViewController.viewControllers
                 }
             }
         } else if UIApplication.shared.isPortrait {
@@ -76,6 +74,7 @@ class MainSplitViewController: UIViewController {
         mainSplitViewController.preferredPrimaryColumnWidthFraction = 0.5
         mainSplitViewController.setViewController(secondaryNavigationViewController, for: .secondary)
         mainSplitViewController.preferredDisplayMode = .twoDisplaceSecondary
+        primaryViewController.select(tab: .home)
         mainSplitViewController.show(.primary)
         Self.rootSplitVC = mainSplitViewController
 

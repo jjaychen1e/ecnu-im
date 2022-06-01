@@ -10,7 +10,7 @@ import SwiftUI
 
 class TabItem {
     enum Tab {
-        case posts
+        case home
         case notifications
         case profile
         case setting
@@ -21,14 +21,16 @@ class TabItem {
     var name: String
     var color: Color
     var viewController: UIViewController
+    var secondaryViewControllers: [UIViewController]
     var badgeCount: Int = 0
 
-    internal init(tab: TabItem.Tab, icon: String, name: String, color: Color, viewController: UIViewController, badgeCount: Int = 0) {
+    internal init(tab: TabItem.Tab, icon: String, name: String, color: Color, viewController: UIViewController, secondaryViewController: [UIViewController] = [], badgeCount: Int = 0) {
         self.tab = tab
         self.icon = icon
         self.name = name
         self.color = color
         self.viewController = viewController
+        self.secondaryViewControllers = secondaryViewController
         self.badgeCount = badgeCount
     }
 }

@@ -83,7 +83,7 @@ class AppGlobalState: ObservableObject {
     static let shared = AppGlobalState()
 
     init() {
-        UserDefaults.standard.setValuesForKeys([
+        UserDefaults.standard.setDefaultValuesForKeys([
             "blockCompletely": false,
             "themeStyleOption": ThemeStyleOption.auto.rawValue,
             "showRecentActiveUsers": true,

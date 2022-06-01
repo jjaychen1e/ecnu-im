@@ -7,7 +7,7 @@
 
 import Foundation
 
-public extension UserDefaults {
+extension UserDefaults {
     func optionalInt(forKey defaultName: String) -> Int? {
         let defaults = self
         if let value = defaults.value(forKey: defaultName) {
@@ -22,5 +22,10 @@ public extension UserDefaults {
             return value as? Bool
         }
         return nil
+    }
+
+    func setDefaultValuesForKeys(_ keyedValues: [String: Any]) {
+        let filteredKeyedValues = keyedValues.filter { value(forKey: $0.key) == nil }
+        setValuesForKeys(filteredKeyedValues)
     }
 }
