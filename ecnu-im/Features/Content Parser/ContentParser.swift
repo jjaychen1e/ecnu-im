@@ -22,8 +22,24 @@ class ContentParser {
     private var updateLayout: (() -> Void)?
 
     private static func preprocess(content: String) -> String {
+        // Merge continues '>', because flarum does it.
         let _r1 = Regex("(^>.*?)\n\\s*?\n>")
-        let content = content.replacingAll(matching: _r1, with: "$1\n>")
+        var content = content.replacingAll(matching: _r1, with: "$1\n>")
+
+        // Add '>' for continues lines
+        var processedLines: [String] = []
+        content
+            .split(separator: "\n", omittingEmptySubsequences: false)
+            .enumerated()
+            .forEach { index, element in
+                if index > 0, processedLines[index - 1].starts(with: ">"), !element.starts(with: ">"), element.contains(where: { !$0.isWhitespace }) {
+                    processedLines.append(">" + element)
+                } else {
+                    processedLines.append(String(element))
+                }
+            }
+        content = processedLines.joined(separator: "\n")
+
         return content
     }
 
