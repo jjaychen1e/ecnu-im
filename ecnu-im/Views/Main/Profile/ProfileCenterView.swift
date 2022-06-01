@@ -199,6 +199,8 @@ struct ProfileCenterView: View {
             } else {
                 if loadInfo.isLoading {
                     return
+                } else {
+                    loadInfo.isLoading = true
                 }
             }
 
