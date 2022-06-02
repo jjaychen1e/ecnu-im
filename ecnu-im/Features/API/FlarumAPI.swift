@@ -60,7 +60,8 @@ enum Flarum {
     case discussionSearch(q: String, offset: Int = 0, limit: Int = 20)
     case allDiscussions(includes: Set<DiscussionIncludeOption> = DiscussionIncludeOption.homeDiscussionIncludeOptionSet,
                         pageOffset: Int = 0,
-                        pageItemLimit: Int = 20)
+                        pageItemLimit: Int = 20,
+                        tags: [FlarumTag] = [])
     case discussionByUserAccount(includes: Set<DiscussionIncludeOption> = DiscussionIncludeOption.profileDiscussionIncludeOptionSet,
                                  account: String, offset: Int, limit: Int, sort: DiscussionSortOption = .newest)
     case discussionLastRead(discussionId: Int, postNumber: Int)
@@ -273,12 +274,21 @@ extension Flarum: TargetType {
                 "page[limit]": limit,
                 "include": includes.map { $0.rawValue }.joined(separator: ","),
             ], encoding: URLEncoding.default)
-        case let .allDiscussions(includes, pageOffset, pageLimit):
-            return .requestParameters(parameters: [
-                "include": includes.map { $0.rawValue }.joined(separator: ","),
-                "page[offset]": pageOffset,
-                "page[limit]": pageLimit,
-            ], encoding: URLEncoding.default)
+        case let .allDiscussions(includes, pageOffset, pageLimit, tags):
+            if tags.count > 0 {
+                return .requestParameters(parameters: [
+                    "include": includes.map { $0.rawValue }.joined(separator: ","),
+                    "page[offset]": pageOffset,
+                    "page[limit]": pageLimit,
+                    "filter[tag]": tags.map { $0.attributes.slug }.joined(separator: ","),
+                ], encoding: URLEncoding.default)
+            } else {
+                return .requestParameters(parameters: [
+                    "include": includes.map { $0.rawValue }.joined(separator: ","),
+                    "page[offset]": pageOffset,
+                    "page[limit]": pageLimit,
+                ], encoding: URLEncoding.default)
+            }
         case let .discussionByUserAccount(includes, account, offset, limit, sort):
             return .requestParameters(parameters: [
                 "include": includes.map { $0.rawValue }.joined(separator: ","),

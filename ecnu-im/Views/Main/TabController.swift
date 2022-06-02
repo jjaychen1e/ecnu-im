@@ -36,7 +36,6 @@ class TabController: UIViewController {
     private let tabBarHeight: CGFloat = 49.0
 
     private var currentTabItem: TabItem?
-    private var allDiscussionsViewController = AllDiscussionsViewController()
     private var homeViewController = HomeViewController()
     private var notificationCenterViewController = NotificationCenterViewController()
     private var myProfileViewController = MyProfileCenterViewController()
@@ -146,9 +145,6 @@ class TabController: UIViewController {
     }
 
     private func initViewControllers() {
-        allDiscussionsViewController.splitVC = splitViewController
-        allDiscussionsViewController.nvc = navigationController
-
         homeViewController.splitVC = splitViewController
         homeViewController.nvc = navigationController
 

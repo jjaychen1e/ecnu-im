@@ -77,14 +77,14 @@ struct ProfileCenterPostFooterView: View {
 
     var buttons: some View {
         PopoverMenu {
-            PopoverMenuItem(title: "App 问题反馈", systemImage: "exclamationmark.bubble", action: {})
+            PopoverMenuLabelItem(title: "App 问题反馈", systemImage: "exclamationmark.bubble", action: {})
                 .disabled(true)
-            PopoverMenuItem(title: "分享", systemImage: "square.and.arrow.up", action: {})
+            PopoverMenuLabelItem(title: "分享", systemImage: "square.and.arrow.up", action: {})
                 .disabled(true)
 
             if let number = viewModel.post.attributes?.number,
                let url = URL(string: URLService.link(href: "https://ecnu.im/d/\(viewModel.discussion.id)/\(number)").url) {
-                PopoverMenuItem(title: "打开网页版", systemImage: "safari", action: {
+                PopoverMenuLabelItem(title: "打开网页版", systemImage: "safari", action: {
                     UIApplication.shared.open(url)
                 })
             }

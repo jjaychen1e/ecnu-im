@@ -404,20 +404,20 @@ private struct ProfileCenterViewHeader: View {
             .frame(maxWidth: .infinity)
             .overlay(
                 PopoverMenu {
-                    PopoverMenuItem(title: "App 问题反馈", systemImage: "exclamationmark.bubble", action: {})
+                    PopoverMenuLabelItem(title: "App 问题反馈", systemImage: "exclamationmark.bubble", action: {})
                         .disabled(true)
-                    PopoverMenuItem(title: "分享", systemImage: "square.and.arrow.up", action: {})
+                    PopoverMenuLabelItem(title: "分享", systemImage: "square.and.arrow.up", action: {})
                         .disabled(true)
 
                     if let url = URL(string: URLService.link(href: "https://ecnu.im/u/\(user.attributes.username)").url) {
-                        PopoverMenuItem(title: "打开网页版", systemImage: "safari", action: {
+                        PopoverMenuLabelItem(title: "打开网页版", systemImage: "safari", action: {
                             UIApplication.shared.open(url)
                         })
                     }
 
                     if user.attributes.canBeIgnored == true {
                         if user.attributes.ignored == true {
-                            PopoverMenuItem(title: "取消屏蔽", systemImage: "person.crop.circle.fill.badge.checkmark", titleColor: .primary, iconColor: .primary, action: {
+                            PopoverMenuLabelItem(title: "取消屏蔽", systemImage: "person.crop.circle.fill.badge.checkmark", titleColor: .primary, iconColor: .primary, action: {
                                 let alertController = UIAlertController(title: "注意", message: "你确定要取消屏蔽该用户吗？", preferredStyle: .alert)
                                 alertController.addAction(UIAlertAction(title: "确定", style: .destructive, handler: { action in
                                     if let id = Int(user.id) {
@@ -442,7 +442,7 @@ private struct ProfileCenterViewHeader: View {
                                 UIApplication.shared.presentOnTop(alertController, animated: true)
                             })
                         } else {
-                            PopoverMenuItem(title: "屏蔽", systemImage: "person.crop.circle.fill.badge.minus", titleColor: .red, iconColor: .red, action: {
+                            PopoverMenuLabelItem(title: "屏蔽", systemImage: "person.crop.circle.fill.badge.minus", titleColor: .red, iconColor: .red, action: {
                                 let alertController = UIAlertController(title: "注意", message: "你确定要屏蔽该用户吗？", preferredStyle: .alert)
                                 alertController.addAction(UIAlertAction(title: "确定", style: .destructive, handler: { action in
                                     if let id = Int(user.id) {

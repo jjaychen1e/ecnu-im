@@ -49,6 +49,7 @@ class AppGlobalState: ObservableObject {
     public var showRecentOnlineUsers: CurrentValueSubject<Bool, Never>
     public var showRecentRegisteredUsers: CurrentValueSubject<Bool, Never>
     public var autoClearUnreadNotification: CurrentValueSubject<Bool, Never>
+    public var discussionBrowseCategory: CurrentValueSubject<BrowseCategory, Never>
 
     @Published var unreadNotificationCount = 0
     @Published var userInfo: FlarumUser?
@@ -91,6 +92,7 @@ class AppGlobalState: ObservableObject {
             "showRecentOnlineUsers": false,
             "showRecentRegisteredUsers": false,
             "autoClearUnreadNotification": false,
+            "discussionBrowseCategory": BrowseCategory.cards.rawValue,
         ])
 
         blockCompletely = CurrentValueSubject<Bool, Never>(UserDefaults.standard.bool(forKey: "blockCompletely"))
@@ -106,7 +108,14 @@ class AppGlobalState: ObservableObject {
         showRecentOnlineUsers = CurrentValueSubject<Bool, Never>(UserDefaults.standard.bool(forKey: "showRecentOnlineUsers"))
         showRecentRegisteredUsers = CurrentValueSubject<Bool, Never>(UserDefaults.standard.bool(forKey: "showRecentRegisteredUsers"))
         autoClearUnreadNotification = CurrentValueSubject<Bool, Never>(UserDefaults.standard.bool(forKey: "autoClearUnreadNotification"))
-        
+        discussionBrowseCategory = {
+            if let rawString = UserDefaults.standard.string(forKey: "discussionBrowseCategory"),
+               let browseCategory = BrowseCategory(rawValue: rawString) {
+                return CurrentValueSubject<BrowseCategory, Never>(browseCategory)
+            } else {
+                return CurrentValueSubject<BrowseCategory, Never>(.cards)
+            }
+        }()
 
         blockCompletely.removeDuplicates().sink { value in
             UserDefaults.standard.set(value, forKey: "blockCompletely")
@@ -150,9 +159,15 @@ class AppGlobalState: ObservableObject {
             self.objectWillChange.send()
         }
         .store(in: &subscriptions)
-        
+
         autoClearUnreadNotification.removeDuplicates().sink { value in
             UserDefaults.standard.set(value, forKey: "autoClearUnreadNotification")
+            self.objectWillChange.send()
+        }
+        .store(in: &subscriptions)
+
+        discussionBrowseCategory.removeDuplicates().sink { value in
+            UserDefaults.standard.set(value.rawValue, forKey: "discussionBrowseCategory")
             self.objectWillChange.send()
         }
         .store(in: &subscriptions)

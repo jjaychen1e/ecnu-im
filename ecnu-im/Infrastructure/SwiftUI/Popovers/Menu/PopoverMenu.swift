@@ -7,21 +7,21 @@
 
 import SwiftUI
 
-struct PopoverMenuItem: View {
+struct PopoverMenuLabelItem: View {
     @State var title: String
     @State var systemImage: String
     @State var titleColor: Color = .primary
     @State var iconColor: Color = .primary
     @State var action: () -> Void
 
-    @Environment(\.operatePopoverMenu) var operatePopoverMenu
+    @Environment(\.popoverMenuDismissEnvironment) var popoverMenuDismissEnvironment
     @Environment(\.popoverMenuMinWidth) var popoverMenuMinWidth
 
     @Environment(\.isEnabled) var isEnabled
 
     var body: some View {
         Button {
-            operatePopoverMenu(false, action)
+            popoverMenuDismissEnvironment.operator?.dismiss(action)
         } label: {
             HStack {
                 Image(systemName: systemImage)
@@ -43,10 +43,33 @@ struct PopoverMenuItem: View {
     }
 }
 
+struct PopoverMenuCustomItem<Content>: View where Content: View {
+    private let content: () -> Content
+
+    @Environment(\.popoverMenuMinWidth) var popoverMenuMinWidth
+    @Environment(\.isEnabled) var isEnabled
+
+    init(@ViewBuilder content: @escaping () -> Content) {
+        self.content = content
+    }
+
+    var body: some View {
+        content()
+            .frame(minWidth: popoverMenuMinWidth, alignment: .leading)
+            .disabled(!isEnabled)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .overlay(
+                Color.primary.opacity(0.1).frame(height: 1).frame(maxWidth: .infinity),
+                alignment: .bottom
+            )
+    }
+}
+
 private struct _PopoverMenu<Label>: View where Label: View {
     private let label: () -> Label
 
-    @Environment(\.operatePopoverMenu) var operatePopoverMenu
+    @Environment(\.popoverMenuPresentEnvironment) var popoverMenuPresentEnvironment
 
     init(@ViewBuilder label: @escaping () -> Label) {
         self.label = label
@@ -54,7 +77,7 @@ private struct _PopoverMenu<Label>: View where Label: View {
 
     var body: some View {
         Button {
-            operatePopoverMenu(true) {}
+            popoverMenuPresentEnvironment.operator?.present()
         } label: {
             label()
                 .frame(minWidth: 24, minHeight: 24)
@@ -81,6 +104,7 @@ struct PopoverMenu<Label, Content>: View where Label: View, Content: View {
                     content()
                         .environment(\.popoverMenuMinWidth, minWidth)
                 }
+                .fixedSize(horizontal: true, vertical: false)
                 .overlay(
                     Color(uiColor: UIColor.systemBackground).frame(height: 1).frame(maxWidth: .infinity),
                     alignment: .top
@@ -93,14 +117,57 @@ struct PopoverMenu<Label, Content>: View where Label: View, Content: View {
     }
 }
 
-struct OperatePopoverMenuKey: EnvironmentKey {
-    static let defaultValue: (_ present: Bool, _ completion: @escaping () -> Void) -> Void = { _, _ in }
+class PopoverMenuPresentEnvironmentOperator {
+    var present: () -> Void
+
+    init(_ present: @escaping () -> Void) {
+        self.present = present
+    }
+}
+
+class PopoverMenuPresentEnvironment {
+    init(operator: PopoverMenuPresentEnvironmentOperator? = nil) {
+        self.operator = `operator`
+    }
+
+    weak var `operator`: PopoverMenuPresentEnvironmentOperator?
+}
+
+class PopoverMenuDismissEnvironmentOperator {
+    var dismiss: (@escaping () -> Void) -> Void
+
+    init(_ dismiss: @escaping (@escaping () -> Void) -> Void) {
+        self.dismiss = dismiss
+    }
+}
+
+class PopoverMenuDismissEnvironment {
+    init(operator: PopoverMenuDismissEnvironmentOperator? = nil) {
+        self.operator = `operator`
+    }
+
+    weak var `operator`: PopoverMenuDismissEnvironmentOperator?
+}
+
+struct OperatePopoverPresentMenuKey: EnvironmentKey {
+    static let defaultValue: PopoverMenuPresentEnvironment = .init()
+}
+
+struct OperatePopoverDismissMenuKey: EnvironmentKey {
+    static let defaultValue: PopoverMenuDismissEnvironment = .init()
 }
 
 extension EnvironmentValues {
-    var operatePopoverMenu: (_ present: Bool, _ completion: @escaping () -> Void) -> Void {
-        get { self[OperatePopoverMenuKey.self] }
-        set { self[OperatePopoverMenuKey.self] = newValue }
+    var popoverMenuPresentEnvironment: PopoverMenuPresentEnvironment {
+        get { self[OperatePopoverPresentMenuKey.self] }
+        set { self[OperatePopoverPresentMenuKey.self] = newValue }
+    }
+}
+
+extension EnvironmentValues {
+    var popoverMenuDismissEnvironment: PopoverMenuDismissEnvironment {
+        get { self[OperatePopoverDismissMenuKey.self] }
+        set { self[OperatePopoverDismissMenuKey.self] = newValue }
     }
 }
 

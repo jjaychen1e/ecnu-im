@@ -11,19 +11,27 @@ import SwiftUI
 
 private class AlwaysPopoverModifierViewModel: ObservableObject {
     weak var presentedViewController: UIViewController?
+    func dismiss(_ completion: @escaping () -> Void) {
+        presentedViewController?.dismiss(animated: true, completion: completion)
+        presentedViewController = nil
+    }
+}
+
+private class AnchorViewModel: ObservableObject {
+    var anchorView = UIView()
+}
+
+class PopoverOperatorViewModel: ObservableObject {
+    var popoverMenuPresentEnvironmentOperator: PopoverMenuPresentEnvironmentOperator = .init {}
+    var popoverMenuDismissEnvironmentOperator: PopoverMenuDismissEnvironmentOperator = .init { _ in }
 }
 
 private struct AlwaysPopoverModifier<PopoverContent>: ViewModifier where PopoverContent: View {
-    let contentBlock: () -> PopoverContent
+    @State var contentBlock: () -> PopoverContent
 
     @StateObject private var viewModel = AlwaysPopoverModifierViewModel()
-
-    // Workaround for missing @StateObject in iOS 13.
-    private struct Store {
-        var anchorView = UIView()
-    }
-
-    @State private var store = Store()
+    @StateObject private var anchorViewModel = AnchorViewModel()
+    @StateObject private var popoverOperatorViewModel = PopoverOperatorViewModel()
 
     init(contentBlock: @escaping () -> PopoverContent) {
         self.contentBlock = contentBlock
@@ -31,44 +39,39 @@ private struct AlwaysPopoverModifier<PopoverContent>: ViewModifier where Popover
 
     func body(content: Content) -> some View {
         return content
-            .background(InternalAnchorView(uiView: store.anchorView))
-            .environment(\.operatePopoverMenu) { present, completion in
-                operatePopoverContent(present, completion)
-            }
-    }
+            .background(InternalAnchorView(uiView: anchorViewModel.anchorView))
+            .environment(\.popoverMenuPresentEnvironment, .init(operator: popoverOperatorViewModel.popoverMenuPresentEnvironmentOperator))
+            .onLoad(perform: {
+                // Damn it.. memory leak
+                let content = contentBlock()
+                    .environment(\.popoverMenuDismissEnvironment, .init(operator: popoverOperatorViewModel.popoverMenuDismissEnvironmentOperator))
+                popoverOperatorViewModel.popoverMenuPresentEnvironmentOperator.present = { [weak viewModel, weak anchorViewModel] in
+                    if let viewModel = viewModel, let anchorViewModel = anchorViewModel {
+                        let contentController = ContentViewController(rootView: content)
+                        contentController.modalPresentationStyle = .popover
 
-    private func operatePopoverContent(_ present: Bool, _ completion: @escaping () -> Void) {
-        if present {
-            presentPopover(completion: completion)
-        } else {
-            viewModel.presentedViewController?.dismiss(animated: true, completion: completion)
-            viewModel.presentedViewController = nil
-        }
-    }
+                        let view = anchorViewModel.anchorView
+                        guard let popover = contentController.popoverPresentationController else { return }
+                        popover.sourceView = view
+                        popover.sourceRect = view.bounds
+                        popover.delegate = contentController
 
-    private func presentPopover(completion: @escaping () -> Void) {
-        let contentController = ContentViewController(rootView: contentBlock()
-            .environment(\.operatePopoverMenu) { present, completion in
-                operatePopoverContent(present, completion)
+                        guard let sourceVC = view.closestVC() else { return }
+                        if let presentedVC = sourceVC.presentedViewController {
+                            presentedVC.dismiss(animated: true) {
+                                sourceVC.present(contentController, animated: true, completion: {})
+                                viewModel.presentedViewController = sourceVC
+                            }
+                        } else {
+                            sourceVC.present(contentController, animated: true, completion: {})
+                            viewModel.presentedViewController = sourceVC
+                        }
+                    }
+                }
+                popoverOperatorViewModel.popoverMenuDismissEnvironmentOperator.dismiss = { [weak viewModel] completion in
+                    viewModel?.dismiss(completion)
+                }
             })
-        contentController.modalPresentationStyle = .popover
-
-        let view = store.anchorView
-        guard let popover = contentController.popoverPresentationController else { return }
-        popover.sourceView = view
-        popover.sourceRect = view.bounds
-        popover.delegate = contentController
-
-        guard let sourceVC = view.closestVC() else { return }
-        if let presentedVC = sourceVC.presentedViewController {
-            presentedVC.dismiss(animated: true) {
-                sourceVC.present(contentController, animated: true, completion: completion)
-                viewModel.presentedViewController = sourceVC
-            }
-        } else {
-            sourceVC.present(contentController, animated: true, completion: completion)
-            viewModel.presentedViewController = sourceVC
-        }
     }
 
     private struct InternalAnchorView: UIViewRepresentable {
