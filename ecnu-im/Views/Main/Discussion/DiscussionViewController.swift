@@ -309,8 +309,8 @@ class DiscussionViewController: UIViewController, NoOverlayViewController, HasNa
                 if let self = self {
                     self.addReply(target: .edit(post))
                 }
-            } hidePostAction: { [weak self] isHidden in
-                if let self = self {
+            } hidePostAction: { [weak self, weak tableView] isHidden in
+                if let self = self, let tableView = tableView {
                     if let id = Int(post.id) {
                         Task {
                             if let response = try? await flarumProvider.request(.hidePost(id: id, isHidden: isHidden)).flarumResponse() {
@@ -335,8 +335,8 @@ class DiscussionViewController: UIViewController, NoOverlayViewController, HasNa
                         }
                     }
                 }
-            } deletePostAction: { [weak self] in
-                if let self = self {
+            } deletePostAction: { [weak self, weak tableView] in
+                if let self = self, let tableView = tableView {
                     if let id = Int(post.id) {
                         Task {
                             if let response = try? await flarumProvider.request(.deletePost(id: id)) {

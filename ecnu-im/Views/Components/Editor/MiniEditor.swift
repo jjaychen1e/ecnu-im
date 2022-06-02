@@ -94,7 +94,6 @@ struct MiniEditor: View {
 
     @State private var sending = false
     @FocusState private var focus: Bool
-    @State private var subscriptions: Set<AnyCancellable> = []
 
     init(discussion: FlarumDiscussion, textFieldVM: MiniEditorViewModel) {
         self.discussion = discussion
@@ -113,11 +112,12 @@ struct MiniEditor: View {
                 Asset.DynamicColors.dynamicWhite.swiftUIColor.frame(height: 1000)
                     .offset(x: 0, y: 1000)
             }
-            .onLoad {
-                viewModel.$focused.sink { focus in
-                    self.focus = focus
-                }
-                .store(in: &subscriptions)
+            .onChange(of: viewModel.focused) {
+                // FocusState is a in-view property wrapper... Hard to use subscriptions(without memory leak)
+                focus = $0
+            }
+            .onChange(of: focus) {
+                viewModel.focused = $0
             }
     }
 
