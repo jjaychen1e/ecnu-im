@@ -196,7 +196,6 @@ struct PostCommentCellFooterView: View {
                     PopoverMenuItem(title: "编辑", systemImage: "pencil", action: {
                         viewModel.editAction()
                     })
-                    .disabled(true)
                 }
                 PopoverMenuItem(title: "分享", systemImage: "square.and.arrow.up", action: {})
                     .disabled(true)

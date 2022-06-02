@@ -166,16 +166,16 @@ class DiscussionViewController: UIViewController, NoOverlayViewController, HasNa
         process(loadedData: [post], completionHandler: {})
     }
 
-    private func showReplyView(post: FlarumPost?) {
-        miniEditorViewModel.show(post: post)
+    private func showReplyView(target: MiniEditorViewModel.ReplyTarget) {
+        miniEditorViewModel.show(target: target)
     }
 
     private func hideReplyView() {
         miniEditorViewModel.hide()
     }
 
-    private func addReply(post: FlarumPost?) {
-        showReplyView(post: post)
+    private func addReply(target: MiniEditorViewModel.ReplyTarget) {
+        showReplyView(target: target)
     }
 
     private func setReplyView() {
@@ -220,7 +220,9 @@ class DiscussionViewController: UIViewController, NoOverlayViewController, HasNa
             }
         }
         toolVC = UIHostingController(rootView: AddButton(action: { [weak self] in
-            self?.addReply(post: nil)
+            if let self = self {
+                self.addReply(target: .discussion(self.discussion))
+            }
         }))
         toolVC.view.backgroundColor = .clear
         addChildViewController(toolVC)
@@ -300,9 +302,13 @@ class DiscussionViewController: UIViewController, NoOverlayViewController, HasNa
                     }
                 }
             } replyPostAction: { [weak self] in
-                self?.addReply(post: post)
+                if let self = self {
+                    self.addReply(target: .post(post))
+                }
             } editAction: { [weak self] in
-
+                if let self = self {
+                    self.addReply(target: .edit(post))
+                }
             } hidePostAction: { [weak self] isHidden in
                 if let self = self {
                     if let id = Int(post.id) {

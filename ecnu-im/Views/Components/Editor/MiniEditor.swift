@@ -26,6 +26,7 @@ class MiniEditorViewModel: ObservableObject {
     enum ReplyTarget: Hashable {
         case discussion(FlarumDiscussion)
         case post(FlarumPost)
+        case edit(FlarumPost)
     }
 
     var contentCache: [ReplyTarget: String] = [:]
@@ -33,7 +34,7 @@ class MiniEditorViewModel: ObservableObject {
     var hideCallback: () -> Void
     var didPostCallback: (FlarumPost) -> Void
 
-    func show(post: FlarumPost?) {
+    func show(target: ReplyTarget) {
         if let replyTarget = replyTarget {
             // Directly switched from another reply
             if let contentModel = contentModel {
@@ -44,21 +45,32 @@ class MiniEditorViewModel: ObservableObject {
             self.replyTarget = nil
         }
 
-        if let post = post {
-            replyTarget = .post(post)
-        } else {
-            replyTarget = .discussion(discussion)
-        }
+        replyTarget = target
         if let contentModel = contentModel, let replyTarget = replyTarget {
-            contentModel.text = contentCache[replyTarget] ?? ""
+            switch replyTarget {
+            case .discussion, .post:
+                contentModel.text = contentCache[replyTarget] ?? ""
+            case let .edit(flarumPost):
+                if let content = flarumPost.attributes?.content, case let .comment(postContent) = content {
+                    contentModel.text = postContent
+                } else {
+                    fatalErrorDebug()
+                }
+            }
         }
+
         focused = true
         showCallback()
     }
 
     func hide() {
         if let contentModel = contentModel, let replyTarget = replyTarget {
-            contentCache[replyTarget] = contentModel.text
+            switch replyTarget {
+            case .discussion, .post:
+                contentCache[replyTarget] = contentModel.text
+            case .edit:
+                break
+            }
             contentModel.text = ""
             self.replyTarget = nil
         }
@@ -131,6 +143,8 @@ struct MiniEditor: View {
                 return "正在回复主题 - \(discussion.discussionTitle)"
             case let .post(post):
                 return "正在回复 @\(post.authorName) - 帖子#\(post.attributes?.number ?? -1)"
+            case let .edit(post):
+                return "正在编辑 @\(post.authorName) - 帖子#\(post.attributes?.number ?? -1)"
             case .none:
                 return ""
             }
