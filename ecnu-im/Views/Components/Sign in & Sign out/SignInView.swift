@@ -99,11 +99,11 @@ struct SignInView: View {
                     .foregroundColor(.primary.opacity(0.7))
                     .accentColor(.primary.opacity(0.7))
                     .onTapGesture {
-                        let selectSignUpButtonJS = """
+                        let selectForgetPasswordButtonJS = """
                         document.querySelector('ul  li.item-logIn > button').click();
                         document.querySelector('p.LogInModal-forgotPassword > a').click();
                         """
-                        if let url = URL(string: URLService.link(href: "https://ecnu.im/", jsAction: selectSignUpButtonJS).url) {
+                        if let url = URL(string: URLService.link(href: "https://ecnu.im/", jsAction: selectForgetPasswordButtonJS).url) {
                             UIApplication.shared.open(url)
                         }
                     }
