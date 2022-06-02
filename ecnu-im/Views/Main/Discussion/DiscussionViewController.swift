@@ -634,7 +634,7 @@ private class DiscussionPostsLoader: ObservableObject {
 
     func loadData(offset: Int) async -> (posts: [FlarumPost], loadMoreState: FlarumPost.FlarumPostLoadMoreState)? {
         guard await info.shouldLoad(offset: offset) else { return nil }
-        print("loading: \(offset)")
+//        print("loading: \(offset)")
         var postLists: [FlarumPost] = []
         var loadMoreState = FlarumPost.FlarumPostLoadMoreState()
         if let response = try? await flarumProvider.request(.posts(discussionID: discussionID,
@@ -659,7 +659,7 @@ private class DiscussionPostsLoader: ObservableObject {
             postLists.append(contentsOf: posts)
         }
         await info.finishLoad(offset: offset)
-        print("finish loading: \(offset)")
+//        print("finish loading: \(offset)")
         return (posts: postLists, loadMoreState: loadMoreState)
     }
 

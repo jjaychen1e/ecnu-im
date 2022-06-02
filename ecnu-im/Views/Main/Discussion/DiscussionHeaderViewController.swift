@@ -22,10 +22,12 @@ class DiscussionHeaderViewController: UIViewController {
         viewModel = .init(discussion: discussion)
         super.init(nibName: nil, bundle: nil)
 
-        if discussion.relationships?.tags == nil {
-            Task {
-                if let id = Int(discussion.id),
-                   let response = try? await flarumProvider.request(.discussionInfo(discussionID: id)).flarumResponse() {
+        // This can add view count
+        Task {
+            if let id = Int(discussion.id),
+               let response = try? await flarumProvider.request(.discussionInfo(discussionID: id)).flarumResponse() {
+                // The other purpose is to add view count
+                if discussion.relationships?.tags == nil {
                     if let first = response.data.discussions.first {
                         viewModel.discussion = first
                         self.headerHostingVC.safelyRemoveFromParent()
