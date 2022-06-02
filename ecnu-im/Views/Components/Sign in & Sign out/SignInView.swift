@@ -83,15 +83,41 @@ struct SignInView: View {
 
             Divider()
 
-            Text("还没有账号? **点击注册**")
-                .font(.footnote)
-                .foregroundColor(.primary.opacity(0.7))
-                .accentColor(.primary.opacity(0.7))
-                .onTapGesture {
-                    withAnimation {
-                        model.selectedPanel = .signUp
+            VStack(alignment: .leading, spacing: 10) {
+                Text("还没有账号? **点击注册**")
+                    .font(.footnote)
+                    .foregroundColor(.primary.opacity(0.7))
+                    .accentColor(.primary.opacity(0.7))
+                    .onTapGesture {
+                        withAnimation {
+                            model.selectedPanel = .signUp
+                        }
                     }
-                }
+
+                Text("**忘记密码？**")
+                    .font(.footnote)
+                    .foregroundColor(.primary.opacity(0.7))
+                    .accentColor(.primary.opacity(0.7))
+                    .onTapGesture {
+                        let selectSignUpButtonJS = """
+                        document.querySelector('ul  li.item-logIn > button').click();
+                        document.querySelector('p.LogInModal-forgotPassword > a').click();
+                        """
+                        if let url = URL(string: URLService.link(href: "https://ecnu.im/", jsAction: selectSignUpButtonJS).url) {
+                            UIApplication.shared.open(url)
+                        }
+                    }
+
+                Text("**点击此处打开腾讯企业邮箱**")
+                    .font(.footnote)
+                    .foregroundColor(.primary.opacity(0.7))
+                    .accentColor(.primary.opacity(0.7))
+                    .onTapGesture {
+                        if let url = URL(string: URLService.link(href: "https://exmail.qq.com/").url) {
+                            UIApplication.shared.open(url)
+                        }
+                    }
+            }
         }
     }
 

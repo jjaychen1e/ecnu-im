@@ -151,9 +151,19 @@ struct SignUpView: View {
                 .accentColor(.primary.opacity(0.7))
                 .onTapGesture {
                     let selectSignUpButtonJS = """
-                    document.querySelector('#header-secondary > ul > li.item-signUp > button').click();
+                    document.querySelector('ul li.item-signUp > button').click();
                     """
                     if let url = URL(string: URLService.link(href: "https://ecnu.im/", jsAction: selectSignUpButtonJS).url) {
+                        UIApplication.shared.open(url)
+                    }
+                }
+            
+            Text("**点击此处打开腾讯企业邮箱**")
+                .font(.footnote)
+                .foregroundColor(.primary.opacity(0.7))
+                .accentColor(.primary.opacity(0.7))
+                .onTapGesture {
+                    if let url = URL(string: URLService.link(href: "https://exmail.qq.com/").url) {
                         UIApplication.shared.open(url)
                     }
                 }
