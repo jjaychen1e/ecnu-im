@@ -44,6 +44,7 @@
 		631E59E12813EE7E009A1A94 /* FlarumTag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631E59E02813EE7E009A1A94 /* FlarumTag.swift */; };
 		631E59E32813FA79009A1A94 /* FlarumUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631E59E22813FA79009A1A94 /* FlarumUser.swift */; };
 		631E59E52813FB15009A1A94 /* FlarumLinks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631E59E42813FB15009A1A94 /* FlarumLinks.swift */; };
+		6329538F28488FCA00D00119 /* Task+Delayed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6329538E28488FCA00D00119 /* Task+Delayed.swift */; };
 		6329EE6B281A9C78001BE8DD /* ContentItemDivider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6329EE6A281A9C78001BE8DD /* ContentItemDivider.swift */; };
 		6329EE70281AAEFC001BE8DD /* ContentItemSingleImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6329EE6F281AAEFC001BE8DD /* ContentItemSingleImage.swift */; };
 		6329EE72281AB031001BE8DD /* ContentItemImagesGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6329EE71281AB031001BE8DD /* ContentItemImagesGrid.swift */; };
@@ -261,6 +262,7 @@
 		631E59E02813EE7E009A1A94 /* FlarumTag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlarumTag.swift; sourceTree = "<group>"; };
 		631E59E22813FA79009A1A94 /* FlarumUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlarumUser.swift; sourceTree = "<group>"; };
 		631E59E42813FB15009A1A94 /* FlarumLinks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlarumLinks.swift; sourceTree = "<group>"; };
+		6329538E28488FCA00D00119 /* Task+Delayed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Task+Delayed.swift"; sourceTree = "<group>"; };
 		6329EE6A281A9C78001BE8DD /* ContentItemDivider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentItemDivider.swift; sourceTree = "<group>"; };
 		6329EE6F281AAEFC001BE8DD /* ContentItemSingleImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentItemSingleImage.swift; sourceTree = "<group>"; };
 		6329EE71281AB031001BE8DD /* ContentItemImagesGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentItemImagesGrid.swift; sourceTree = "<group>"; };
@@ -1141,6 +1143,7 @@
 		63B3C73428354DD50068701F /* Extension */ = {
 			isa = PBXGroup;
 			children = (
+				6329538E28488FCA00D00119 /* Task+Delayed.swift */,
 			);
 			path = Extension;
 			sourceTree = "<group>";
@@ -1643,6 +1646,7 @@
 				63EB854E27F2EC1D0064F5A8 /* AvatarView.swift in Sources */,
 				6349B18B27EEAA180002E89A /* TargetType.swift in Sources */,
 				6329EE74281AB1C7001BE8DD /* ParseConfiguration.swift in Sources */,
+				6329538F28488FCA00D00119 /* Task+Delayed.swift in Sources */,
 				63706E1327F5F08800BE3A48 /* PostAuthorAvatarView.swift in Sources */,
 				63146579282FD2EF00484CC9 /* ProfileCenterPostFooterView.swift in Sources */,
 				63F6321B2830F76B002623F8 /* KeyboardAppearListener.swift in Sources */,

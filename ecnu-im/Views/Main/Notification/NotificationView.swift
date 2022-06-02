@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct NotificationView: View {
-    @State var notification: FlarumNotification
+    @Binding var notification: FlarumNotification
     @State var badgeNotificationTitle: String?
     @State var userBadge: FlarumUserBadge?
     @State var replyExcerptText: String?
@@ -21,6 +21,14 @@ struct NotificationView: View {
         let relatedDiscussion = notification.relatedDiscussion
         let originalPost = notification.originalPost
         let user = notification.relationships?.fromUser
+        let backgroundColor: Color = {
+            if colorScheme == .light {
+                return Color(rgba: "#e4ebf6").opacity(notification.attributes.isRead ? 0.0 : 1.0)
+            } else if colorScheme == .dark {
+                return Color(rgba: "#e4ebf6").opacity(notification.attributes.isRead ? 0.0 : 0.2)
+            }
+            return .clear
+        }()
 
         VStack(alignment: .leading, spacing: 6) {
             Group {
@@ -62,7 +70,9 @@ struct NotificationView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.all, 8)
-        .background(notification.attributes.isRead ? Color.clear.opacity(0.0001) : colorScheme == .light ? Color(rgba: "#e4ebf6") : Color(rgba: "#e4ebf6").opacity(0.2))
+        .background(Color.clear.opacity(0.0001))
+        .background(backgroundColor)
+        .animation(.default, value: notification.attributes.isRead)
         .onLoad {
             Task {
                 if let repliedPost = await notification.newPost() {

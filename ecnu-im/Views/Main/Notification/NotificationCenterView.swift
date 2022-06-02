@@ -15,21 +15,28 @@ private class NotificationCenterViewLoadInfo {
     var isLoading = false
 }
 
+class NotificationCenterViewModel: ObservableObject {
+    @Published var notifications: [FlarumNotification] = []
+}
+
 struct NotificationCenterView: View {
-    @State private var notifications: [FlarumNotification] = []
+    @ObservedObject private var viewModel = NotificationCenterViewModel()
     @State private var subscriptions: Set<AnyCancellable> = []
     @State private var hasScrolled = false
     @State private var loadInfo = NotificationCenterViewLoadInfo()
     @ObservedObject var appGlobalState = AppGlobalState.shared
 
+    @State private var appeared = false
+    @State private var task: Task<Void, Error>?
+
     @State private var sequenceQueue = DispatchQueue(label: "NotificationCenterViewLoadQueue")
 
     var body: some View {
         Group {
-            if notifications.count > 0 {
+            if viewModel.notifications.count > 0 {
                 List {
-                    ForEach(0 ..< notifications.count, id: \.self) { index in
-                        let notification = notifications[index]
+                    ForEach(0 ..< viewModel.notifications.count, id: \.self) { index in
+                        let notification = viewModel.notifications[index]
                         let ignored: Bool = {
                             if let user = notification.relationships?.fromUser {
                                 if appGlobalState.ignoredUserIds.contains(user.id) {
@@ -38,7 +45,7 @@ struct NotificationCenterView: View {
                             }
                             return false
                         }()
-                        NotificationView(notification: notification)
+                        NotificationView(notification: .constant(notification))
                             .listRowInsets(EdgeInsets())
                             .background(
                                 Group {
@@ -71,10 +78,43 @@ struct NotificationCenterView: View {
                 load()
             }.store(in: &subscriptions)
         }
+        .onAppear {
+            appeared = true
+            tryToStartReadNotificationTask()
+        }
+        .onDisappear {
+            appeared = false
+            task?.cancel()
+            task = nil
+        }
+    }
+
+    private func tryToStartReadNotificationTask() {
+        if appGlobalState.autoClearUnreadNotification.value, viewModel.notifications.contains(where: { $0.attributes.isRead == false }) {
+            task?.cancel()
+            task = nil
+            task = Task {
+                try await Task.sleep(nanoseconds: 3_000_000_000)
+                guard !Task.isCancelled else { return }
+                if let _ = try? await flarumProvider.request(.readNotifications) {
+                    guard !Task.isCancelled else { return }
+                    DispatchQueue.main.async {
+                        appGlobalState.unreadNotificationCount = 0
+                        appGlobalState.clearNotificationEvent.send()
+                        viewModel.notifications.forEach { notification in
+                            withAnimation {
+                                notification.attributes.isRead = true
+                            }
+                        }
+                        Toast.default(icon: .emoji("✔️"), title: "已自动已读通知").show()
+                    }
+                }
+            }
+        }
     }
 
     private func checkLoadMore(_ i: Int) {
-        if i == notifications.count - 10 || i == notifications.count - 1 {
+        if i == viewModel.notifications.count - 10 || i == viewModel.notifications.count - 1 {
             load()
         }
     }
@@ -87,7 +127,7 @@ struct NotificationCenterView: View {
                 loadInfo.loadingOffset = 0
                 loadInfo.isLoading = true
                 withAnimation {
-                    notifications = []
+                    viewModel.notifications = []
                 }
             } else {
                 if loadInfo.isLoading {
@@ -102,7 +142,11 @@ struct NotificationCenterView: View {
                 if let response = try? await flarumProvider.request(.notification(offset: loadInfo.loadingOffset, limit: loadInfo.limit)).flarumResponse() {
                     guard !Task.isCancelled else { return }
                     withAnimation {
-                        self.notifications.append(contentsOf: response.data.notifications)
+                        let isFirstTimeLoad = self.viewModel.notifications.count == 0
+                        self.viewModel.notifications.append(contentsOf: response.data.notifications)
+                        if isFirstTimeLoad, response.data.notifications.count != 0 {
+                            tryToStartReadNotificationTask()
+                        }
                     }
                     guard !Task.isCancelled else { return }
                     sequenceQueue.async {

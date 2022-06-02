@@ -16,6 +16,11 @@ class RootSettingViewController: SettingViewController {
                                       },
                                       publisher: AppGlobalState.shared.blockCompletely.eraseToAnyPublisher()),
                         icon: .system(name: "person.crop.circle.badge.minus"), label: "完全隐藏屏蔽用户"),
+                RowItem(type: .toggle(action: { value in
+                                          AppGlobalState.shared.autoClearUnreadNotification.send(value)
+                                      },
+                                      publisher: AppGlobalState.shared.autoClearUnreadNotification.eraseToAnyPublisher()),
+                        icon: .system(name: "bell.badge"), label: "自动已读通知"),
                 RowItem(type: .navigation(action: {
                     if let url = URL(string: URLService.link(href: "https://ecnu.im/p/2-FAQ").url) {
                         UIApplication.shared.open(url)
