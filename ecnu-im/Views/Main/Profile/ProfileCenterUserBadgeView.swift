@@ -50,6 +50,7 @@ struct ProfileCenterUserBadgeView: View {
                     Text(badge.attributes.name)
                         .font(.system(size: 15, weight: .medium, design: .rounded))
                         .foregroundColor(Color(rgba: badge.attributes.labelColor))
+                        .fixedSize()
                 }
                 .padding(.horizontal, 5)
                 .padding(.vertical, 2)
@@ -62,10 +63,12 @@ struct ProfileCenterUserBadgeView: View {
                 Spacer(minLength: 0)
 
                 Group {
-                    Text("于 ") +
+                    (Text("于 ") +
                         Text(userBadge.assignedAtDateDescription)
                         .font(.system(size: 15, weight: .medium, design: .rounded)) +
                         Text(" 获得")
+                     )
+                    .multilineTextAlignment(.trailing)
                 }
                 .font(.system(size: 15, weight: .light, design: .rounded))
             }
