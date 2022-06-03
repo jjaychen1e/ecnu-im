@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import WebKit
 
 class RootSettingViewController: SettingViewController {
     override func viewDidLoad() {
@@ -77,6 +78,26 @@ class RootSettingViewController: SettingViewController {
                 RowItem(type: .navigation(action: {
                     Toast.default(icon: .emoji("👀"), title: "尚未支持").show()
                 }), icon: .system(name: "calendar.badge.plus"), label: "导入课表至日历"),
+            ]),
+            HeaderItem(title: "App", rowItems: [
+                RowItem(type: .action(action: { sender in
+                    let alertController = UIAlertController(title: "你确定清除浏览器缓存吗吗", message: "如果网页样式出现问题，可以尝试清空缓存。", preferredStyle: .actionSheet)
+                    alertController.addAction(.init(title: "确定", style: .destructive, handler: { _ in
+                        WKWebsiteDataStore.default().removeData(ofTypes: [WKWebsiteDataTypeDiskCache, WKWebsiteDataTypeMemoryCache],
+                                                                modifiedSince: Date(timeIntervalSince1970: 0),
+                                                                completionHandler: {
+                                                                    Toast.default(icon: .emoji("✔️"), title: "清除成功").show()
+                                                                })
+                    }))
+                    alertController.addAction(.init(title: "取消", style: .cancel, handler: { _ in
+                        alertController.dismiss(animated: true)
+                    }))
+                    if let popoverController = alertController.popoverPresentationController {
+                        popoverController.sourceView = sender // to set the source of your alert
+                    }
+                    self.present(alertController, animated: true)
+                }),
+                label: "清空浏览器缓存"),
             ]),
             HeaderItem(title: "其他", rowItems: [
                 RowItem(type: .navigation(action: {
