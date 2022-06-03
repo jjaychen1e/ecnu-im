@@ -21,8 +21,42 @@ struct FlarumUserBadgeAttributes: Codable {
     }
 }
 
+struct FlarumUserBadgeRelationshipsNew: Codable {
+    var badge: FlarumBadgeNew
+
+    init(_ i: FlarumUserBadgeRelationships) {
+        badge = .init(i.badge)
+    }
+}
+
 struct FlarumUserBadgeRelationships: Codable {
     var badge: FlarumBadge
+}
+
+struct FlarumUserBadgeNew: Codable {
+    init(id: String, attributes: FlarumUserBadgeAttributes, relationships: FlarumUserBadgeRelationshipsNew? = nil) {
+        self.id = id
+        self.attributes = attributes
+        self.relationships = relationships
+    }
+
+    var id: String
+    var attributes: FlarumUserBadgeAttributes
+    var relationships: FlarumUserBadgeRelationshipsNew?
+
+    var assignedAtDateDescription: String {
+        if let date = attributes.assignedAtDate {
+            return date.localeDescription
+        } else {
+            return "Unknown"
+        }
+    }
+
+    init(_ i: FlarumUserBadge) {
+        id = i.id
+        attributes = i.attributes
+        relationships = i.relationships != nil ? .init(i.relationships!) : nil
+    }
 }
 
 class FlarumUserBadge: Codable {

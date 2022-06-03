@@ -9,6 +9,46 @@ import Foundation
 import SwiftUI
 import SwiftyJSON
 
+struct FlarumResponseNew {
+    struct FlarumResponseDataNew {
+        var allData: [FlarumDataNew] = []
+        var discussions: [FlarumDiscussionNew] = []
+        var posts: [FlarumPostNew] = []
+        var users: [FlarumUserNew] = []
+        var tags: [FlarumTagNew] = []
+        var postReactions: [FlarumPostReactionNew] = []
+        var notifications: [FlarumNotificationNew] = []
+        var badges: [FlarumBadgeNew] = []
+        var badgeCategories: [FlarumBadgeCategoryNew] = []
+        var userBadges: [FlarumUserBadgeNew] = []
+        var profileAnswers: [FlarumProfileAnswerNew] = []
+
+        init(_ i: FlarumResponse.FlarumResponseData) {
+            allData = i.allData.map { .init($0) }
+            discussions = i.discussions.map { .init($0) }
+            posts = i.posts.map { .init($0) }
+            users = i.users.map { .init($0) }
+            tags = i.tags.map { .init($0) }
+            postReactions = i.postReactions.map { .init($0) }
+            notifications = i.notifications.map { .init($0) }
+            badges = i.badges.map { .init($0) }
+            badgeCategories = i.badgeCategories.map { .init($0) }
+            userBadges = i.userBadges.map { .init($0) }
+            profileAnswers = i.profileAnswers.map { .init($0) }
+        }
+    }
+
+    var links: FlarumLinks?
+    var data: FlarumResponseDataNew
+    var included: FlarumResponseDataNew
+
+    init(_ i: FlarumResponse) {
+        links = i.links
+        data = .init(i.data)
+        included = .init(i.included)
+    }
+}
+
 struct FlarumResponse {
     struct FlarumResponseData {
         var allData: [FlarumData] = []
@@ -497,6 +537,54 @@ enum FlarumData {
     case badgeCategory(FlarumBadgeCategory)
     case userBadge(FlarumUserBadge)
     case profileAnswer(FlarumProfileAnswer)
+}
+
+enum FlarumDataNew {
+    case discussion(FlarumDiscussionNew)
+    case post(FlarumPostNew)
+    case user(FlarumUserNew)
+    case tag(FlarumTagNew)
+    case postReaction(FlarumPostReactionNew)
+    case notification(FlarumNotificationNew)
+    case badge(FlarumBadgeNew)
+    case badgeCategory(FlarumBadgeCategoryNew)
+    case userBadge(FlarumUserBadgeNew)
+    case profileAnswer(FlarumProfileAnswerNew)
+
+    init(_ i: FlarumData) {
+        switch i {
+        case let .discussion(flarumDiscussion):
+            self = .discussion(.init(flarumDiscussion))
+            return
+        case let .post(flarumPost):
+            self = .post(.init(flarumPost))
+            return
+        case let .user(flarumUser):
+            self = .user(.init(flarumUser))
+            return
+        case let .tag(flarumTag):
+            self = .tag(.init(flarumTag))
+            return
+        case let .postReaction(flarumPostReaction):
+            self = .postReaction(.init(flarumPostReaction))
+            return
+        case let .notification(flarumNotification):
+            self = .notification(.init(flarumNotification))
+            return
+        case let .badge(flarumBadge):
+            self = .badge(.init(flarumBadge))
+            return
+        case let .badgeCategory(flarumBadgeCategory):
+            self = .badgeCategory(.init(flarumBadgeCategory))
+            return
+        case let .userBadge(flarumUserBadge):
+            self = .userBadge(.init(flarumUserBadge))
+            return
+        case let .profileAnswer(flarumProfileAnswer):
+            self = .profileAnswer(.init(flarumProfileAnswer))
+            return
+        }
+    }
 }
 
 extension Response {

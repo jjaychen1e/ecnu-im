@@ -90,6 +90,88 @@ struct FlarumPostRelationships {
     var mentionedBy: [FlarumPost]?
 }
 
+struct FlarumPostRelationshipsNew {
+    enum Relationship: CaseIterable {
+        case user
+        case discussion
+        case likes
+        case reactions
+        case mentionedBy
+    }
+
+    var user: FlarumUserNew?
+    var likes: [FlarumUserNew]?
+    var reactions: [FlarumPostReactionNew]?
+    var mentionedBy: [FlarumPostNew]?
+    private var boxedDiscussion: Box<FlarumDiscussionNew>?
+    
+    var discussion: FlarumDiscussionNew? {
+        boxedDiscussion?.value
+    }
+
+    init(_ i: FlarumPostRelationships) {
+        user = i.user != nil ? .init(i.user!) : nil
+        boxedDiscussion = i.discussion != nil ? .init(value: .init(i.discussion!)) : nil
+        likes = i.likes?.map { .init($0) }
+    }
+}
+
+struct FlarumPostNew: Hashable {
+    static func == (lhs: FlarumPostNew, rhs: FlarumPostNew) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+
+    init(id: String, attributes: FlarumPostAttributes? = nil, relationships: FlarumPostRelationshipsNew? = nil) {
+        self.id = id
+        self.attributes = attributes
+        self.relationships = relationships
+    }
+
+    init(_ i: FlarumPost) {
+        id = i.id
+        attributes = i.attributes
+        relationships = i.relationships != nil ? .init(i.relationships!) : nil
+    }
+
+    var id: String
+    var attributes: FlarumPostAttributes?
+    var relationships: FlarumPostRelationshipsNew?
+
+    // MARK: Loading Logic
+
+    struct FlarumPostLoadMoreState {
+        var prevOffset: Int?
+        var nextOffset: Int?
+    }
+
+    var loadMoreState: FlarumPostLoadMoreState?
+    var isDeleted: Bool?
+
+    static var deletedPost: FlarumPost {
+        let post = FlarumPost(id: UUID().uuidString)
+        post.isDeleted = true
+        return post
+    }
+
+    // Excerpt Text
+    func excerptText(configuration: ContentParser.ContentExcerpt.ContentExcerptConfiguration) -> String? {
+        if let content = attributes?.content,
+           case let .comment(comment) = content {
+            let parser = ContentParser(content: comment,
+                                       configuration: .init(imageOnTapAction: { _, _ in },
+                                                            imageGridDisplayMode: .narrow),
+                                       updateLayout: nil)
+            let postExcerptText = parser.getExcerptContent(configuration: configuration).text
+            return postExcerptText
+        }
+        return nil
+    }
+}
+
 class FlarumPost: Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
@@ -136,6 +218,51 @@ class FlarumPost: Hashable {
     }
 }
 
+extension FlarumPostNew {
+    var author: FlarumUserNew? {
+        relationships?.user
+    }
+
+    var authorName: String {
+        author?.attributes.displayName ?? "Unkown"
+    }
+
+    var authorAvatarURL: URL? {
+        if let urlStr = author?.attributes.avatarUrl {
+            return URL(string: urlStr)
+        }
+        return nil
+    }
+
+    var createdDateDescription: String {
+        if let date = attributes?.createdDate {
+            return date.localeDescription
+        } else {
+            return "Unknown"
+        }
+    }
+
+    var editedDateDescription: String? {
+        if let date = attributes?.editedDate {
+            return date.localeDescription
+        } else {
+            return nil
+        }
+    }
+
+    var isHidden: Bool {
+        attributes?.isHidden ?? false
+    }
+
+    var discussion: FlarumDiscussionNew? {
+        relationships?.discussion ?? nil
+    }
+
+    var discussionAuthor: FlarumUserNew? {
+        discussion?.starter
+    }
+}
+
 extension FlarumPost {
     var author: FlarumUser? {
         relationships?.user
@@ -167,15 +294,15 @@ extension FlarumPost {
             return nil
         }
     }
-    
+
     var isHidden: Bool {
         attributes?.isHidden ?? false
     }
-    
+
     var discussion: FlarumDiscussion? {
         relationships?.discussion ?? nil
     }
-    
+
     var discussionAuthor: FlarumUser? {
         discussion?.starter
     }

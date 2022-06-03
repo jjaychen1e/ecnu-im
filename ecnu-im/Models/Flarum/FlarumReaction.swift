@@ -28,6 +28,21 @@ struct FlarumPostReactionAttributes {
     var reaction: FlarumReaction
 }
 
+struct FlarumPostReactionNew {
+    init(id: String, attributes: FlarumPostReactionAttributes) {
+        self.id = id
+        self.attributes = attributes
+    }
+
+    var id: String
+    var attributes: FlarumPostReactionAttributes
+
+    init(_ i: FlarumPostReaction) {
+        id = i.id
+        attributes = i.attributes
+    }
+}
+
 class FlarumPostReaction {
     init(id: String, attributes: FlarumPostReactionAttributes) {
         self.id = id

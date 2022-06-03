@@ -51,6 +51,36 @@ struct FlarumUserRelationships: Codable {
     var ignoredUsers: [FlarumUser]
 }
 
+struct FlarumUserRelationshipsNew: Codable {
+    var userBadges: [FlarumUserBadgeNew]
+    var profileAnswers: [FlarumProfileAnswerNew]
+    var ignoredUsers: [FlarumUserNew]
+
+    init(_ i: FlarumUserRelationships) {
+        userBadges = i.userBadges.map { .init($0) }
+        profileAnswers = i.profileAnswers.map { .init($0) }
+        ignoredUsers = i.ignoredUsers.map { .init($0) }
+    }
+}
+
+struct FlarumUserNew: Codable {
+    init(id: String, attributes: FlarumUserAttributes, relationships: FlarumUserRelationshipsNew? = nil) {
+        self.id = id
+        self.attributes = attributes
+        self.relationships = relationships
+    }
+
+    var id: String
+    var attributes: FlarumUserAttributes
+    var relationships: FlarumUserRelationshipsNew?
+
+    init(_ i: FlarumUser) {
+        id = i.id
+        attributes = i.attributes
+        relationships = i.relationships != nil ? .init(i.relationships!) : nil
+    }
+}
+
 final class FlarumUser {
     init(id: String, attributes: FlarumUserAttributes, relationships: FlarumUserRelationships? = nil) {
         self.id = id

@@ -83,6 +83,135 @@ struct FlarumNotificationRelationships {
     var subject: Subject
 }
 
+struct FlarumNotificationRelationshipsNew {
+    enum Subject {
+        case post(post: FlarumPostNew)
+        case discussion(discussion: FlarumDiscussionNew)
+        case userBadge(userBadgeId: Int)
+
+        init(_ i: FlarumNotificationRelationships.Subject) {
+            switch i {
+            case let .discussion(discussion):
+                self = .discussion(discussion: .init(discussion))
+                return
+            case let .post(post):
+                self = .post(post: .init(post))
+                return
+            case let .userBadge(userBadgeId):
+                self = .userBadge(userBadgeId: userBadgeId)
+                return
+            }
+        }
+    }
+
+    enum SubjectType: String, RawRepresentable {
+        case post = "posts"
+        case discussion = "discussions"
+        case userBadge = "userBadges"
+    }
+
+    var fromUser: FlarumUserNew?
+    var subject: Subject
+
+    init(_ i: FlarumNotificationRelationships) {
+        subject = .init(i.subject)
+        fromUser = i.fromUser != nil ? .init(i.fromUser!) : nil
+    }
+}
+
+struct FlarumNotificationNew {
+    init(id: String, attributes: FlarumNotificationAttributes, relationships: FlarumNotificationRelationshipsNew? = nil) {
+        self.id = id
+        self.attributes = attributes
+        self.relationships = relationships
+    }
+
+    init(_ i: FlarumNotification) {
+        id = i.id
+        attributes = i.attributes
+        relationships = i.relationships != nil ? .init(i.relationships!) : nil
+    }
+
+    var id: String
+    var attributes: FlarumNotificationAttributes
+    var relationships: FlarumNotificationRelationshipsNew?
+
+    var createdDateDescription: String {
+        if let date = attributes.createdDate {
+            return date.localeDescription
+        } else {
+            return "Unknown"
+        }
+    }
+
+    var relatedDiscussion: FlarumDiscussionNew? {
+        switch relationships?.subject {
+        case let .post(post):
+            return post.relationships?.discussion
+        case let .discussion(discussion):
+            return discussion
+        case .userBadge, .none:
+            return nil
+        }
+    }
+
+    var originalPost: FlarumPostNew? {
+        switch attributes.content {
+        case .badgeReceived, .postLiked, .postMentioned, .postReacted, .privateDiscussionCreated, .privateDiscussionReplied:
+            switch relationships?.subject {
+            case let .post(post):
+                return post
+            case let .discussion(discussion):
+                return discussion.firstPost
+            case .userBadge, .none:
+                return nil
+            }
+        case .userMentioned, .newPost:
+            return nil
+        }
+    }
+
+    func newPost() async -> FlarumPostNew? {
+        var targetPostNumber: Int?
+        var targetPost: FlarumPostNew?
+        switch attributes.content {
+        case .postLiked, .postReacted, .privateDiscussionCreated, .badgeReceived:
+            break
+        case let .postMentioned(replyNumber):
+            targetPostNumber = replyNumber
+        case let .newPost(postNumber):
+            targetPostNumber = postNumber
+        case let .privateDiscussionReplied(postNumber):
+            targetPostNumber = postNumber
+        case .userMentioned:
+            if let subject = relationships?.subject {
+                if case let .post(post) = subject {
+                    targetPost = post
+                }
+            }
+        }
+
+        if let targetPost = targetPost {
+            return targetPost
+        }
+        
+        // TODO: New -
+        
+//        if let targetPostNumber = targetPostNumber,
+//           let discussion = relatedDiscussion,
+//           let id = Int(discussion.id) {
+//            if let response = try? await flarumProvider.request(.postsNearNumber(discussionID: id, nearNumber: targetPostNumber, limit: 4)).flarumResponse() {
+//                let post = response.data.posts.first { p in
+//                    p.attributes?.number == targetPostNumber
+//                }
+//                return post
+//            }
+//        }
+
+        return nil
+    }
+}
+
 class FlarumNotification {
     init(id: String, attributes: FlarumNotificationAttributes, relationships: FlarumNotificationRelationships? = nil) {
         self.id = id

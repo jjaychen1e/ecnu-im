@@ -90,6 +90,33 @@ struct FlarumDiscussionRelationships {
     var tags: [FlarumTag]?
 }
 
+struct FlarumDiscussionRelationshipsNew {
+    enum Relationship: CaseIterable {
+        case user
+        case lastPostedUser
+        case firstPost
+        case lastPost
+        case mostRelevantPost
+        case tags
+    }
+
+    var user: FlarumUserNew?
+    var lastPostedUser: FlarumUserNew?
+    var firstPost: FlarumPostNew?
+    var lastPost: FlarumPostNew?
+    var mostRelevantPost: FlarumPostNew?
+    var tags: [FlarumTagNew]?
+
+    init(_ i: FlarumDiscussionRelationships) {
+        user = i.user != nil ? .init(i.user!) : nil
+        lastPostedUser = i.lastPostedUser != nil ? .init(i.lastPostedUser!) : nil
+        firstPost = i.firstPost != nil ? .init(i.firstPost!) : nil
+        lastPost = i.lastPost != nil ? .init(i.lastPost!) : nil
+        mostRelevantPost = i.mostRelevantPost != nil ? .init(i.mostRelevantPost!) : nil
+        tags = i.tags?.map { FlarumTagNew($0) }
+    }
+}
+
 class FlarumDiscussion {
     init(id: String, attributes: FlarumDiscussionAttributes? = nil, relationships: FlarumDiscussionRelationships? = nil) {
         self.id = id
@@ -101,6 +128,125 @@ class FlarumDiscussion {
     var attributes: FlarumDiscussionAttributes?
     var relationships: FlarumDiscussionRelationships?
 }
+
+struct FlarumDiscussionNew {
+    init(id: String, attributes: FlarumDiscussionAttributes? = nil, relationships: FlarumDiscussionRelationshipsNew? = nil) {
+        self.id = id
+        self.attributes = attributes
+        self.relationships = relationships
+    }
+
+    var id: String
+    var attributes: FlarumDiscussionAttributes?
+    var relationships: FlarumDiscussionRelationshipsNew?
+
+    init(_ i: FlarumDiscussion) {
+        id = i.id
+        attributes = i.attributes
+        relationships = i.relationships != nil ? .init(i.relationships!) : nil
+    }
+}
+
+extension FlarumDiscussionNew {
+    var starter: FlarumUserNew? {
+        relationships?.user
+    }
+
+    var firstPost: FlarumPostNew? {
+        relationships?.firstPost
+    }
+
+    var lastPost: FlarumPostNew? {
+        relationships?.lastPost
+    }
+
+    var mostRelevantPost: FlarumPostNew? {
+        relationships?.mostRelevantPost
+    }
+
+    var mostRelevantPostUser: FlarumUserNew? {
+        mostRelevantPost?.author
+    }
+
+    var lastPostedUser: FlarumUserNew? {
+        relationships?.lastPostedUser
+    }
+
+    var tags: [FlarumTagNew] {
+        relationships?.tags ?? []
+    }
+
+    // TODO: New - 
+//    var tagViewModels: [TagViewModel] {
+//        tags.mappedTagViewModels
+//    }
+
+    var discussionTitle: String {
+        attributes?.title ?? "Unkown"
+    }
+
+    var starterName: String {
+        "@" + (starter?.attributes.displayName ?? "Unkown")
+    }
+
+    var starterAvatarURL: URL? {
+        if let urlString = starter?.attributes.avatarUrl {
+            return URL(string: urlString)
+        }
+        return nil
+    }
+
+    var lastPostedUserName: String {
+        "@" + (lastPostedUser?.attributes.displayName ?? "Unkown")
+    }
+
+    var lastPostedUserAvatarURL: URL? {
+        if let urlString = lastPostedUser?.attributes.avatarUrl {
+            return URL(string: urlString)
+        }
+        return nil
+    }
+
+    var mostRelevantPostedUserName: String {
+        "@" + (mostRelevantPostUser?.attributes.displayName ?? "Unkown")
+    }
+
+    var mostRelevantPostUserAvatarURL: URL? {
+        if let urlString = mostRelevantPostUser?.attributes.avatarUrl {
+            return URL(string: urlString)
+        }
+        return nil
+    }
+
+    var firstPostDateDescription: String {
+        if let date = firstPost?.attributes?.createdDate {
+            return date.localeDescription
+        } else {
+            return "Unknown"
+        }
+    }
+
+    var lastPostDateDescription: String {
+        if let date = lastPost?.attributes?.createdDate {
+            return date.localeDescription
+        } else {
+            return "Unknown"
+        }
+    }
+
+    var commentCount: Int {
+        attributes?.commentCount ?? 0
+    }
+
+    var viewCount: Int {
+        attributes?.viewCount ?? 0
+    }
+
+    var isHidden: Bool {
+        attributes?.isHidden ?? false
+    }
+}
+
 
 extension FlarumDiscussion {
     var starter: FlarumUser? {
@@ -244,3 +390,4 @@ extension Array where Element == FlarumTag {
         return tagViewModels
     }
 }
+

@@ -25,6 +25,36 @@ struct FlarumBadgeRelationships: Codable {
     var category: FlarumBadgeCategory
 }
 
+struct FlarumBadgeRelationshipsNew: Codable {
+    var category: FlarumBadgeCategoryNew
+
+    init(_ i: FlarumBadgeRelationships) {
+        category = .init(i.category)
+    }
+}
+
+struct FlarumBadgeNew: Codable {
+    init(id: String, attributes: FlarumBadgeAttributes, relationships: FlarumBadgeRelationshipsNew? = nil) {
+        self.id = id
+        self.attributes = attributes
+        self.relationships = relationships
+    }
+
+    var id: String
+    var attributes: FlarumBadgeAttributes
+    var relationships: FlarumBadgeRelationshipsNew?
+
+    var description: String {
+        attributes.description ?? "该徽章暂无描述"
+    }
+
+    init(_ i: FlarumBadge) {
+        id = i.id
+        attributes = i.attributes
+        relationships = i.relationships != nil ? .init(i.relationships!) : nil
+    }
+}
+
 class FlarumBadge: Codable {
     init(id: String, attributes: FlarumBadgeAttributes, relationships: FlarumBadgeRelationships? = nil) {
         self.id = id
