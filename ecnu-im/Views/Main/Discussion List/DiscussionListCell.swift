@@ -323,10 +323,10 @@ private struct LastPostCell: View {
                     HStack(alignment: .center, spacing: 2) {
                         Text(viewModel.discussion.lastPostedUserName)
                             .font(.system(size: 15, weight: .medium))
-                        HStack(spacing: 2) {
+                        HStack(spacing: 0) {
                             Text(dateDescription)
+                                .allowsTightening(true)
                                 .font(.system(size: 12, weight: .light))
-                                .fixedSize()
                             Spacer(minLength: 0)
                             DiscussionTagsView(tags: .constant(viewModel.discussion.tagViewModels), fontSize: 14, horizontalPadding: 6, verticalPadding: 4, cornerRadius: 5)
                                 .fixedSize()
