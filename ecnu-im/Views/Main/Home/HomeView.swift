@@ -647,6 +647,7 @@ struct HomeView: View {
                                 .onTapGesture {
                                     UIApplication.shared.presentOnTop(ProfileCenterViewController(userId: user.id), animated: true)
                                 }
+                                .contentShape(Rectangle())
                         }
                     }
                     .padding(.horizontal)
@@ -677,6 +678,7 @@ struct HomeView: View {
                                 .onTapGesture {
                                     UIApplication.shared.presentOnTop(ProfileCenterViewController(userId: user.id), animated: true)
                                 }
+                                .contentShape(Rectangle())
                         }
                     }
                     .padding(.horizontal)
@@ -707,6 +709,7 @@ struct HomeView: View {
                                 .onTapGesture {
                                     UIApplication.shared.presentOnTop(ProfileCenterViewController(userId: user.id), animated: true)
                                 }
+                                .contentShape(Rectangle())
                         }
                     }
                     .padding(.horizontal)

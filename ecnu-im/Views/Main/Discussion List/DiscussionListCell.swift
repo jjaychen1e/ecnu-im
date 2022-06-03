@@ -71,6 +71,7 @@ struct DiscussionListCell: View {
                     .background(Color.white.opacity(0.001))
             }
             .buttonStyle(.plain)
+            .contentShape(Rectangle())
 
             if viewModel.discussion.firstPost != nil
                 && viewModel.discussion.lastPost != nil
@@ -84,6 +85,7 @@ struct DiscussionListCell: View {
                         .background(Color.white.opacity(0.001))
                 }
                 .buttonStyle(.plain)
+                .contentShape(Rectangle())
             }
 
             if viewModel.discussion.firstPost == nil {
