@@ -66,10 +66,10 @@ struct FlarumNotificationAttributes: Codable {
     }
 }
 
-struct FlarumNotificationRelationships {
+struct FlarumNotificationRelationshipsReference {
     enum Subject {
-        case post(post: FlarumPost)
-        case discussion(discussion: FlarumDiscussion)
+        case post(post: FlarumPostReference)
+        case discussion(discussion: FlarumDiscussionReference)
         case userBadge(userBadgeId: Int)
     }
 
@@ -79,8 +79,20 @@ struct FlarumNotificationRelationships {
         case userBadge = "userBadges"
     }
 
-    var fromUser: FlarumUser?
+    var fromUser: FlarumUserReference?
     var subject: Subject
+}
+
+class FlarumNotificationReference {
+    init(id: String, attributes: FlarumNotificationAttributes, relationships: FlarumNotificationRelationshipsReference? = nil) {
+        self.id = id
+        self.attributes = attributes
+        self.relationships = relationships
+    }
+
+    var id: String
+    var attributes: FlarumNotificationAttributes
+    var relationships: FlarumNotificationRelationshipsReference?
 }
 
 struct FlarumNotificationRelationshipsNew {
@@ -89,7 +101,7 @@ struct FlarumNotificationRelationshipsNew {
         case discussion(discussion: FlarumDiscussionNew)
         case userBadge(userBadgeId: Int)
 
-        init(_ i: FlarumNotificationRelationships.Subject) {
+        init(_ i: FlarumNotificationRelationshipsReference.Subject) {
             switch i {
             case let .discussion(discussion):
                 self = .discussion(discussion: .init(discussion))
@@ -113,7 +125,7 @@ struct FlarumNotificationRelationshipsNew {
     var fromUser: FlarumUserNew?
     var subject: Subject
 
-    init(_ i: FlarumNotificationRelationships) {
+    init(_ i: FlarumNotificationRelationshipsReference) {
         subject = .init(i.subject)
         fromUser = i.fromUser != nil ? .init(i.fromUser!) : nil
     }
@@ -126,7 +138,7 @@ struct FlarumNotificationNew {
         self.relationships = relationships
     }
 
-    init(_ i: FlarumNotification) {
+    init(_ i: FlarumNotificationReference) {
         id = i.id
         attributes = i.attributes
         relationships = i.relationships != nil ? .init(i.relationships!) : nil
@@ -194,9 +206,9 @@ struct FlarumNotificationNew {
         if let targetPost = targetPost {
             return targetPost
         }
-        
+
         // TODO: New -
-        
+
 //        if let targetPostNumber = targetPostNumber,
 //           let discussion = relatedDiscussion,
 //           let id = Int(discussion.id) {
@@ -207,91 +219,6 @@ struct FlarumNotificationNew {
 //                return post
 //            }
 //        }
-
-        return nil
-    }
-}
-
-class FlarumNotification {
-    init(id: String, attributes: FlarumNotificationAttributes, relationships: FlarumNotificationRelationships? = nil) {
-        self.id = id
-        self.attributes = attributes
-        self.relationships = relationships
-    }
-
-    var id: String
-    var attributes: FlarumNotificationAttributes
-    var relationships: FlarumNotificationRelationships?
-
-    var createdDateDescription: String {
-        if let date = attributes.createdDate {
-            return date.localeDescription
-        } else {
-            return "Unknown"
-        }
-    }
-
-    var relatedDiscussion: FlarumDiscussion? {
-        switch relationships?.subject {
-        case let .post(post):
-            return post.relationships?.discussion
-        case let .discussion(discussion):
-            return discussion
-        case .userBadge, .none:
-            return nil
-        }
-    }
-
-    var originalPost: FlarumPost? {
-        switch attributes.content {
-        case .badgeReceived, .postLiked, .postMentioned, .postReacted, .privateDiscussionCreated, .privateDiscussionReplied:
-            switch relationships?.subject {
-            case let .post(post):
-                return post
-            case let .discussion(discussion):
-                return discussion.firstPost
-            case .userBadge, .none:
-                return nil
-            }
-        case .userMentioned, .newPost:
-            return nil
-        }
-    }
-
-    func newPost() async -> FlarumPost? {
-        var targetPostNumber: Int?
-        var targetPost: FlarumPost?
-        switch attributes.content {
-        case .postLiked, .postReacted, .privateDiscussionCreated, .badgeReceived:
-            break
-        case let .postMentioned(replyNumber):
-            targetPostNumber = replyNumber
-        case let .newPost(postNumber):
-            targetPostNumber = postNumber
-        case let .privateDiscussionReplied(postNumber):
-            targetPostNumber = postNumber
-        case .userMentioned:
-            if let subject = relationships?.subject {
-                if case let .post(post) = subject {
-                    targetPost = post
-                }
-            }
-        }
-
-        if let targetPost = targetPost {
-            return targetPost
-        }
-
-        if let targetPostNumber = targetPostNumber,
-           let discussion = relatedDiscussion,
-           let id = Int(discussion.id) {
-            if let response = try? await flarumProvider.request(.postsNearNumber(discussionID: id, nearNumber: targetPostNumber, limit: 4)).flarumResponse() {
-                let post = response.data.posts.first { p in
-                    p.attributes?.number == targetPostNumber
-                }
-                return post
-            }
-        }
 
         return nil
     }

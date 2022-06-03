@@ -8,6 +8,13 @@
 import Foundation
 import SwiftyJSON
 
+class Box<T> {
+    var value: T
+    init(value: T) {
+        self.value = value
+    }
+}
+
 struct FlarumTagAttributes: Codable {
     var name: String
     var description: String
@@ -23,15 +30,20 @@ struct FlarumTagAttributes: Codable {
     var canAddToDiscussion: Bool
 }
 
-struct FlarumTagRelationships: Codable {
-    var parent: FlarumTag?
+struct FlarumTagRelationshipsReference: Codable {
+    var parent: FlarumTagReference?
 }
 
-class Box<T> {
-    var value: T
-    init(value: T) {
-        self.value = value
+class FlarumTagReference: Codable {
+    init(id: String, attributes: FlarumTagAttributes, relationships: FlarumTagRelationshipsReference? = nil) {
+        self.id = id
+        self.attributes = attributes
+        self.relationships = relationships
     }
+
+    var id: String
+    var attributes: FlarumTagAttributes
+    var relationships: FlarumTagRelationshipsReference?
 }
 
 // TODO: New - Codable
@@ -42,7 +54,7 @@ struct FlarumTagRelationshipsNew {
         boxedParent?.value
     }
 
-    init(_ i: FlarumTagRelationships) {
+    init(_ i: FlarumTagRelationshipsReference) {
         boxedParent = i.parent != nil ? .init(value: .init(i.parent!)) : nil
     }
 
@@ -63,27 +75,15 @@ struct FlarumTagNew {
     var attributes: FlarumTagAttributes
     var relationships: FlarumTagRelationshipsNew?
 
-    init(_ i: FlarumTag) {
+    init(_ i: FlarumTagReference) {
         id = i.id
         attributes = i.attributes
         relationships = i.relationships != nil ? .init(i.relationships!) : nil
     }
 }
 
-class FlarumTag: Codable {
-    init(id: String, attributes: FlarumTagAttributes, relationships: FlarumTagRelationships? = nil) {
-        self.id = id
-        self.attributes = attributes
-        self.relationships = relationships
-    }
-
-    var id: String
-    var attributes: FlarumTagAttributes
-    var relationships: FlarumTagRelationships?
-}
-
-extension FlarumTag: Equatable {
-    static func == (lhs: FlarumTag, rhs: FlarumTag) -> Bool {
+extension FlarumTagNew: Equatable {
+    static func == (lhs: FlarumTagNew, rhs: FlarumTagNew) -> Bool {
         lhs.id == rhs.id
     }
 }

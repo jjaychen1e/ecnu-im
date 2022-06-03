@@ -31,17 +31,7 @@ struct FlarumProfileAnswerAttributes: Codable {
     var fieldId: Int
 }
 
-struct FlarumProfileAnswerNew: Codable {
-    init(_ i: FlarumProfileAnswer) {
-        self.id = i.id
-        self.attributes = i.attributes
-    }
-
-    var id: String
-    var attributes: FlarumProfileAnswerAttributes
-}
-
-class FlarumProfileAnswer: Codable {
+class FlarumProfileAnswerReference: Codable {
     init(id: String, attributes: FlarumProfileAnswerAttributes) {
         self.id = id
         self.attributes = attributes
@@ -51,8 +41,18 @@ class FlarumProfileAnswer: Codable {
     var attributes: FlarumProfileAnswerAttributes
 }
 
-extension FlarumProfileAnswer: Hashable {
-    static func == (lhs: FlarumProfileAnswer, rhs: FlarumProfileAnswer) -> Bool {
+struct FlarumProfileAnswerNew: Codable {
+    init(_ i: FlarumProfileAnswerReference) {
+        id = i.id
+        attributes = i.attributes
+    }
+
+    var id: String
+    var attributes: FlarumProfileAnswerAttributes
+}
+
+extension FlarumProfileAnswerNew: Hashable {
+    static func == (lhs: FlarumProfileAnswerNew, rhs: FlarumProfileAnswerNew) -> Bool {
         lhs.id == rhs.id
     }
 

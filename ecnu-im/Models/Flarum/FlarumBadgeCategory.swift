@@ -16,16 +16,28 @@ struct FlarumBadgeCategoryAttributes: Codable {
     var createdAt: String
 }
 
+struct FlarumBadgeCategoryRelationshipsReference: Codable {
+    var badges: [FlarumBadgeReference]
+}
+
+class FlarumBadgeCategoryReference: Codable {
+    init(id: String, attributes: FlarumBadgeCategoryAttributes, relationships: FlarumBadgeCategoryRelationshipsReference? = nil) {
+        self.id = id
+        self.attributes = attributes
+        self.relationships = relationships
+    }
+
+    var id: String
+    var attributes: FlarumBadgeCategoryAttributes
+    var relationships: FlarumBadgeCategoryRelationshipsReference?
+}
+
 struct FlarumBadgeCategoryRelationshipsNew: Codable {
     var badges: [FlarumBadgeNew]
 
-    init(_ i: FlarumBadgeCategoryRelationships) {
+    init(_ i: FlarumBadgeCategoryRelationshipsReference) {
         badges = i.badges.map { .init($0) }
     }
-}
-
-struct FlarumBadgeCategoryRelationships: Codable {
-    var badges: [FlarumBadge]
 }
 
 struct FlarumBadgeCategoryNew: Codable {
@@ -39,27 +51,15 @@ struct FlarumBadgeCategoryNew: Codable {
     var attributes: FlarumBadgeCategoryAttributes
     var relationships: FlarumBadgeCategoryRelationshipsNew?
 
-    init(_ i: FlarumBadgeCategory) {
+    init(_ i: FlarumBadgeCategoryReference) {
         id = i.id
         attributes = i.attributes
         relationships = i.relationships != nil ? .init(i.relationships!) : nil
     }
 }
 
-class FlarumBadgeCategory: Codable {
-    init(id: String, attributes: FlarumBadgeCategoryAttributes, relationships: FlarumBadgeCategoryRelationships? = nil) {
-        self.id = id
-        self.attributes = attributes
-        self.relationships = relationships
-    }
-
-    var id: String
-    var attributes: FlarumBadgeCategoryAttributes
-    var relationships: FlarumBadgeCategoryRelationships?
-}
-
-extension FlarumBadgeCategory: Hashable {
-    static func == (lhs: FlarumBadgeCategory, rhs: FlarumBadgeCategory) -> Bool {
+extension FlarumBadgeCategoryNew: Hashable {
+    static func == (lhs: FlarumBadgeCategoryNew, rhs: FlarumBadgeCategoryNew) -> Bool {
         lhs.id == rhs.id
     }
 

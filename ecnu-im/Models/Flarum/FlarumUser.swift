@@ -45,10 +45,22 @@ struct FlarumUserAttributes: Codable {
     }
 }
 
-struct FlarumUserRelationships: Codable {
-    var userBadges: [FlarumUserBadge]
-    var profileAnswers: [FlarumProfileAnswer]
-    var ignoredUsers: [FlarumUser]
+struct FlarumUserRelationshipsReference: Codable {
+    var userBadges: [FlarumUserBadgeReference]
+    var profileAnswers: [FlarumProfileAnswerReference]
+    var ignoredUsers: [FlarumUserReference]
+}
+
+final class FlarumUserReference {
+    init(id: String, attributes: FlarumUserAttributes, relationships: FlarumUserRelationshipsReference? = nil) {
+        self.id = id
+        self.attributes = attributes
+        self.relationships = relationships
+    }
+
+    var id: String
+    var attributes: FlarumUserAttributes
+    var relationships: FlarumUserRelationshipsReference?
 }
 
 struct FlarumUserRelationshipsNew: Codable {
@@ -56,7 +68,7 @@ struct FlarumUserRelationshipsNew: Codable {
     var profileAnswers: [FlarumProfileAnswerNew]
     var ignoredUsers: [FlarumUserNew]
 
-    init(_ i: FlarumUserRelationships) {
+    init(_ i: FlarumUserRelationshipsReference) {
         userBadges = i.userBadges.map { .init($0) }
         profileAnswers = i.profileAnswers.map { .init($0) }
         ignoredUsers = i.ignoredUsers.map { .init($0) }
@@ -74,28 +86,16 @@ struct FlarumUserNew: Codable {
     var attributes: FlarumUserAttributes
     var relationships: FlarumUserRelationshipsNew?
 
-    init(_ i: FlarumUser) {
+    init(_ i: FlarumUserReference) {
         id = i.id
         attributes = i.attributes
         relationships = i.relationships != nil ? .init(i.relationships!) : nil
     }
 }
 
-final class FlarumUser {
-    init(id: String, attributes: FlarumUserAttributes, relationships: FlarumUserRelationships? = nil) {
-        self.id = id
-        self.attributes = attributes
-        self.relationships = relationships
-    }
+extension FlarumUserNew: Codable {}
 
-    var id: String
-    var attributes: FlarumUserAttributes
-    var relationships: FlarumUserRelationships?
-}
-
-extension FlarumUser: Codable {}
-
-extension FlarumUser {
+extension FlarumUserNew {
     var avatarURL: URL? {
         if let url = attributes.avatarUrl {
             return URL(string: url)
@@ -155,8 +155,8 @@ extension FlarumUser {
     }
 }
 
-extension FlarumUser: Hashable {
-    static func == (lhs: FlarumUser, rhs: FlarumUser) -> Bool {
+extension FlarumUserNew: Hashable {
+    static func == (lhs: FlarumUserNew, rhs: FlarumUserNew) -> Bool {
         lhs.id == rhs.id
     }
 

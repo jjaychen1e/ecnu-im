@@ -21,16 +21,28 @@ struct FlarumUserBadgeAttributes: Codable {
     }
 }
 
+struct FlarumUserBadgeRelationshipsReference: Codable {
+    var badge: FlarumBadgeReference
+}
+
+class FlarumUserBadgeReference: Codable {
+    init(id: String, attributes: FlarumUserBadgeAttributes, relationships: FlarumUserBadgeRelationshipsReference? = nil) {
+        self.id = id
+        self.attributes = attributes
+        self.relationships = relationships
+    }
+
+    var id: String
+    var attributes: FlarumUserBadgeAttributes
+    var relationships: FlarumUserBadgeRelationshipsReference?
+}
+
 struct FlarumUserBadgeRelationshipsNew: Codable {
     var badge: FlarumBadgeNew
 
-    init(_ i: FlarumUserBadgeRelationships) {
+    init(_ i: FlarumUserBadgeRelationshipsReference) {
         badge = .init(i.badge)
     }
-}
-
-struct FlarumUserBadgeRelationships: Codable {
-    var badge: FlarumBadge
 }
 
 struct FlarumUserBadgeNew: Codable {
@@ -52,35 +64,15 @@ struct FlarumUserBadgeNew: Codable {
         }
     }
 
-    init(_ i: FlarumUserBadge) {
+    init(_ i: FlarumUserBadgeReference) {
         id = i.id
         attributes = i.attributes
         relationships = i.relationships != nil ? .init(i.relationships!) : nil
     }
 }
 
-class FlarumUserBadge: Codable {
-    init(id: String, attributes: FlarumUserBadgeAttributes, relationships: FlarumUserBadgeRelationships? = nil) {
-        self.id = id
-        self.attributes = attributes
-        self.relationships = relationships
-    }
-
-    var id: String
-    var attributes: FlarumUserBadgeAttributes
-    var relationships: FlarumUserBadgeRelationships?
-
-    var assignedAtDateDescription: String {
-        if let date = attributes.assignedAtDate {
-            return date.localeDescription
-        } else {
-            return "Unknown"
-        }
-    }
-}
-
-extension FlarumUserBadge: Hashable {
-    static func == (lhs: FlarumUserBadge, rhs: FlarumUserBadge) -> Bool {
+extension FlarumUserBadgeNew: Hashable {
+    static func == (lhs: FlarumUserBadgeNew, rhs: FlarumUserBadgeNew) -> Bool {
         lhs.id == rhs.id
     }
 
