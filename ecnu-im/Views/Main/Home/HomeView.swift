@@ -516,7 +516,7 @@ struct HomeView: View {
                                 }
                                 HStack {
                                     Text(viewModel.latestNotificationTitle ?? "暂无通知标题")
-                                        .lineLimit(1)
+                                        .lineLimit(2)
                                         .font(.system(size: 12, weight: .semibold, design: .rounded))
                                     Text(latestNotificationCreatedDateDescription)
                                         .font(.system(size: 12, weight: .semibold, design: .rounded))
