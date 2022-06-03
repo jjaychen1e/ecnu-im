@@ -46,9 +46,15 @@ struct FlarumUserAttributes: Codable {
 }
 
 struct FlarumUserRelationshipsReference {
-    var userBadges: [FlarumUserBadgeReference]
-    var profileAnswers: [FlarumProfileAnswerReference]
-    var ignoredUsers: [FlarumUserReference]
+    @Weak var userBadges: [FlarumUserBadgeReference]
+    @Weak var profileAnswers: [FlarumProfileAnswerReference]
+    @Weak var ignoredUsers: [FlarumUserReference]
+
+    init(userBadges: [FlarumUserBadgeReference], profileAnswers: [FlarumProfileAnswerReference], ignoredUsers: [FlarumUserReference]) {
+        self.userBadges = userBadges
+        self.profileAnswers = profileAnswers
+        self.ignoredUsers = ignoredUsers
+    }
 }
 
 final class FlarumUserReference {

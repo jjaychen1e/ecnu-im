@@ -8,7 +8,6 @@
 import Cache
 import Foundation
 
-// TODO: New -
 extension FlarumBadge {
     static func initBadgeInfo() {
         Task {
@@ -122,7 +121,7 @@ struct FlarumBadgeAttributes: Codable {
 }
 
 struct FlarumBadgeRelationshipsReference {
-    var category: FlarumBadgeCategoryReference
+    unowned var category: FlarumBadgeCategoryReference
 }
 
 class FlarumBadgeReference {

@@ -17,7 +17,11 @@ struct FlarumBadgeCategoryAttributes: Codable {
 }
 
 struct FlarumBadgeCategoryRelationshipsReference {
-    var badges: [FlarumBadgeReference]
+    @Weak var badges: [FlarumBadgeReference]
+
+    init(badges: [FlarumBadgeReference]) {
+        self.badges = badges
+    }
 }
 
 class FlarumBadgeCategoryReference {

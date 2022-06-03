@@ -31,7 +31,7 @@ struct FlarumTagAttributes: Codable {
 }
 
 struct FlarumTagRelationshipsReference {
-    var parent: FlarumTagReference?
+    unowned var parent: FlarumTagReference?
 }
 
 class FlarumTagReference {
@@ -46,7 +46,6 @@ class FlarumTagReference {
     var relationships: FlarumTagRelationshipsReference?
 }
 
-// TODO: New - Codable
 struct FlarumTagRelationships {
     private var boxedParent: Box<FlarumTag>?
 
@@ -63,7 +62,6 @@ struct FlarumTagRelationships {
     }
 }
 
-// TODO: New - Codable
 struct FlarumTag {
     init(id: String, attributes: FlarumTagAttributes, relationships: FlarumTagRelationships? = nil) {
         self.id = id

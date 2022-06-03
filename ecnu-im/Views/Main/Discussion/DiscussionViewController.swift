@@ -318,8 +318,8 @@ class DiscussionViewController: UIViewController, NoOverlayViewController, HasNa
                                     tableView.performBatchUpdates {
                                         tableView.reloadRows(at: [IndexPath(row: postIndex, section: 0)], with: .none)
                                         if case let .comment(post) = self.posts[postIndex] {
-                                            // TODO: New
-//                                            post.attributes?.isHidden = isHidden
+                                            var post = post
+                                            post.attributes?.isHidden = isHidden
                                             self.posts[postIndex] = .comment(post)
                                         } else {
                                             fatalErrorDebug()

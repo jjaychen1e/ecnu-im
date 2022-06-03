@@ -22,7 +22,7 @@ struct FlarumUserBadgeAttributes: Codable {
 }
 
 struct FlarumUserBadgeRelationshipsReference {
-    var badge: FlarumBadgeReference
+    unowned var badge: FlarumBadgeReference
 }
 
 class FlarumUserBadgeReference {

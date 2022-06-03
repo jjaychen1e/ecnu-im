@@ -24,20 +24,3 @@ struct Weak<Element> where Element: AnyObject {
         }
     }
 }
-
-final class UnownedObject<T: AnyObject> {
-    private(set) unowned var value: T?
-    init(_ v: T) { value = v }
-}
-
-@propertyWrapper
-struct Unowned<Element> where Element: AnyObject {
-    private var storage = [UnownedObject<Element>]()
-
-    var wrappedValue: [Element] {
-        get { storage.compactMap { $0.value } }
-        set {
-            storage = newValue.map { UnownedObject($0) }
-        }
-    }
-}

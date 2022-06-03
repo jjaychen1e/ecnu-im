@@ -82,12 +82,12 @@ struct FlarumDiscussionRelationshipsReference {
         case tags
     }
 
-    var user: FlarumUserReference?
-    var lastPostedUser: FlarumUserReference?
-    var firstPost: FlarumPostReference?
-    var lastPost: FlarumPostReference?
-    var mostRelevantPost: FlarumPostReference?
-    var tags: [FlarumTagReference]?
+    weak var user: FlarumUserReference?
+    weak var lastPostedUser: FlarumUserReference?
+    weak var firstPost: FlarumPostReference?
+    weak var lastPost: FlarumPostReference?
+    weak var mostRelevantPost: FlarumPostReference?
+    @Weak var tags: [FlarumTagReference]
 }
 
 class FlarumDiscussionReference {
@@ -142,7 +142,7 @@ struct FlarumDiscussionRelationships {
         firstPost = i.firstPost != nil ? .init(i.firstPost!) : nil
         lastPost = i.lastPost != nil ? .init(i.lastPost!) : nil
         mostRelevantPost = i.mostRelevantPost != nil ? .init(i.mostRelevantPost!) : nil
-        tags = i.tags?.map { FlarumTag($0) }
+        tags = i.tags.map { FlarumTag($0) }
     }
 }
 

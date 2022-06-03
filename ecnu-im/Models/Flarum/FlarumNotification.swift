@@ -79,7 +79,8 @@ struct FlarumNotificationRelationshipsReference {
         case userBadge = "userBadges"
     }
 
-    var fromUser: FlarumUserReference?
+    unowned var fromUser: FlarumUserReference?
+    // TODO: enum should have another struct layer to add weak
     var subject: Subject
 }
 
@@ -207,18 +208,16 @@ struct FlarumNotification {
             return targetPost
         }
 
-        // TODO: New -
-
-//        if let targetPostNumber = targetPostNumber,
-//           let discussion = relatedDiscussion,
-//           let id = Int(discussion.id) {
-//            if let response = try? await flarumProvider.request(.postsNearNumber(discussionID: id, nearNumber: targetPostNumber, limit: 4)).flarumResponse() {
-//                let post = response.data.posts.first { p in
-//                    p.attributes?.number == targetPostNumber
-//                }
-//                return post
-//            }
-//        }
+        if let targetPostNumber = targetPostNumber,
+           let discussion = relatedDiscussion,
+           let id = Int(discussion.id) {
+            if let response = try? await flarumProvider.request(.postsNearNumber(discussionID: id, nearNumber: targetPostNumber, limit: 4)).flarumResponse() {
+                let post = response.data.posts.first { p in
+                    p.attributes?.number == targetPostNumber
+                }
+                return post
+            }
+        }
 
         return nil
     }

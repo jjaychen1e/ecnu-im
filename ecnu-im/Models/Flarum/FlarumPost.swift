@@ -83,11 +83,11 @@ struct FlarumPostRelationshipsReference {
         case mentionedBy
     }
 
-    var user: FlarumUserReference?
-    var discussion: FlarumDiscussionReference?
-    var likes: [FlarumUserReference]?
-    var reactions: [FlarumPostReactionReference]?
-    var mentionedBy: [FlarumPostReference]?
+    weak var user: FlarumUserReference?
+    weak var discussion: FlarumDiscussionReference?
+    @Weak var likes: [FlarumUserReference]
+    @Weak var reactions: [FlarumPostReactionReference]
+    @Weak var mentionedBy: [FlarumPostReference]
 }
 
 class FlarumPostReference {
@@ -128,7 +128,7 @@ struct FlarumPostRelationships {
     init(_ i: FlarumPostRelationshipsReference) {
         user = i.user != nil ? .init(i.user!) : nil
         boxedDiscussion = i.discussion != nil ? .init(value: .init(i.discussion!)) : nil
-        likes = i.likes?.map { .init($0) }
+        likes = i.likes.map { .init($0) }
     }
 }
 
