@@ -35,8 +35,7 @@ struct NotificationCenterView: View {
         Group {
             if viewModel.notifications.count > 0 {
                 List {
-                    ForEach(0 ..< viewModel.notifications.count, id: \.self) { index in
-                        let notification = viewModel.notifications[index]
+                    ForEach(Array(zip(viewModel.notifications.indices, viewModel.notifications)), id: \.1) { index, notification in
                         let ignored: Bool = {
                             if let user = notification.relationships?.fromUser {
                                 if appGlobalState.ignoredUserIds.contains(user.id) {
@@ -75,7 +74,7 @@ struct NotificationCenterView: View {
         }
         .onLoad {
             AppGlobalState.shared.$tokenPrepared.sink { change in
-                load()
+                load(isRefresh: true)
             }.store(in: &subscriptions)
         }
         .onAppear {

@@ -222,3 +222,13 @@ struct FlarumNotification {
         return nil
     }
 }
+
+extension FlarumNotification: Hashable {
+    static func == (lhs: FlarumNotification, rhs: FlarumNotification) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+}
