@@ -255,7 +255,7 @@ struct HomeView: View {
                                             return "Unkown"
                                         }()
                                         let latestNotificationTypeDescription = notifications.first?.attributes.contentType.actionDescription ?? "Unkown"
-                                        viewModel.latestNotificationTitle = "@\(latestNotificationUserName)\(latestNotificationTypeDescription)了：\(latestNotificationDiscussionTitle)"
+                                        viewModel.latestNotificationTitle = "@\(latestNotificationUserName)\(latestNotificationTypeDescription)：\(latestNotificationDiscussionTitle)"
                                     case .badgeReceived:
                                         if let subject = notifications[0].relationships?.subject {
                                             if case let .userBadge(userBadgeId) = subject {
