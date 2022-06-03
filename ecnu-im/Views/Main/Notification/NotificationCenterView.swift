@@ -101,9 +101,9 @@ struct NotificationCenterView: View {
                     DispatchQueue.main.async {
                         appGlobalState.unreadNotificationCount = 0
                         appGlobalState.clearNotificationEvent.send()
-                        viewModel.notifications.forEach { notification in
+                        viewModel.notifications.indices.forEach { index in
                             withAnimation {
-                                notification.attributes.isRead = true
+                                viewModel.notifications[index].attributes.isRead = true
                             }
                         }
                         Toast.default(icon: .emoji("✔️"), title: "已自动已读通知").show()
@@ -127,7 +127,9 @@ struct NotificationCenterView: View {
                 loadInfo.loadingOffset = 0
                 loadInfo.isLoading = true
                 withAnimation {
-                    viewModel.notifications = []
+                    DispatchQueue.main.sync {
+                        viewModel.notifications = []
+                    }
                 }
             } else {
                 if loadInfo.isLoading {

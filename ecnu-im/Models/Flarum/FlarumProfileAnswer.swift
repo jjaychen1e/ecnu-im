@@ -31,10 +31,20 @@ struct FlarumProfileAnswerAttributes: Codable {
     var fieldId: Int
 }
 
-class FlarumProfileAnswer: Codable {
+class FlarumProfileAnswerReference {
     init(id: String, attributes: FlarumProfileAnswerAttributes) {
         self.id = id
         self.attributes = attributes
+    }
+
+    var id: String
+    var attributes: FlarumProfileAnswerAttributes
+}
+
+struct FlarumProfileAnswer: Codable {
+    init(_ i: FlarumProfileAnswerReference) {
+        id = i.id
+        attributes = i.attributes
     }
 
     var id: String

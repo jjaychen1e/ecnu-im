@@ -66,11 +66,55 @@ struct FlarumNotificationAttributes: Codable {
     }
 }
 
+struct FlarumNotificationRelationshipsReference {
+    enum Subject {
+        case post(post: FlarumPostReference)
+        case discussion(discussion: FlarumDiscussionReference)
+        case userBadge(userBadgeId: Int)
+    }
+
+    enum SubjectType: String, RawRepresentable {
+        case post = "posts"
+        case discussion = "discussions"
+        case userBadge = "userBadges"
+    }
+
+    unowned var fromUser: FlarumUserReference?
+    // TODO: enum should have another struct layer to add weak
+    var subject: Subject
+}
+
+class FlarumNotificationReference {
+    init(id: String, attributes: FlarumNotificationAttributes, relationships: FlarumNotificationRelationshipsReference? = nil) {
+        self.id = id
+        self.attributes = attributes
+        self.relationships = relationships
+    }
+
+    var id: String
+    var attributes: FlarumNotificationAttributes
+    var relationships: FlarumNotificationRelationshipsReference?
+}
+
 struct FlarumNotificationRelationships {
     enum Subject {
         case post(post: FlarumPost)
         case discussion(discussion: FlarumDiscussion)
         case userBadge(userBadgeId: Int)
+
+        init(_ i: FlarumNotificationRelationshipsReference.Subject) {
+            switch i {
+            case let .discussion(discussion):
+                self = .discussion(discussion: .init(discussion))
+                return
+            case let .post(post):
+                self = .post(post: .init(post))
+                return
+            case let .userBadge(userBadgeId):
+                self = .userBadge(userBadgeId: userBadgeId)
+                return
+            }
+        }
     }
 
     enum SubjectType: String, RawRepresentable {
@@ -81,13 +125,24 @@ struct FlarumNotificationRelationships {
 
     var fromUser: FlarumUser?
     var subject: Subject
+
+    init(_ i: FlarumNotificationRelationshipsReference) {
+        subject = .init(i.subject)
+        fromUser = i.fromUser != nil ? .init(i.fromUser!) : nil
+    }
 }
 
-class FlarumNotification {
+struct FlarumNotification {
     init(id: String, attributes: FlarumNotificationAttributes, relationships: FlarumNotificationRelationships? = nil) {
         self.id = id
         self.attributes = attributes
         self.relationships = relationships
+    }
+
+    init(_ i: FlarumNotificationReference) {
+        id = i.id
+        attributes = i.attributes
+        relationships = i.relationships != nil ? .init(i.relationships!) : nil
     }
 
     var id: String

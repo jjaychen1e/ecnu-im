@@ -72,6 +72,53 @@ struct FlarumDiscussionAttributes: Decodable {
     }
 }
 
+struct FlarumDiscussionRelationshipsReference {
+    enum Relationship: CaseIterable {
+        case user
+        case lastPostedUser
+        case firstPost
+        case lastPost
+        case mostRelevantPost
+        case tags
+    }
+
+    weak var user: FlarumUserReference?
+    weak var lastPostedUser: FlarumUserReference?
+    weak var firstPost: FlarumPostReference?
+    weak var lastPost: FlarumPostReference?
+    weak var mostRelevantPost: FlarumPostReference?
+    @Weak var tags: [FlarumTagReference]
+}
+
+class FlarumDiscussionReference {
+    init(id: String, attributes: FlarumDiscussionAttributes? = nil, relationships: FlarumDiscussionRelationshipsReference? = nil) {
+        self.id = id
+        self.attributes = attributes
+        self.relationships = relationships
+    }
+
+    var id: String
+    var attributes: FlarumDiscussionAttributes?
+    var relationships: FlarumDiscussionRelationshipsReference?
+}
+
+extension Array where Element == FlarumTag {
+    var mappedTagViewModels: [TagViewModel] {
+        var tagViewModels: [TagViewModel] = []
+        let subTags = filter { $0.attributes.isChild }
+        let firstLevelTags = filter { !$0.attributes.isChild }
+        for tag in firstLevelTags {
+            let tagViewModel = TagViewModel(tag: tag)
+            if let childTag = subTags.first(where: { $0.relationships?.parent?.id == tag.id }) {
+                tagViewModel.child = TagViewModel(tag: childTag)
+            }
+            tagViewModels.append(tagViewModel)
+        }
+
+        return tagViewModels
+    }
+}
+
 struct FlarumDiscussionRelationships {
     enum Relationship: CaseIterable {
         case user
@@ -88,9 +135,18 @@ struct FlarumDiscussionRelationships {
     var lastPost: FlarumPost?
     var mostRelevantPost: FlarumPost?
     var tags: [FlarumTag]?
+
+    init(_ i: FlarumDiscussionRelationshipsReference) {
+        user = i.user != nil ? .init(i.user!) : nil
+        lastPostedUser = i.lastPostedUser != nil ? .init(i.lastPostedUser!) : nil
+        firstPost = i.firstPost != nil ? .init(i.firstPost!) : nil
+        lastPost = i.lastPost != nil ? .init(i.lastPost!) : nil
+        mostRelevantPost = i.mostRelevantPost != nil ? .init(i.mostRelevantPost!) : nil
+        tags = i.tags.map { FlarumTag($0) }
+    }
 }
 
-class FlarumDiscussion {
+struct FlarumDiscussion {
     init(id: String, attributes: FlarumDiscussionAttributes? = nil, relationships: FlarumDiscussionRelationships? = nil) {
         self.id = id
         self.attributes = attributes
@@ -100,6 +156,12 @@ class FlarumDiscussion {
     var id: String
     var attributes: FlarumDiscussionAttributes?
     var relationships: FlarumDiscussionRelationships?
+
+    init(_ i: FlarumDiscussionReference) {
+        id = i.id
+        attributes = i.attributes
+        relationships = i.relationships != nil ? .init(i.relationships!) : nil
+    }
 }
 
 extension FlarumDiscussion {
@@ -225,22 +287,5 @@ extension FlarumDiscussion: Hashable {
         if let lastPostContentHtml = lastPost?.attributes?.contentHtml {
             hasher.combine(lastPostContentHtml)
         }
-    }
-}
-
-extension Array where Element == FlarumTag {
-    var mappedTagViewModels: [TagViewModel] {
-        var tagViewModels: [TagViewModel] = []
-        let subTags = filter { $0.attributes.isChild }
-        let firstLevelTags = filter { !$0.attributes.isChild }
-        for tag in firstLevelTags {
-            let tagViewModel = TagViewModel(tag: tag)
-            if let childTag = subTags.first(where: { $0.relationships?.parent?.id == tag.id }) {
-                tagViewModel.child = TagViewModel(tag: childTag)
-            }
-            tagViewModels.append(tagViewModel)
-        }
-
-        return tagViewModels
     }
 }

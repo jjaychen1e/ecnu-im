@@ -8,46 +8,19 @@
 import Cache
 import Foundation
 
-struct FlarumBadgeAttributes: Codable {
-    var name: String
-    var icon: String
-    var order: Int
-    var description: String?
-    var earnedAmount: Int
-    var isVisible: Int
-    var backgroundColor: String
-    var iconColor: String
-    var labelColor: String
-    var createdAt: String
-}
+extension FlarumBadge {
+    static func initBadgeInfo() {
+        Task {
+            if let response = try? await flarumProvider.request(.allBadgeCategories).flarumResponse() {
+                FlarumBadgeStorage.shared.store(badgeCategories: response.data.badgeCategories)
+            }
+        }
 
-struct FlarumBadgeRelationships: Codable {
-    var category: FlarumBadgeCategory
-}
-
-class FlarumBadge: Codable {
-    init(id: String, attributes: FlarumBadgeAttributes, relationships: FlarumBadgeRelationships? = nil) {
-        self.id = id
-        self.attributes = attributes
-        self.relationships = relationships
-    }
-
-    var id: String
-    var attributes: FlarumBadgeAttributes
-    var relationships: FlarumBadgeRelationships?
-
-    var description: String {
-        attributes.description ?? "该徽章暂无描述"
-    }
-}
-
-extension FlarumBadge: Hashable {
-    static func == (lhs: FlarumBadge, rhs: FlarumBadge) -> Bool {
-        lhs.id == rhs.id
-    }
-
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
+        Task {
+            if let response = try? await flarumProvider.request(.allBadges).flarumResponse() {
+                FlarumBadgeStorage.shared.store(badges: response.data.badges)
+            }
+        }
     }
 }
 
@@ -134,18 +107,71 @@ struct FlarumBadgeStorage {
     }
 }
 
-extension FlarumBadge {
-    static func initBadgeInfo() {
-        Task {
-            if let response = try? await flarumProvider.request(.allBadgeCategories).flarumResponse() {
-                FlarumBadgeStorage.shared.store(badgeCategories: response.data.badgeCategories)
-            }
-        }
+struct FlarumBadgeAttributes: Codable {
+    var name: String
+    var icon: String
+    var order: Int
+    var description: String?
+    var earnedAmount: Int
+    var isVisible: Int
+    var backgroundColor: String
+    var iconColor: String
+    var labelColor: String
+    var createdAt: String
+}
 
-        Task {
-            if let response = try? await flarumProvider.request(.allBadges).flarumResponse() {
-                FlarumBadgeStorage.shared.store(badges: response.data.badges)
-            }
-        }
+struct FlarumBadgeRelationshipsReference {
+    unowned var category: FlarumBadgeCategoryReference
+}
+
+class FlarumBadgeReference {
+    init(id: String, attributes: FlarumBadgeAttributes, relationships: FlarumBadgeRelationshipsReference? = nil) {
+        self.id = id
+        self.attributes = attributes
+        self.relationships = relationships
+    }
+
+    var id: String
+    var attributes: FlarumBadgeAttributes
+    var relationships: FlarumBadgeRelationshipsReference?
+}
+
+struct FlarumBadgeRelationships: Codable {
+    var category: FlarumBadgeCategory
+
+    init(_ i: FlarumBadgeRelationshipsReference) {
+        category = .init(i.category)
+    }
+}
+
+struct FlarumBadge: Codable {
+    init(id: String, attributes: FlarumBadgeAttributes, relationships: FlarumBadgeRelationships? = nil) {
+        self.id = id
+        self.attributes = attributes
+        self.relationships = relationships
+    }
+
+    var id: String
+    var attributes: FlarumBadgeAttributes
+    var relationships: FlarumBadgeRelationships?
+
+    var description: String {
+        attributes.description ?? "该徽章暂无描述"
+    }
+
+    init(_ i: FlarumBadgeReference) {
+        id = i.id
+        attributes = i.attributes
+        relationships = i.relationships != nil ? .init(i.relationships!) : nil
+    }
+}
+
+extension FlarumBadge: Hashable {
+    static func == (lhs: FlarumBadge, rhs: FlarumBadge) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }

@@ -45,13 +45,43 @@ struct FlarumUserAttributes: Codable {
     }
 }
 
+struct FlarumUserRelationshipsReference {
+    @Weak var userBadges: [FlarumUserBadgeReference]
+    @Weak var profileAnswers: [FlarumProfileAnswerReference]
+    @Weak var ignoredUsers: [FlarumUserReference]
+
+    init(userBadges: [FlarumUserBadgeReference], profileAnswers: [FlarumProfileAnswerReference], ignoredUsers: [FlarumUserReference]) {
+        self.userBadges = userBadges
+        self.profileAnswers = profileAnswers
+        self.ignoredUsers = ignoredUsers
+    }
+}
+
+final class FlarumUserReference {
+    init(id: String, attributes: FlarumUserAttributes, relationships: FlarumUserRelationshipsReference? = nil) {
+        self.id = id
+        self.attributes = attributes
+        self.relationships = relationships
+    }
+
+    var id: String
+    var attributes: FlarumUserAttributes
+    var relationships: FlarumUserRelationshipsReference?
+}
+
 struct FlarumUserRelationships: Codable {
     var userBadges: [FlarumUserBadge]
     var profileAnswers: [FlarumProfileAnswer]
     var ignoredUsers: [FlarumUser]
+
+    init(_ i: FlarumUserRelationshipsReference) {
+        userBadges = i.userBadges.map { .init($0) }
+        profileAnswers = i.profileAnswers.map { .init($0) }
+        ignoredUsers = i.ignoredUsers.map { .init($0) }
+    }
 }
 
-final class FlarumUser {
+struct FlarumUser: Codable {
     init(id: String, attributes: FlarumUserAttributes, relationships: FlarumUserRelationships? = nil) {
         self.id = id
         self.attributes = attributes
@@ -61,9 +91,13 @@ final class FlarumUser {
     var id: String
     var attributes: FlarumUserAttributes
     var relationships: FlarumUserRelationships?
-}
 
-extension FlarumUser: Codable {}
+    init(_ i: FlarumUserReference) {
+        id = i.id
+        attributes = i.attributes
+        relationships = i.relationships != nil ? .init(i.relationships!) : nil
+    }
+}
 
 extension FlarumUser {
     var avatarURL: URL? {

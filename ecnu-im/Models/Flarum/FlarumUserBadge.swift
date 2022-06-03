@@ -21,11 +21,31 @@ struct FlarumUserBadgeAttributes: Codable {
     }
 }
 
-struct FlarumUserBadgeRelationships: Codable {
-    var badge: FlarumBadge
+struct FlarumUserBadgeRelationshipsReference {
+    unowned var badge: FlarumBadgeReference
 }
 
-class FlarumUserBadge: Codable {
+class FlarumUserBadgeReference {
+    init(id: String, attributes: FlarumUserBadgeAttributes, relationships: FlarumUserBadgeRelationshipsReference? = nil) {
+        self.id = id
+        self.attributes = attributes
+        self.relationships = relationships
+    }
+
+    var id: String
+    var attributes: FlarumUserBadgeAttributes
+    var relationships: FlarumUserBadgeRelationshipsReference?
+}
+
+struct FlarumUserBadgeRelationships: Codable {
+    var badge: FlarumBadge
+
+    init(_ i: FlarumUserBadgeRelationshipsReference) {
+        badge = .init(i.badge)
+    }
+}
+
+struct FlarumUserBadge: Codable {
     init(id: String, attributes: FlarumUserBadgeAttributes, relationships: FlarumUserBadgeRelationships? = nil) {
         self.id = id
         self.attributes = attributes
@@ -42,6 +62,12 @@ class FlarumUserBadge: Codable {
         } else {
             return "Unknown"
         }
+    }
+
+    init(_ i: FlarumUserBadgeReference) {
+        id = i.id
+        attributes = i.attributes
+        relationships = i.relationships != nil ? .init(i.relationships!) : nil
     }
 }
 

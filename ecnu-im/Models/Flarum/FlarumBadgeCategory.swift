@@ -16,11 +16,35 @@ struct FlarumBadgeCategoryAttributes: Codable {
     var createdAt: String
 }
 
-struct FlarumBadgeCategoryRelationships: Codable {
-    var badges: [FlarumBadge]
+struct FlarumBadgeCategoryRelationshipsReference {
+    @Weak var badges: [FlarumBadgeReference]
+
+    init(badges: [FlarumBadgeReference]) {
+        self.badges = badges
+    }
 }
 
-class FlarumBadgeCategory: Codable {
+class FlarumBadgeCategoryReference {
+    init(id: String, attributes: FlarumBadgeCategoryAttributes, relationships: FlarumBadgeCategoryRelationshipsReference? = nil) {
+        self.id = id
+        self.attributes = attributes
+        self.relationships = relationships
+    }
+
+    var id: String
+    var attributes: FlarumBadgeCategoryAttributes
+    var relationships: FlarumBadgeCategoryRelationshipsReference?
+}
+
+struct FlarumBadgeCategoryRelationships: Codable {
+    var badges: [FlarumBadge]
+
+    init(_ i: FlarumBadgeCategoryRelationshipsReference) {
+        badges = i.badges.map { .init($0) }
+    }
+}
+
+struct FlarumBadgeCategory: Codable {
     init(id: String, attributes: FlarumBadgeCategoryAttributes, relationships: FlarumBadgeCategoryRelationships? = nil) {
         self.id = id
         self.attributes = attributes
@@ -30,13 +54,19 @@ class FlarumBadgeCategory: Codable {
     var id: String
     var attributes: FlarumBadgeCategoryAttributes
     var relationships: FlarumBadgeCategoryRelationships?
+
+    init(_ i: FlarumBadgeCategoryReference) {
+        id = i.id
+        attributes = i.attributes
+        relationships = i.relationships != nil ? .init(i.relationships!) : nil
+    }
 }
 
 extension FlarumBadgeCategory: Hashable {
     static func == (lhs: FlarumBadgeCategory, rhs: FlarumBadgeCategory) -> Bool {
         lhs.id == rhs.id
     }
-    
+
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }

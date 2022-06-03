@@ -8,6 +8,13 @@
 import Foundation
 import SwiftyJSON
 
+class Box<T> {
+    var value: T
+    init(value: T) {
+        self.value = value
+    }
+}
+
 struct FlarumTagAttributes: Codable {
     var name: String
     var description: String
@@ -23,11 +30,39 @@ struct FlarumTagAttributes: Codable {
     var canAddToDiscussion: Bool
 }
 
-struct FlarumTagRelationships: Codable {
-    var parent: FlarumTag?
+struct FlarumTagRelationshipsReference {
+    unowned var parent: FlarumTagReference?
 }
 
-class FlarumTag: Codable {
+class FlarumTagReference {
+    init(id: String, attributes: FlarumTagAttributes, relationships: FlarumTagRelationshipsReference? = nil) {
+        self.id = id
+        self.attributes = attributes
+        self.relationships = relationships
+    }
+
+    var id: String
+    var attributes: FlarumTagAttributes
+    var relationships: FlarumTagRelationshipsReference?
+}
+
+struct FlarumTagRelationships {
+    private var boxedParent: Box<FlarumTag>?
+
+    var parent: FlarumTag? {
+        boxedParent?.value
+    }
+
+    init(_ i: FlarumTagRelationshipsReference) {
+        boxedParent = i.parent != nil ? .init(value: .init(i.parent!)) : nil
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case parent
+    }
+}
+
+struct FlarumTag {
     init(id: String, attributes: FlarumTagAttributes, relationships: FlarumTagRelationships? = nil) {
         self.id = id
         self.attributes = attributes
@@ -37,6 +72,12 @@ class FlarumTag: Codable {
     var id: String
     var attributes: FlarumTagAttributes
     var relationships: FlarumTagRelationships?
+
+    init(_ i: FlarumTagReference) {
+        id = i.id
+        attributes = i.attributes
+        relationships = i.relationships != nil ? .init(i.relationships!) : nil
+    }
 }
 
 extension FlarumTag: Equatable {
