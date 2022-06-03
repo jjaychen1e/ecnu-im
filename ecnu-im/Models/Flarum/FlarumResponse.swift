@@ -9,21 +9,21 @@ import Foundation
 import SwiftUI
 import SwiftyJSON
 
-struct FlarumResponseNew {
-    struct FlarumResponseDataNew {
-        var allData: [FlarumDataNew] = []
-        var discussions: [FlarumDiscussionNew] = []
-        var posts: [FlarumPostNew] = []
-        var users: [FlarumUserNew] = []
-        var tags: [FlarumTagNew] = []
-        var postReactions: [FlarumPostReactionNew] = []
-        var notifications: [FlarumNotificationNew] = []
-        var badges: [FlarumBadgeNew] = []
-        var badgeCategories: [FlarumBadgeCategoryNew] = []
-        var userBadges: [FlarumUserBadgeNew] = []
-        var profileAnswers: [FlarumProfileAnswerNew] = []
+struct FlarumResponse {
+    struct FlarumResponseData {
+        var allData: [FlarumData] = []
+        var discussions: [FlarumDiscussion] = []
+        var posts: [FlarumPost] = []
+        var users: [FlarumUser] = []
+        var tags: [FlarumTag] = []
+        var postReactions: [FlarumPostReaction] = []
+        var notifications: [FlarumNotification] = []
+        var badges: [FlarumBadge] = []
+        var badgeCategories: [FlarumBadgeCategory] = []
+        var userBadges: [FlarumUserBadge] = []
+        var profileAnswers: [FlarumProfileAnswer] = []
 
-        init(_ i: FlarumResponse.FlarumResponseData) {
+        init(_ i: FlarumResponseReference.FlarumResponseData) {
             allData = i.allData.map { .init($0) }
             discussions = i.discussions.map { .init($0) }
             posts = i.posts.map { .init($0) }
@@ -39,29 +39,29 @@ struct FlarumResponseNew {
     }
 
     var links: FlarumLinks?
-    var data: FlarumResponseDataNew
-    var included: FlarumResponseDataNew
+    var data: FlarumResponseData
+    var included: FlarumResponseData
 
-    init(_ i: FlarumResponse) {
+    init(_ i: FlarumResponseReference) {
         links = i.links
         data = .init(i.data)
         included = .init(i.included)
     }
 }
 
-struct FlarumResponse {
+struct FlarumResponseReference {
     struct FlarumResponseData {
-        var allData: [FlarumData] = []
-        var discussions: [FlarumDiscussion] = []
-        var posts: [FlarumPost] = []
-        var users: [FlarumUser] = []
-        var tags: [FlarumTag] = []
-        var postReactions: [FlarumPostReaction] = []
-        var notifications: [FlarumNotification] = []
-        var badges: [FlarumBadge] = []
-        var badgeCategories: [FlarumBadgeCategory] = []
-        var userBadges: [FlarumUserBadge] = []
-        var profileAnswers: [FlarumProfileAnswer] = []
+        var allData: [FlarumDataReference] = []
+        var discussions: [FlarumDiscussionReference] = []
+        var posts: [FlarumPostReference] = []
+        var users: [FlarumUserReference] = []
+        var tags: [FlarumTagReference] = []
+        var postReactions: [FlarumPostReactionReference] = []
+        var notifications: [FlarumNotificationReference] = []
+        var badges: [FlarumBadgeReference] = []
+        var badgeCategories: [FlarumBadgeCategoryReference] = []
+        var userBadges: [FlarumUserBadgeReference] = []
+        var profileAnswers: [FlarumProfileAnswerReference] = []
     }
 
     var links: FlarumLinks?
@@ -103,18 +103,18 @@ struct FlarumResponse {
                 switch dataType {
                 case .discussion:
                     if let id = dataJSON["id"].string {
-                        let discussion: FlarumDiscussion
+                        let discussion: FlarumDiscussionReference
                         if !isData, let _discussion = includedData?.discussions.first(where: { $0.id == id }) {
                             discussion = _discussion
                         } else {
-                            discussion = FlarumDiscussion(id: id)
+                            discussion = FlarumDiscussionReference(id: id)
                             discussion.attributes = dataJSON["attributes"].decode(FlarumDiscussionAttributes.self)
                             if isData, let _discussion = includedData?.discussions.first(where: { $0.id == id }) {
                                 discussion.relationships = _discussion.relationships
                             }
                         }
                         if withRelationship, let includedData = includedData {
-                            var relationships = FlarumDiscussionRelationships()
+                            var relationships = FlarumDiscussionRelationshipsReference()
                             if let dic = dataJSON["relationships"].dictionary {
                                 for relationship in FlarumDiscussionRelationships.Relationship.allCases {
                                     switch relationship {
@@ -152,11 +152,11 @@ struct FlarumResponse {
                     }
                 case .post:
                     if let id = dataJSON["id"].string {
-                        let post: FlarumPost
+                        let post: FlarumPostReference
                         if !isData, let _post = includedData?.posts.first(where: { $0.id == id }) {
                             post = _post
                         } else {
-                            post = FlarumPost(id: id)
+                            post = FlarumPostReference(id: id)
                             var attributes = dataJSON["attributes"]
                             if attributes["content"].exists() {
                                 if let contentType = FlarumPostAttributes.FlarumPostContentType(rawValue: attributes["contentType"].string ?? "") {
@@ -196,8 +196,8 @@ struct FlarumResponse {
                             }
                         }
                         if withRelationship, let includedData = includedData {
-                            var relationships = FlarumPostRelationships()
-                            for relationship in FlarumPostRelationships.Relationship.allCases {
+                            var relationships = FlarumPostRelationshipsReference()
+                            for relationship in FlarumPostRelationshipsReference.Relationship.allCases {
                                 switch relationship {
                                 case .discussion:
                                     if let discussionId = dataJSON["relationships"]["discussion"]["data"]["id"].string {
@@ -228,12 +228,12 @@ struct FlarumResponse {
                     }
                 case .user:
                     if let id = dataJSON["id"].string {
-                        var user: FlarumUser?
+                        var user: FlarumUserReference?
                         if !isData, let _user = includedData?.users.first(where: { $0.id == id }) {
                             user = _user
                         } else {
                             if let attributes = dataJSON["attributes"].decode(FlarumUserAttributes.self) {
-                                user = FlarumUser(id: id, attributes: attributes)
+                                user = FlarumUserReference(id: id, attributes: attributes)
                                 if isData, let _user = includedData?.users.first(where: { $0.id == id }) {
                                     user?.relationships = _user.relationships
                                 }
@@ -241,19 +241,19 @@ struct FlarumResponse {
                         }
                         if let user = user {
                             if withRelationship, let includedData = includedData {
-                                var userBadges: [FlarumUserBadge] = []
+                                var userBadges: [FlarumUserBadgeReference] = []
                                 if let badgeIds = dataJSON["relationships"]["badges"]["data"].array?.compactMap({ $0["id"].string }) {
                                     userBadges = includedData.userBadges.filter { badgeIds.contains($0.id) }
                                 }
-                                var profileAnswers: [FlarumProfileAnswer] = []
+                                var profileAnswers: [FlarumProfileAnswerReference] = []
                                 if let profileAnswerIds = dataJSON["relationships"]["masqueradeAnswers"]["data"].array?.compactMap({ $0["id"].string }) {
                                     profileAnswers = includedData.profileAnswers.filter { profileAnswerIds.contains($0.id) }
                                 }
-                                var ignoredUsers: [FlarumUser] = []
+                                var ignoredUsers: [FlarumUserReference] = []
                                 if let ignoredUserIds = dataJSON["relationships"]["ignoredUsers"]["data"].array?.compactMap({ $0["id"].string }) {
                                     ignoredUsers = includedData.users.filter { ignoredUserIds.contains($0.id) }
                                 }
-                                user.relationships = FlarumUserRelationships(userBadges: userBadges, profileAnswers: profileAnswers, ignoredUsers: ignoredUsers)
+                                user.relationships = FlarumUserRelationshipsReference(userBadges: userBadges, profileAnswers: profileAnswers, ignoredUsers: ignoredUsers)
                             }
                             responseData.allData.append(.user(user))
                             responseData.users.append(user)
@@ -261,12 +261,12 @@ struct FlarumResponse {
                     }
                 case .tag:
                     if let id = dataJSON["id"].string {
-                        var tag: FlarumTag?
+                        var tag: FlarumTagReference?
                         if !isData, let _tag = includedData?.tags.first(where: { $0.id == id }) {
                             tag = _tag
                         } else {
                             if let tagAttributes = dataJSON["attributes"].decode(FlarumTagAttributes.self) {
-                                tag = FlarumTag(id: id, attributes: tagAttributes)
+                                tag = FlarumTagReference(id: id, attributes: tagAttributes)
                                 if isData, let _tag = includedData?.tags.first(where: { $0.id == id }) {
                                     tag?.relationships = _tag.relationships
                                 }
@@ -274,7 +274,7 @@ struct FlarumResponse {
                         }
                         if let tag = tag {
                             if withRelationship, let includedData = includedData {
-                                var relationships = FlarumTagRelationships()
+                                var relationships = FlarumTagRelationshipsReference()
                                 if let parentId = dataJSON["relationships"]["parent"]["data"]["id"].string {
                                     if let parentTag = includedData.tags.first(where: { $0.id == parentId }) {
                                         relationships.parent = parentTag
@@ -294,14 +294,14 @@ struct FlarumResponse {
                            let user = includedData?.users.first(where: { userId == $0.id }),
                            let post = includedData?.posts.first(where: { postId == $0.id }),
                            let reaction = FlarumReactionsPublisher.shared.allReactions.first(where: { reactionId == $0.id }) {
-                            let postReaction = FlarumPostReaction(id: id, attributes: .init(user: user, post: post, reaction: reaction))
+                            let postReaction = FlarumPostReactionReference(id: id, attributes: .init(user: user, post: post, reaction: reaction))
                             responseData.allData.append(.postReaction(postReaction))
                             responseData.postReactions.append(postReaction)
                         }
                     }
                 case .notification:
                     if let id = dataJSON["id"].string {
-                        var notification: FlarumNotification?
+                        var notification: FlarumNotificationReference?
                         if !isData, let _notification = includedData?.notifications.first(where: { $0.id == id }) {
                             notification = _notification
                         } else {
@@ -369,7 +369,7 @@ struct FlarumResponse {
                                     attributes = attributes.removing(key: "contentType")
                                 }
                                 if let attributes = attributes.decode(FlarumNotificationAttributes.self) {
-                                    notification = FlarumNotification(id: id, attributes: attributes)
+                                    notification = FlarumNotificationReference(id: id, attributes: attributes)
                                     if isData, let _notification = includedData?.notifications.first(where: { $0.id == id }) {
                                         notification?.relationships = _notification.relationships
                                     }
@@ -378,10 +378,10 @@ struct FlarumResponse {
                         }
                         if let notification = notification {
                             if withRelationship, let includedData = includedData {
-                                if let subjectType = FlarumNotificationRelationships.SubjectType(rawValue:
+                                if let subjectType = FlarumNotificationRelationshipsReference.SubjectType(rawValue:
                                     dataJSON["relationships"]["subject"]["data"]["type"].string ?? ""
                                 ) {
-                                    var fromUser: FlarumUser?
+                                    var fromUser: FlarumUserReference?
                                     if let userId = dataJSON["relationships"]["fromUser"]["data"]["id"].string,
                                        let user = includedData.users.first(where: { $0.id == userId }) {
                                         fromUser = user
@@ -390,19 +390,19 @@ struct FlarumResponse {
                                     case .post:
                                         if let postId = dataJSON["relationships"]["subject"]["data"]["id"].string,
                                            let post = includedData.posts.first(where: { $0.id == postId }) {
-                                            let relationships = FlarumNotificationRelationships(fromUser: fromUser, subject: .post(post: post))
+                                            let relationships = FlarumNotificationRelationshipsReference(fromUser: fromUser, subject: .post(post: post))
                                             notification.relationships = relationships
                                         }
                                     case .discussion:
                                         if let discussionId = dataJSON["relationships"]["subject"]["data"]["id"].string,
                                            let discussion = includedData.discussions.first(where: { $0.id == discussionId }) {
-                                            let relationships = FlarumNotificationRelationships(fromUser: fromUser, subject: .discussion(discussion: discussion))
+                                            let relationships = FlarumNotificationRelationshipsReference(fromUser: fromUser, subject: .discussion(discussion: discussion))
                                             notification.relationships = relationships
                                         }
                                     case .userBadge:
                                         if let userBadgeId = dataJSON["relationships"]["subject"]["data"]["id"].string,
                                            let userBadgeId = Int(userBadgeId) {
-                                            let relationships = FlarumNotificationRelationships(subject: .userBadge(userBadgeId: userBadgeId))
+                                            let relationships = FlarumNotificationRelationshipsReference(subject: .userBadge(userBadgeId: userBadgeId))
                                             notification.relationships = relationships
                                         }
                                     }
@@ -422,12 +422,12 @@ struct FlarumResponse {
                     }
                 case .badge:
                     if let id = dataJSON["id"].string {
-                        var badge: FlarumBadge?
+                        var badge: FlarumBadgeReference?
                         if !isData, let _badge = includedData?.badges.first(where: { $0.id == id }) {
                             badge = _badge
                         } else {
                             if let attributes = dataJSON["attributes"].decode(FlarumBadgeAttributes.self) {
-                                badge = FlarumBadge(id: id, attributes: attributes)
+                                badge = FlarumBadgeReference(id: id, attributes: attributes)
                                 if isData, let _badge = includedData?.badges.first(where: { $0.id == id }) {
                                     badge?.relationships = _badge.relationships
                                 }
@@ -437,7 +437,7 @@ struct FlarumResponse {
                             if withRelationship, let includedData = includedData {
                                 if let categoryId = dataJSON["relationships"]["category"]["data"]["id"].string {
                                     if let category = includedData.badgeCategories.first(where: { $0.id == categoryId }) {
-                                        let relationships = FlarumBadgeRelationships(category: category)
+                                        let relationships = FlarumBadgeRelationshipsReference(category: category)
                                         badge.relationships = relationships
                                     }
                                 }
@@ -448,12 +448,12 @@ struct FlarumResponse {
                     }
                 case .badgeCategory:
                     if let id = dataJSON["id"].string {
-                        var badgeCategory: FlarumBadgeCategory?
+                        var badgeCategory: FlarumBadgeCategoryReference?
                         if !isData, let _badgeCategory = includedData?.badgeCategories.first(where: { $0.id == id }) {
                             badgeCategory = _badgeCategory
                         } else {
                             if let attributes = dataJSON["attributes"].decode(FlarumBadgeCategoryAttributes.self) {
-                                badgeCategory = FlarumBadgeCategory(id: id, attributes: attributes)
+                                badgeCategory = FlarumBadgeCategoryReference(id: id, attributes: attributes)
                                 if isData, let _badgeCategory = includedData?.badgeCategories.first(where: { $0.id == id }) {
                                     badgeCategory?.relationships = _badgeCategory.relationships
                                 }
@@ -463,7 +463,7 @@ struct FlarumResponse {
                             if withRelationship, let includedData = includedData {
                                 if let badgeIds = dataJSON["relationships"]["badges"]["data"].array?.compactMap({ $0["id"].string }) {
                                     let badges = includedData.badges.filter { badgeIds.contains($0.id) }
-                                    let relationships = FlarumBadgeCategoryRelationships(badges: badges)
+                                    let relationships = FlarumBadgeCategoryRelationshipsReference(badges: badges)
                                     badgeCategory.relationships = relationships
                                 }
                             }
@@ -473,12 +473,12 @@ struct FlarumResponse {
                     }
                 case .userBadge:
                     if let id = dataJSON["id"].string {
-                        var userBadge: FlarumUserBadge?
+                        var userBadge: FlarumUserBadgeReference?
                         if !isData, let _userBadge = includedData?.userBadges.first(where: { $0.id == id }) {
                             userBadge = _userBadge
                         } else {
                             if let attributes = dataJSON["attributes"].decode(FlarumUserBadgeAttributes.self) {
-                                userBadge = FlarumUserBadge(id: id, attributes: attributes)
+                                userBadge = FlarumUserBadgeReference(id: id, attributes: attributes)
                                 if isData, let _userBadge = includedData?.userBadges.first(where: { $0.id == id }) {
                                     userBadge?.relationships = _userBadge.relationships
                                 }
@@ -488,7 +488,7 @@ struct FlarumResponse {
                             if withRelationship, let includedData = includedData {
                                 if let badgeId = dataJSON["relationships"]["badge"]["data"]["id"].string {
                                     if let badge = includedData.badges.first(where: { $0.id == badgeId }) {
-                                        let relationships = FlarumUserBadgeRelationships(badge: badge)
+                                        let relationships = FlarumUserBadgeRelationshipsReference(badge: badge)
                                         userBadge.relationships = relationships
                                     }
                                 }
@@ -500,7 +500,7 @@ struct FlarumResponse {
                 case .profileAnswer:
                     if let id = dataJSON["id"].string {
                         if let attributes = dataJSON["attributes"].decode(FlarumProfileAnswerAttributes.self) {
-                            let profileAnswer = FlarumProfileAnswer(id: id, attributes: attributes)
+                            let profileAnswer = FlarumProfileAnswerReference(id: id, attributes: attributes)
                             responseData.allData.append(.profileAnswer(profileAnswer))
                             responseData.profileAnswers.append(profileAnswer)
                         }
@@ -526,6 +526,19 @@ enum FlarumDataType: String, RawRepresentable {
     case profileAnswer = "masquerade-answer"
 }
 
+enum FlarumDataReference {
+    case discussion(FlarumDiscussionReference)
+    case post(FlarumPostReference)
+    case user(FlarumUserReference)
+    case tag(FlarumTagReference)
+    case postReaction(FlarumPostReactionReference)
+    case notification(FlarumNotificationReference)
+    case badge(FlarumBadgeReference)
+    case badgeCategory(FlarumBadgeCategoryReference)
+    case userBadge(FlarumUserBadgeReference)
+    case profileAnswer(FlarumProfileAnswerReference)
+}
+
 enum FlarumData {
     case discussion(FlarumDiscussion)
     case post(FlarumPost)
@@ -537,21 +550,8 @@ enum FlarumData {
     case badgeCategory(FlarumBadgeCategory)
     case userBadge(FlarumUserBadge)
     case profileAnswer(FlarumProfileAnswer)
-}
 
-enum FlarumDataNew {
-    case discussion(FlarumDiscussionNew)
-    case post(FlarumPostNew)
-    case user(FlarumUserNew)
-    case tag(FlarumTagNew)
-    case postReaction(FlarumPostReactionNew)
-    case notification(FlarumNotificationNew)
-    case badge(FlarumBadgeNew)
-    case badgeCategory(FlarumBadgeCategoryNew)
-    case userBadge(FlarumUserBadgeNew)
-    case profileAnswer(FlarumProfileAnswerNew)
-
-    init(_ i: FlarumData) {
+    init(_ i: FlarumDataReference) {
         switch i {
         case let .discussion(flarumDiscussion):
             self = .discussion(.init(flarumDiscussion))
@@ -590,6 +590,7 @@ enum FlarumDataNew {
 extension Response {
     func flarumResponse() -> FlarumResponse {
         let json = JSON(data)
-        return FlarumResponse(json: json)
+        let flarumResponseReference = FlarumResponseReference(json: json)
+        return .init(flarumResponseReference)
     }
 }

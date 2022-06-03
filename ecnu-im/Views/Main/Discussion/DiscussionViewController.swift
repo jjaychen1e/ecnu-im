@@ -318,7 +318,8 @@ class DiscussionViewController: UIViewController, NoOverlayViewController, HasNa
                                     tableView.performBatchUpdates {
                                         tableView.reloadRows(at: [IndexPath(row: postIndex, section: 0)], with: .none)
                                         if case let .comment(post) = self.posts[postIndex] {
-                                            post.attributes?.isHidden = isHidden
+                                            // TODO: New
+//                                            post.attributes?.isHidden = isHidden
                                             self.posts[postIndex] = .comment(post)
                                         } else {
                                             fatalErrorDebug()
@@ -661,7 +662,7 @@ private class DiscussionPostsLoader: ObservableObject {
             }
 
 //             If empty, maybe we should fetch `prev`
-            let posts = FlarumResponse(json: json).data.posts
+            let posts = FlarumResponse(FlarumResponseReference(json: json)).data.posts
             postLists.append(contentsOf: posts)
         }
         await info.finishLoad(offset: offset)

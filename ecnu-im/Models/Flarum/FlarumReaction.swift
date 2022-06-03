@@ -44,9 +44,9 @@ class FlarumPostReactionReference {
     var attributes: FlarumPostReactionAttributesReference
 }
 
-struct FlarumPostReactionAttributesNew {
-    var user: FlarumUserNew
-    var post: FlarumPostNew
+struct FlarumPostReactionAttributes {
+    var user: FlarumUser
+    var post: FlarumPost
     var reaction: FlarumReaction
 
     init(_ i: FlarumPostReactionAttributesReference) {
@@ -56,14 +56,14 @@ struct FlarumPostReactionAttributesNew {
     }
 }
 
-struct FlarumPostReactionNew {
-    init(id: String, attributes: FlarumPostReactionAttributesNew) {
+struct FlarumPostReaction {
+    init(id: String, attributes: FlarumPostReactionAttributes) {
         self.id = id
         self.attributes = attributes
     }
 
     var id: String
-    var attributes: FlarumPostReactionAttributesNew
+    var attributes: FlarumPostReactionAttributes
 
     init(_ i: FlarumPostReactionReference) {
         id = i.id

@@ -45,7 +45,7 @@ struct FlarumUserAttributes: Codable {
     }
 }
 
-struct FlarumUserRelationshipsReference: Codable {
+struct FlarumUserRelationshipsReference {
     var userBadges: [FlarumUserBadgeReference]
     var profileAnswers: [FlarumProfileAnswerReference]
     var ignoredUsers: [FlarumUserReference]
@@ -63,10 +63,10 @@ final class FlarumUserReference {
     var relationships: FlarumUserRelationshipsReference?
 }
 
-struct FlarumUserRelationshipsNew: Codable {
-    var userBadges: [FlarumUserBadgeNew]
-    var profileAnswers: [FlarumProfileAnswerNew]
-    var ignoredUsers: [FlarumUserNew]
+struct FlarumUserRelationships: Codable {
+    var userBadges: [FlarumUserBadge]
+    var profileAnswers: [FlarumProfileAnswer]
+    var ignoredUsers: [FlarumUser]
 
     init(_ i: FlarumUserRelationshipsReference) {
         userBadges = i.userBadges.map { .init($0) }
@@ -75,8 +75,8 @@ struct FlarumUserRelationshipsNew: Codable {
     }
 }
 
-struct FlarumUserNew: Codable {
-    init(id: String, attributes: FlarumUserAttributes, relationships: FlarumUserRelationshipsNew? = nil) {
+struct FlarumUser: Codable {
+    init(id: String, attributes: FlarumUserAttributes, relationships: FlarumUserRelationships? = nil) {
         self.id = id
         self.attributes = attributes
         self.relationships = relationships
@@ -84,7 +84,7 @@ struct FlarumUserNew: Codable {
 
     var id: String
     var attributes: FlarumUserAttributes
-    var relationships: FlarumUserRelationshipsNew?
+    var relationships: FlarumUserRelationships?
 
     init(_ i: FlarumUserReference) {
         id = i.id
@@ -93,9 +93,7 @@ struct FlarumUserNew: Codable {
     }
 }
 
-extension FlarumUserNew: Codable {}
-
-extension FlarumUserNew {
+extension FlarumUser {
     var avatarURL: URL? {
         if let url = attributes.avatarUrl {
             return URL(string: url)
@@ -155,8 +153,8 @@ extension FlarumUserNew {
     }
 }
 
-extension FlarumUserNew: Hashable {
-    static func == (lhs: FlarumUserNew, rhs: FlarumUserNew) -> Bool {
+extension FlarumUser: Hashable {
+    static func == (lhs: FlarumUser, rhs: FlarumUser) -> Bool {
         lhs.id == rhs.id
     }
 

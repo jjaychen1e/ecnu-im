@@ -16,11 +16,11 @@ struct FlarumBadgeCategoryAttributes: Codable {
     var createdAt: String
 }
 
-struct FlarumBadgeCategoryRelationshipsReference: Codable {
+struct FlarumBadgeCategoryRelationshipsReference {
     var badges: [FlarumBadgeReference]
 }
 
-class FlarumBadgeCategoryReference: Codable {
+class FlarumBadgeCategoryReference {
     init(id: String, attributes: FlarumBadgeCategoryAttributes, relationships: FlarumBadgeCategoryRelationshipsReference? = nil) {
         self.id = id
         self.attributes = attributes
@@ -32,16 +32,16 @@ class FlarumBadgeCategoryReference: Codable {
     var relationships: FlarumBadgeCategoryRelationshipsReference?
 }
 
-struct FlarumBadgeCategoryRelationshipsNew: Codable {
-    var badges: [FlarumBadgeNew]
+struct FlarumBadgeCategoryRelationships: Codable {
+    var badges: [FlarumBadge]
 
     init(_ i: FlarumBadgeCategoryRelationshipsReference) {
         badges = i.badges.map { .init($0) }
     }
 }
 
-struct FlarumBadgeCategoryNew: Codable {
-    init(id: String, attributes: FlarumBadgeCategoryAttributes, relationships: FlarumBadgeCategoryRelationshipsNew? = nil) {
+struct FlarumBadgeCategory: Codable {
+    init(id: String, attributes: FlarumBadgeCategoryAttributes, relationships: FlarumBadgeCategoryRelationships? = nil) {
         self.id = id
         self.attributes = attributes
         self.relationships = relationships
@@ -49,7 +49,7 @@ struct FlarumBadgeCategoryNew: Codable {
 
     var id: String
     var attributes: FlarumBadgeCategoryAttributes
-    var relationships: FlarumBadgeCategoryRelationshipsNew?
+    var relationships: FlarumBadgeCategoryRelationships?
 
     init(_ i: FlarumBadgeCategoryReference) {
         id = i.id
@@ -58,8 +58,8 @@ struct FlarumBadgeCategoryNew: Codable {
     }
 }
 
-extension FlarumBadgeCategoryNew: Hashable {
-    static func == (lhs: FlarumBadgeCategoryNew, rhs: FlarumBadgeCategoryNew) -> Bool {
+extension FlarumBadgeCategory: Hashable {
+    static func == (lhs: FlarumBadgeCategory, rhs: FlarumBadgeCategory) -> Bool {
         lhs.id == rhs.id
     }
 

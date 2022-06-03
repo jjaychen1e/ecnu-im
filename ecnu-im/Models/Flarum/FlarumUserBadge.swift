@@ -21,11 +21,11 @@ struct FlarumUserBadgeAttributes: Codable {
     }
 }
 
-struct FlarumUserBadgeRelationshipsReference: Codable {
+struct FlarumUserBadgeRelationshipsReference {
     var badge: FlarumBadgeReference
 }
 
-class FlarumUserBadgeReference: Codable {
+class FlarumUserBadgeReference {
     init(id: String, attributes: FlarumUserBadgeAttributes, relationships: FlarumUserBadgeRelationshipsReference? = nil) {
         self.id = id
         self.attributes = attributes
@@ -37,16 +37,16 @@ class FlarumUserBadgeReference: Codable {
     var relationships: FlarumUserBadgeRelationshipsReference?
 }
 
-struct FlarumUserBadgeRelationshipsNew: Codable {
-    var badge: FlarumBadgeNew
+struct FlarumUserBadgeRelationships: Codable {
+    var badge: FlarumBadge
 
     init(_ i: FlarumUserBadgeRelationshipsReference) {
         badge = .init(i.badge)
     }
 }
 
-struct FlarumUserBadgeNew: Codable {
-    init(id: String, attributes: FlarumUserBadgeAttributes, relationships: FlarumUserBadgeRelationshipsNew? = nil) {
+struct FlarumUserBadge: Codable {
+    init(id: String, attributes: FlarumUserBadgeAttributes, relationships: FlarumUserBadgeRelationships? = nil) {
         self.id = id
         self.attributes = attributes
         self.relationships = relationships
@@ -54,7 +54,7 @@ struct FlarumUserBadgeNew: Codable {
 
     var id: String
     var attributes: FlarumUserBadgeAttributes
-    var relationships: FlarumUserBadgeRelationshipsNew?
+    var relationships: FlarumUserBadgeRelationships?
 
     var assignedAtDateDescription: String {
         if let date = attributes.assignedAtDate {
@@ -71,8 +71,8 @@ struct FlarumUserBadgeNew: Codable {
     }
 }
 
-extension FlarumUserBadgeNew: Hashable {
-    static func == (lhs: FlarumUserBadgeNew, rhs: FlarumUserBadgeNew) -> Bool {
+extension FlarumUserBadge: Hashable {
+    static func == (lhs: FlarumUserBadge, rhs: FlarumUserBadge) -> Bool {
         lhs.id == rhs.id
     }
 

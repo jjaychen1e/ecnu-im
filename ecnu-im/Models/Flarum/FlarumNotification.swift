@@ -95,10 +95,10 @@ class FlarumNotificationReference {
     var relationships: FlarumNotificationRelationshipsReference?
 }
 
-struct FlarumNotificationRelationshipsNew {
+struct FlarumNotificationRelationships {
     enum Subject {
-        case post(post: FlarumPostNew)
-        case discussion(discussion: FlarumDiscussionNew)
+        case post(post: FlarumPost)
+        case discussion(discussion: FlarumDiscussion)
         case userBadge(userBadgeId: Int)
 
         init(_ i: FlarumNotificationRelationshipsReference.Subject) {
@@ -122,7 +122,7 @@ struct FlarumNotificationRelationshipsNew {
         case userBadge = "userBadges"
     }
 
-    var fromUser: FlarumUserNew?
+    var fromUser: FlarumUser?
     var subject: Subject
 
     init(_ i: FlarumNotificationRelationshipsReference) {
@@ -131,8 +131,8 @@ struct FlarumNotificationRelationshipsNew {
     }
 }
 
-struct FlarumNotificationNew {
-    init(id: String, attributes: FlarumNotificationAttributes, relationships: FlarumNotificationRelationshipsNew? = nil) {
+struct FlarumNotification {
+    init(id: String, attributes: FlarumNotificationAttributes, relationships: FlarumNotificationRelationships? = nil) {
         self.id = id
         self.attributes = attributes
         self.relationships = relationships
@@ -146,7 +146,7 @@ struct FlarumNotificationNew {
 
     var id: String
     var attributes: FlarumNotificationAttributes
-    var relationships: FlarumNotificationRelationshipsNew?
+    var relationships: FlarumNotificationRelationships?
 
     var createdDateDescription: String {
         if let date = attributes.createdDate {
@@ -156,7 +156,7 @@ struct FlarumNotificationNew {
         }
     }
 
-    var relatedDiscussion: FlarumDiscussionNew? {
+    var relatedDiscussion: FlarumDiscussion? {
         switch relationships?.subject {
         case let .post(post):
             return post.relationships?.discussion
@@ -167,7 +167,7 @@ struct FlarumNotificationNew {
         }
     }
 
-    var originalPost: FlarumPostNew? {
+    var originalPost: FlarumPost? {
         switch attributes.content {
         case .badgeReceived, .postLiked, .postMentioned, .postReacted, .privateDiscussionCreated, .privateDiscussionReplied:
             switch relationships?.subject {
@@ -183,9 +183,9 @@ struct FlarumNotificationNew {
         }
     }
 
-    func newPost() async -> FlarumPostNew? {
+    func newPost() async -> FlarumPost? {
         var targetPostNumber: Int?
-        var targetPost: FlarumPostNew?
+        var targetPost: FlarumPost?
         switch attributes.content {
         case .postLiked, .postReacted, .privateDiscussionCreated, .badgeReceived:
             break

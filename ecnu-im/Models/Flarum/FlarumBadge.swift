@@ -121,11 +121,11 @@ struct FlarumBadgeAttributes: Codable {
     var createdAt: String
 }
 
-struct FlarumBadgeRelationshipsReference: Codable {
+struct FlarumBadgeRelationshipsReference {
     var category: FlarumBadgeCategoryReference
 }
 
-class FlarumBadgeReference: Codable {
+class FlarumBadgeReference {
     init(id: String, attributes: FlarumBadgeAttributes, relationships: FlarumBadgeRelationshipsReference? = nil) {
         self.id = id
         self.attributes = attributes
@@ -137,16 +137,16 @@ class FlarumBadgeReference: Codable {
     var relationships: FlarumBadgeRelationshipsReference?
 }
 
-struct FlarumBadgeRelationshipsNew: Codable {
-    var category: FlarumBadgeCategoryNew
+struct FlarumBadgeRelationships: Codable {
+    var category: FlarumBadgeCategory
 
     init(_ i: FlarumBadgeRelationshipsReference) {
         category = .init(i.category)
     }
 }
 
-struct FlarumBadgeNew: Codable {
-    init(id: String, attributes: FlarumBadgeAttributes, relationships: FlarumBadgeRelationshipsNew? = nil) {
+struct FlarumBadge: Codable {
+    init(id: String, attributes: FlarumBadgeAttributes, relationships: FlarumBadgeRelationships? = nil) {
         self.id = id
         self.attributes = attributes
         self.relationships = relationships
@@ -154,7 +154,7 @@ struct FlarumBadgeNew: Codable {
 
     var id: String
     var attributes: FlarumBadgeAttributes
-    var relationships: FlarumBadgeRelationshipsNew?
+    var relationships: FlarumBadgeRelationships?
 
     var description: String {
         attributes.description ?? "该徽章暂无描述"
@@ -167,8 +167,8 @@ struct FlarumBadgeNew: Codable {
     }
 }
 
-extension FlarumBadgeNew: Hashable {
-    static func == (lhs: FlarumBadgeNew, rhs: FlarumBadgeNew) -> Bool {
+extension FlarumBadge: Hashable {
+    static func == (lhs: FlarumBadge, rhs: FlarumBadge) -> Bool {
         lhs.id == rhs.id
     }
 

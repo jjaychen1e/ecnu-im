@@ -119,7 +119,7 @@ extension Array where Element == FlarumTag {
     }
 }
 
-struct FlarumDiscussionRelationshipsNew {
+struct FlarumDiscussionRelationships {
     enum Relationship: CaseIterable {
         case user
         case lastPostedUser
@@ -129,12 +129,12 @@ struct FlarumDiscussionRelationshipsNew {
         case tags
     }
 
-    var user: FlarumUserNew?
-    var lastPostedUser: FlarumUserNew?
-    var firstPost: FlarumPostNew?
-    var lastPost: FlarumPostNew?
-    var mostRelevantPost: FlarumPostNew?
-    var tags: [FlarumTagNew]?
+    var user: FlarumUser?
+    var lastPostedUser: FlarumUser?
+    var firstPost: FlarumPost?
+    var lastPost: FlarumPost?
+    var mostRelevantPost: FlarumPost?
+    var tags: [FlarumTag]?
 
     init(_ i: FlarumDiscussionRelationshipsReference) {
         user = i.user != nil ? .init(i.user!) : nil
@@ -142,12 +142,12 @@ struct FlarumDiscussionRelationshipsNew {
         firstPost = i.firstPost != nil ? .init(i.firstPost!) : nil
         lastPost = i.lastPost != nil ? .init(i.lastPost!) : nil
         mostRelevantPost = i.mostRelevantPost != nil ? .init(i.mostRelevantPost!) : nil
-        tags = i.tags?.map { FlarumTagNew($0) }
+        tags = i.tags?.map { FlarumTag($0) }
     }
 }
 
-struct FlarumDiscussionNew {
-    init(id: String, attributes: FlarumDiscussionAttributes? = nil, relationships: FlarumDiscussionRelationshipsNew? = nil) {
+struct FlarumDiscussion {
+    init(id: String, attributes: FlarumDiscussionAttributes? = nil, relationships: FlarumDiscussionRelationships? = nil) {
         self.id = id
         self.attributes = attributes
         self.relationships = relationships
@@ -155,7 +155,7 @@ struct FlarumDiscussionNew {
 
     var id: String
     var attributes: FlarumDiscussionAttributes?
-    var relationships: FlarumDiscussionRelationshipsNew?
+    var relationships: FlarumDiscussionRelationships?
 
     init(_ i: FlarumDiscussionReference) {
         id = i.id
@@ -164,39 +164,38 @@ struct FlarumDiscussionNew {
     }
 }
 
-extension FlarumDiscussionNew {
-    var starter: FlarumUserNew? {
+extension FlarumDiscussion {
+    var starter: FlarumUser? {
         relationships?.user
     }
 
-    var firstPost: FlarumPostNew? {
+    var firstPost: FlarumPost? {
         relationships?.firstPost
     }
 
-    var lastPost: FlarumPostNew? {
+    var lastPost: FlarumPost? {
         relationships?.lastPost
     }
 
-    var mostRelevantPost: FlarumPostNew? {
+    var mostRelevantPost: FlarumPost? {
         relationships?.mostRelevantPost
     }
 
-    var mostRelevantPostUser: FlarumUserNew? {
+    var mostRelevantPostUser: FlarumUser? {
         mostRelevantPost?.author
     }
 
-    var lastPostedUser: FlarumUserNew? {
+    var lastPostedUser: FlarumUser? {
         relationships?.lastPostedUser
     }
 
-    var tags: [FlarumTagNew] {
+    var tags: [FlarumTag] {
         relationships?.tags ?? []
     }
 
-    // TODO: New -
-//    var tagViewModels: [TagViewModel] {
-//        tags.mappedTagViewModels
-//    }
+    var tagViewModels: [TagViewModel] {
+        tags.mappedTagViewModels
+    }
 
     var discussionTitle: String {
         attributes?.title ?? "Unkown"
@@ -264,8 +263,8 @@ extension FlarumDiscussionNew {
     }
 }
 
-extension FlarumDiscussionNew: Hashable {
-    static func == (lhs: FlarumDiscussionNew, rhs: FlarumDiscussionNew) -> Bool {
+extension FlarumDiscussion: Hashable {
+    static func == (lhs: FlarumDiscussion, rhs: FlarumDiscussion) -> Bool {
         let condition1 = lhs.id == rhs.id
         let condition2 = lhs.firstPost?.id == rhs.firstPost?.id
         let condition3 = lhs.lastPost?.id == rhs.lastPost?.id

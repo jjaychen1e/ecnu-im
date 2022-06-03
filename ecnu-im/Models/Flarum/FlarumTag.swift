@@ -30,11 +30,11 @@ struct FlarumTagAttributes: Codable {
     var canAddToDiscussion: Bool
 }
 
-struct FlarumTagRelationshipsReference: Codable {
+struct FlarumTagRelationshipsReference {
     var parent: FlarumTagReference?
 }
 
-class FlarumTagReference: Codable {
+class FlarumTagReference {
     init(id: String, attributes: FlarumTagAttributes, relationships: FlarumTagRelationshipsReference? = nil) {
         self.id = id
         self.attributes = attributes
@@ -47,10 +47,10 @@ class FlarumTagReference: Codable {
 }
 
 // TODO: New - Codable
-struct FlarumTagRelationshipsNew {
-    private var boxedParent: Box<FlarumTagNew>?
+struct FlarumTagRelationships {
+    private var boxedParent: Box<FlarumTag>?
 
-    var parent: FlarumTagNew? {
+    var parent: FlarumTag? {
         boxedParent?.value
     }
 
@@ -64,8 +64,8 @@ struct FlarumTagRelationshipsNew {
 }
 
 // TODO: New - Codable
-struct FlarumTagNew {
-    init(id: String, attributes: FlarumTagAttributes, relationships: FlarumTagRelationshipsNew? = nil) {
+struct FlarumTag {
+    init(id: String, attributes: FlarumTagAttributes, relationships: FlarumTagRelationships? = nil) {
         self.id = id
         self.attributes = attributes
         self.relationships = relationships
@@ -73,7 +73,7 @@ struct FlarumTagNew {
 
     var id: String
     var attributes: FlarumTagAttributes
-    var relationships: FlarumTagRelationshipsNew?
+    var relationships: FlarumTagRelationships?
 
     init(_ i: FlarumTagReference) {
         id = i.id
@@ -82,8 +82,8 @@ struct FlarumTagNew {
     }
 }
 
-extension FlarumTagNew: Equatable {
-    static func == (lhs: FlarumTagNew, rhs: FlarumTagNew) -> Bool {
+extension FlarumTag: Equatable {
+    static func == (lhs: FlarumTag, rhs: FlarumTag) -> Bool {
         lhs.id == rhs.id
     }
 }

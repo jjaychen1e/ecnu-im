@@ -90,7 +90,7 @@ struct FlarumPostRelationshipsReference {
     var mentionedBy: [FlarumPostReference]?
 }
 
-class FlarumPostReference: Hashable {
+class FlarumPostReference {
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
@@ -106,7 +106,7 @@ class FlarumPostReference: Hashable {
     var relationships: FlarumPostRelationshipsReference?
 }
 
-struct FlarumPostRelationshipsNew {
+struct FlarumPostRelationships {
     enum Relationship: CaseIterable {
         case user
         case discussion
@@ -115,13 +115,13 @@ struct FlarumPostRelationshipsNew {
         case mentionedBy
     }
 
-    var user: FlarumUserNew?
-    var likes: [FlarumUserNew]?
-    var reactions: [FlarumPostReactionNew]?
-    var mentionedBy: [FlarumPostNew]?
-    private var boxedDiscussion: Box<FlarumDiscussionNew>?
+    var user: FlarumUser?
+    var likes: [FlarumUser]?
+    var reactions: [FlarumPostReaction]?
+    var mentionedBy: [FlarumPost]?
+    private var boxedDiscussion: Box<FlarumDiscussion>?
 
-    var discussion: FlarumDiscussionNew? {
+    var discussion: FlarumDiscussion? {
         boxedDiscussion?.value
     }
 
@@ -132,8 +132,8 @@ struct FlarumPostRelationshipsNew {
     }
 }
 
-struct FlarumPostNew: Hashable {
-    static func == (lhs: FlarumPostNew, rhs: FlarumPostNew) -> Bool {
+struct FlarumPost: Hashable {
+    static func == (lhs: FlarumPost, rhs: FlarumPost) -> Bool {
         lhs.id == rhs.id
     }
 
@@ -141,7 +141,7 @@ struct FlarumPostNew: Hashable {
         hasher.combine(id)
     }
 
-    init(id: String, attributes: FlarumPostAttributes? = nil, relationships: FlarumPostRelationshipsNew? = nil) {
+    init(id: String, attributes: FlarumPostAttributes? = nil, relationships: FlarumPostRelationships? = nil) {
         self.id = id
         self.attributes = attributes
         self.relationships = relationships
@@ -155,22 +155,13 @@ struct FlarumPostNew: Hashable {
 
     var id: String
     var attributes: FlarumPostAttributes?
-    var relationships: FlarumPostRelationshipsNew?
+    var relationships: FlarumPostRelationships?
 
     // MARK: Loading Logic
 
     struct FlarumPostLoadMoreState {
         var prevOffset: Int?
         var nextOffset: Int?
-    }
-
-    var loadMoreState: FlarumPostLoadMoreState?
-    var isDeleted: Bool?
-
-    static var deletedPost: FlarumPost {
-        let post = FlarumPost(id: UUID().uuidString)
-        post.isDeleted = true
-        return post
     }
 
     // Excerpt Text
@@ -185,5 +176,50 @@ struct FlarumPostNew: Hashable {
             return postExcerptText
         }
         return nil
+    }
+}
+
+extension FlarumPost {
+    var author: FlarumUser? {
+        relationships?.user
+    }
+
+    var authorName: String {
+        author?.attributes.displayName ?? "Unkown"
+    }
+
+    var authorAvatarURL: URL? {
+        if let urlStr = author?.attributes.avatarUrl {
+            return URL(string: urlStr)
+        }
+        return nil
+    }
+
+    var createdDateDescription: String {
+        if let date = attributes?.createdDate {
+            return date.localeDescription
+        } else {
+            return "Unknown"
+        }
+    }
+
+    var editedDateDescription: String? {
+        if let date = attributes?.editedDate {
+            return date.localeDescription
+        } else {
+            return nil
+        }
+    }
+
+    var isHidden: Bool {
+        attributes?.isHidden ?? false
+    }
+
+    var discussion: FlarumDiscussion? {
+        relationships?.discussion ?? nil
+    }
+
+    var discussionAuthor: FlarumUser? {
+        discussion?.starter
     }
 }

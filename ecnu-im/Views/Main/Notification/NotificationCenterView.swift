@@ -103,7 +103,8 @@ struct NotificationCenterView: View {
                         appGlobalState.clearNotificationEvent.send()
                         viewModel.notifications.forEach { notification in
                             withAnimation {
-                                notification.attributes.isRead = true
+                                // TODO: New
+//                                notification.attributes.isRead = true
                             }
                         }
                         Toast.default(icon: .emoji("✔️"), title: "已自动已读通知").show()
