@@ -49,8 +49,8 @@ class ContentParser {
         self.updateLayout = updateLayout
     }
 
-    private static func parseListToAttributedString(list: ContentBlockList, level: Int) -> NSAttributedString {
-        let styleStack = ContentTextStyleStack()
+    private static func parseListToAttributedString(list: ContentBlockList, level: Int, initStyles: [ContentTextStyle] = []) -> NSAttributedString {
+        let styleStack = ContentTextStyleStack(items: initStyles)
         let attributedString = NSMutableAttributedString()
 
         let indentWhitespaces: String = {
@@ -120,7 +120,9 @@ class ContentParser {
                     contentItems.append(ContentItemBlockquoteUIView(contentItems: subContentItems))
                 }
             case let .list(contentBlockList):
-                let attributedString = Self.parseListToAttributedString(list: contentBlockList, level: 0)
+                let attributedString = Self.parseListToAttributedString(list: contentBlockList, level: 0, initStyles: [
+                    .textColor(Asset.DynamicColors.dynamicBlack.color.withAlphaComponent(0.7)),
+                ])
                 contentItems.append(ContentItemParagraphUIView(attributedText: attributedString))
             case .divider:
                 contentItems.append(ContentItemDividerUIView())
