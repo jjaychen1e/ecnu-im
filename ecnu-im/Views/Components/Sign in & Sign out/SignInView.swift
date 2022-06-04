@@ -57,22 +57,37 @@ struct SignInView: View {
             Button {
                 Task {
                     logging = true
-                    if await AppGlobalState.shared.login(account: signInViewModel.account, password: signInViewModel.password) {
-                        model.dismissModal.toggle()
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    
+                    AppGlobalState.shared.loginState = .trying
+                    let loginResult = await AppGlobalState.shared.login(account: signInViewModel.account, password: signInViewModel.password)
+                    switch loginResult {
+                    case let .success(result):
+                        if !result {
+                            // Maybe password has been modified
+                            UIApplication.shared.topController()?.presentSignView()
+                            AppGlobalState.shared.logout()
+                            AppGlobalState.shared.loginState = .loginFailed
+                            let toast = Toast.default(
+                                icon: .emoji("❗️"),
+                                title: "登录失败",
+                                subtitle: "请检查你的账户与密码"
+                            )
+                            toast.show()
+                        } else {
+                            model.dismissModal.toggle()
+                            AppGlobalState.shared.loginState = .loginSuccess
                             let toast = Toast.default(
                                 icon: .emoji("🎉"),
                                 title: "登录成功"
                             )
                             toast.show()
                         }
-                    } else {
-                        let toast = Toast.default(
-                            icon: .emoji("❗️"),
-                            title: "登录失败",
-                            subtitle: "请检查你的账户与密码"
-                        )
-                        toast.show()
+                    case .failure:
+                        // Network error
+                        AppGlobalState.shared.loginState = .requestFailed
+                        DispatchQueue.main.async {
+                            Toast.default(icon: .emoji("📶"), title: "登录失败", subtitle: "网络请求出错").show()
+                        }
                     }
                     logging = false
                 }

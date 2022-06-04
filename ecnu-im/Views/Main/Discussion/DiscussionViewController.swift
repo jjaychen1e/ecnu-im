@@ -113,6 +113,11 @@ class DiscussionViewController: UIViewController, NoOverlayViewController, HasNa
             }
         }
     }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        hideReplyView()
+    }
 
     private func setViewHierarchy() {
         setHeaderView()
@@ -120,7 +125,7 @@ class DiscussionViewController: UIViewController, NoOverlayViewController, HasNa
         setToolView()
         setReplyView()
         keyboardListener = KeyboardAppearListener(viewController: self, callback: { [weak self] fromOffsetHeight, toOffsetHeight, duration, curve in
-            print("Animation - Keyboard changed")
+//            printDebug("Animation - Keyboard changed")
             if let self = self {
                 if duration > 0 {
                     UIViewPropertyAnimator(duration: duration, curve: curve) {
@@ -696,7 +701,7 @@ private class DiscussionPostsLoader: ObservableObject {
     }
 
     func loadData(nearNumber: Int) async -> [FlarumPost] {
-        print("loading near number: \(nearNumber)")
+//        print("loading near number: \(nearNumber)")
         var postLists: [FlarumPost] = []
         if let response = try? await flarumProvider.request(.postsNearNumber(discussionID: discussionID,
                                                                              nearNumber: nearNumber,
@@ -704,7 +709,7 @@ private class DiscussionPostsLoader: ObservableObject {
             let posts = response.data.posts
             postLists.append(contentsOf: posts)
         }
-        print("finish loading near number: \(nearNumber)")
+//        print("finish loading near number: \(nearNumber)")
         return postLists
     }
 }

@@ -19,6 +19,19 @@ struct Account: Codable {
     }
 }
 
+enum LoginError: Error {
+    case networkError
+}
+
+enum LoginState {
+    case notStart
+    case noAccount
+    case trying
+    case requestFailed
+    case loginFailed
+    case loginSuccess
+}
+
 /// https://stackoverflow.com/a/68795484
 extension Optional: RawRepresentable where Wrapped: Codable {
     public var rawValue: String {
@@ -57,6 +70,7 @@ class AppGlobalState: ObservableObject {
     @Published var hasTriedToLogin = false
     @Published var token: String? = nil
     @Published var tokenPrepared = false
+    @Published var loginState = LoginState.notStart
 
     var emailVerificationEvent = PassthroughSubject<Void, Never>()
     var clearNotificationEvent = PassthroughSubject<Void, Never>()
@@ -184,7 +198,7 @@ class AppGlobalState: ObservableObject {
         flarumProvider.session.session.reset(completionHandler: {})
     }
 
-    func logout() {
+    @MainActor func logout() {
         clearCookieStorage()
         account = nil
         unreadNotificationCount = 0
@@ -195,7 +209,7 @@ class AppGlobalState: ObservableObject {
     }
 
     @discardableResult
-    func login(account: String, password: String) async -> Bool {
+    func login(account: String, password: String) async -> Result<Bool, LoginError> {
         if let result = try? await flarumProvider.request(.token(username: account, password: password)) {
             if let token = try? result.map(Token.self) {
                 let flarumTokenCookie = HTTPCookie(properties: [
@@ -222,7 +236,7 @@ class AppGlobalState: ObservableObject {
                         AppGlobalState.shared.ignoredUserIds = Set(response.data.users.first?.relationships?.ignoredUsers.compactMap { $0.id } ?? [])
                     }
                 }
-                return true
+                return .success(true)
             } else if let error = try? result.map(FlarumAPIErrorModel.self) {
                 debugPrint(error)
             } else {
@@ -231,28 +245,37 @@ class AppGlobalState: ObservableObject {
                     fatalErrorDebug()
                 }
             }
+            return .success(false)
+        } else {
+            // Network request error, maybe app is in background.
+            return .failure(.networkError)
         }
-        DispatchQueue.main.async {
-            self.hasTriedToLogin = true
-        }
-        return false
     }
 
-    func tryToLoginWithStoredAccount() async {
+    @MainActor func tryToLoginWithStoredAccount() async {
         if let account = account {
+            loginState = .trying
             let loginResult = await login(account: account.account, password: account.password)
-            if !loginResult {
-                // Maybe password has been modified
-                await UIApplication.shared.topController()?.presentSignView()
-                logout()
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            switch loginResult {
+            case let .success(result):
+                if !result {
+                    // Maybe password has been modified
+                    UIApplication.shared.topController()?.presentSignView()
+                    logout()
+                    loginState = .loginFailed
                     Toast.default(icon: .emoji("🤔"), title: "登录失败", subtitle: "密码可能被修改，请重新登录").show()
-                }
-            } else {
-                DispatchQueue.main.async {
+                } else {
+                    loginState = .loginSuccess
                     Toast.default(icon: .emoji("🎉"), title: "登录成功").show()
                 }
+            case .failure:
+                // Network error
+                loginState = .requestFailed
+                Toast.default(icon: .emoji("📶"), title: "登录失败", subtitle: "网络请求出错，正在重试").show()
+                await tryToLoginWithStoredAccount()
             }
+        } else {
+            loginState = .noAccount
         }
     }
 }
