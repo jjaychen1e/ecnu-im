@@ -255,7 +255,6 @@ struct AllDiscussionsView: View {
                 proxy.scrollTo(ModeWithID(mode: newValue, id: 0), anchor: .top)
             }
             .onReceive(tagFilterViewModel.confirmPublisher.removeDuplicates()) { newValue in
-                printDebug(newValue)
                 proxy.scrollTo(ModeWithID(mode: appGlobalState.discussionBrowseCategory.value, id: 0), anchor: .top)
                 Task {
                     viewModel.filteredTags = newValue
