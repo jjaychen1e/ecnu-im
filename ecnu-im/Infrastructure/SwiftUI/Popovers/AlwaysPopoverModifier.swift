@@ -11,9 +11,11 @@ import SwiftUI
 
 private class AlwaysPopoverModifierViewModel: ObservableObject {
     weak var presentedViewController: UIViewController?
+    weak var contentViewController: UIViewController?
     func dismiss(_ completion: @escaping () -> Void) {
         presentedViewController?.dismiss(animated: true, completion: completion)
         presentedViewController = nil
+        contentViewController = nil
     }
 }
 
@@ -47,24 +49,28 @@ private struct AlwaysPopoverModifier<PopoverContent>: ViewModifier where Popover
                     .environment(\.popoverMenuDismissEnvironment, .init(operator: popoverOperatorViewModel.popoverMenuDismissEnvironmentOperator))
                 popoverOperatorViewModel.popoverMenuPresentEnvironmentOperator.present = { [weak viewModel, weak anchorViewModel] in
                     if let viewModel = viewModel, let anchorViewModel = anchorViewModel {
-                        let contentController = ContentViewController(rootView: content)
-                        contentController.modalPresentationStyle = .popover
+                        if viewModel.contentViewController == nil {
+                            let contentController = ContentViewController(rootView: content)
+                            contentController.modalPresentationStyle = .popover
 
-                        let view = anchorViewModel.anchorView
-                        guard let popover = contentController.popoverPresentationController else { return }
-                        popover.sourceView = view
-                        popover.sourceRect = view.bounds
-                        popover.delegate = contentController
+                            let view = anchorViewModel.anchorView
+                            guard let popover = contentController.popoverPresentationController else { return }
+                            popover.sourceView = view
+                            popover.sourceRect = view.bounds
+                            popover.delegate = contentController
 
-                        guard let sourceVC = view.closestVC() else { return }
-                        if let presentedVC = sourceVC.presentedViewController {
-                            presentedVC.dismiss(animated: true) {
+                            guard let sourceVC = view.closestVC() else { return }
+                            if let presentedVC = sourceVC.presentedViewController {
+                                presentedVC.dismiss(animated: true) {
+                                    sourceVC.present(contentController, animated: true, completion: {})
+                                    viewModel.presentedViewController = sourceVC
+                                    viewModel.contentViewController = contentController
+                                }
+                            } else {
                                 sourceVC.present(contentController, animated: true, completion: {})
                                 viewModel.presentedViewController = sourceVC
+                                viewModel.contentViewController = contentController
                             }
-                        } else {
-                            sourceVC.present(contentController, animated: true, completion: {})
-                            viewModel.presentedViewController = sourceVC
                         }
                     }
                 }
