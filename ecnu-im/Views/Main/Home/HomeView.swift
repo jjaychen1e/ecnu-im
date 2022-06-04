@@ -18,7 +18,15 @@ struct ScrollPreferenceKey: PreferenceKey {
     }
 }
 
-private class FlarumDiscussionPreviewViewModel: ObservableObject {
+private class FlarumDiscussionPreviewViewModel: ObservableObject, Hashable {
+    static func == (lhs: FlarumDiscussionPreviewViewModel, rhs: FlarumDiscussionPreviewViewModel) -> Bool {
+        lhs.discussion.id == rhs.discussion.id
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(discussion.id)
+    }
+
     @Published var discussion: FlarumDiscussion
     @Published var likesUsers: [FlarumUser] = []
     @Published var relatedUsers: [FlarumUser] = []
@@ -32,6 +40,7 @@ private class HomeViewViewModel: ObservableObject {
     @Published var recentOnlineUsers: [FlarumUser] = []
     @Published var recentActiveUsers: [FlarumUser] = []
     @Published var recentRegisteredUsers: [FlarumUser] = []
+    @Published var randomDiscussions: [FlarumDiscussionPreviewViewModel] = []
     @Published var stickyDiscussions: [FlarumDiscussionPreviewViewModel] = []
     @Published var newestDiscussions: [FlarumDiscussionPreviewViewModel] = []
     @Published var unreadNotifications: (unreadCount: Int, notifications: [FlarumNotification])?
@@ -45,6 +54,7 @@ private class HomeViewViewModel: ObservableObject {
                 self.recentOnlineUsers = []
                 self.recentActiveUsers = []
                 self.recentRegisteredUsers = []
+                self.randomDiscussions = []
                 self.stickyDiscussions = []
                 self.newestDiscussions = []
                 self.unreadNotifications = nil
@@ -68,7 +78,7 @@ struct HomeView: View {
 
     @ObservedObject var appGlobalState = AppGlobalState.shared
 
-    private func processDiscussions(discussions: [FlarumDiscussion]) async {
+    private func processRecent(discussions: [FlarumDiscussion]) async {
         withAnimation {
             viewModel.stickyDiscussions = discussions.filter {
                 if let attributes = $0.attributes {
@@ -85,19 +95,24 @@ struct HomeView: View {
             }.map {
                 FlarumDiscussionPreviewViewModel(discussion: $0)
             }
+        }
 
-            (viewModel.newestDiscussions + viewModel.stickyDiscussions)
-                .compactMap { $0 }
+        await process(discussionPreviewViewModels: viewModel.newestDiscussions + viewModel.stickyDiscussions)
+    }
+
+    private func process(discussionPreviewViewModels: [FlarumDiscussionPreviewViewModel]) async {
+        withAnimation {
+            discussionPreviewViewModels
                 .forEach {
                     $0.postExcerpt = AppGlobalState.shared.tokenPrepared ? "帖子预览内容加载中..." : "登录以查看内容预览"
                 }
         }
 
-        let ids = (viewModel.newestDiscussions + viewModel.stickyDiscussions).compactMap { $0.discussion.lastPost?.id }.compactMap { Int($0) }
+        let ids = discussionPreviewViewModels.compactMap { $0.discussion.lastPost?.id }.compactMap { Int($0) }
         if AppGlobalState.shared.tokenPrepared, let response = try? await flarumProvider.request(.postsByIds(ids: ids)).flarumResponse() {
             let posts = response.data.posts
             for post in posts {
-                if let correspondingDiscussionViewModel = (viewModel.newestDiscussions + viewModel.stickyDiscussions).first(where: { $0.discussion.lastPost?.id == post.id }) {
+                if let correspondingDiscussionViewModel = discussionPreviewViewModels.first(where: { $0.discussion.lastPost?.id == post.id }) {
                     withAnimation {
                         if let excerpt = post.excerptText(configuration: .init(textLengthMax: 300,
                                                                                textLineMax: 4,
@@ -117,31 +132,30 @@ struct HomeView: View {
             }
         }
 
-        for discussion in discussions {
+        for viewModel in discussionPreviewViewModels {
+            let discussion = viewModel.discussion
             Task {
-                if let correspondingDiscussionViewModel = (viewModel.newestDiscussions + viewModel.stickyDiscussions).first(where: { $0.discussion.id == discussion.id }) {
-                    if let users = DiscussionUserStorage.shared.discussionUsers(for: discussion.id),
-                       users.count >= 5 || users.count == discussion.attributes?.participantCount {
+                if let users = DiscussionUserStorage.shared.discussionUsers(for: discussion.id),
+                   users.count >= 5 || users.count == discussion.attributes?.participantCount {
+                    withAnimation {
+                        viewModel.relatedUsers = Array(users)
+                    }
+                } else {
+                    if let id = Int(discussion.id),
+                       let response = try? await flarumProvider.request(.posts(discussionID: id, offset: 0, limit: 15)).flarumResponse() {
+                        let users = response.data.posts.compactMap { $0.author }
+                        let filteredUsers = Array(users.unique { $0.id }.prefix(5))
+                        DiscussionUserStorage.shared.store(discussionUsers: filteredUsers, id: discussion.id)
                         withAnimation {
-                            correspondingDiscussionViewModel.relatedUsers = Array(users)
-                        }
-                    } else {
-                        if let id = Int(discussion.id),
-                           let response = try? await flarumProvider.request(.posts(discussionID: id, offset: 0, limit: 15)).flarumResponse() {
-                            let users = response.data.posts.compactMap { $0.author }
-                            let filteredUsers = Array(users.unique { $0.id }.prefix(5))
-                            DiscussionUserStorage.shared.store(discussionUsers: filteredUsers, id: discussion.id)
-                            withAnimation {
-                                correspondingDiscussionViewModel.relatedUsers = filteredUsers
-                            }
+                            viewModel.relatedUsers = filteredUsers
                         }
                     }
-                    Task {
-                        if let id = Int(discussion.lastPost?.id ?? ""),
-                           let response = try? await flarumProvider.request(.postsById(id: id, includes: [.likes])).flarumResponse() {
-                            let users = response.data.posts.first?.relationships?.likes?.unique { $0.id }.prefix(5).compactMap { $0 } ?? []
-                            correspondingDiscussionViewModel.likesUsers = Array(users)
-                        }
+                }
+                Task {
+                    if let id = Int(discussion.lastPost?.id ?? ""),
+                       let response = try? await flarumProvider.request(.postsById(id: id, includes: [.likes])).flarumResponse() {
+                        let users = response.data.posts.first?.relationships?.likes?.unique { $0.id }.prefix(5).compactMap { $0 } ?? []
+                        viewModel.likesUsers = Array(users)
                     }
                 }
             }
@@ -164,7 +178,41 @@ struct HomeView: View {
                     guard !Task.isCancelled else { return }
 
                     let newDiscussions = response.data.discussions
-                    await processDiscussions(discussions: newDiscussions)
+                    await processRecent(discussions: newDiscussions)
+                }
+            }
+        )
+
+        loadTasks.append(
+            Task {
+                if let response = try? await flarumProvider.request(.allTags).flarumResponse() {
+                    guard !Task.isCancelled else { return }
+
+                    let tags = response.data.tags.filter { $0.relationships?.parent == nil }
+                    let totalDiscussionCount = tags.reduce(0) { partialResult, tag in
+                        partialResult + tag.attributes.discussionCount
+                    }
+
+                    (0 ..< 20).map { _ in
+                        Int.random(in: 0 ..< totalDiscussionCount)
+                    }
+                    .unique { $0 }
+                    .forEach { id in
+                        guard !Task.isCancelled else { return }
+                        Task {
+                            if let response = try? await flarumProvider.request(.discussionById(id: id)).flarumResponse() {
+                                guard !Task.isCancelled else { return }
+                                if let discussion = response.data.discussions.first {
+                                    let previewModel = FlarumDiscussionPreviewViewModel(discussion: discussion)
+                                    withAnimation {
+                                        viewModel.randomDiscussions.append(previewModel)
+                                    }
+                                    guard !Task.isCancelled else { return }
+                                    await process(discussionPreviewViewModels: [previewModel])
+                                }
+                            }
+                        }
+                    }
                 }
             }
         )
@@ -345,6 +393,7 @@ struct HomeView: View {
                 recentOnline()
                 recentRegisteredSection()
                 stickySection()
+                randomRecommendationSection()
                 latestSection()
             }
             .padding(.bottom)
@@ -732,8 +781,9 @@ struct HomeView: View {
 
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 16) {
-                        ForEach(0 ..< viewModel.stickyDiscussions.count, id: \.self) { index in
-                            let viewModel = viewModel.stickyDiscussions[index]
+                        ForEach(Array(zip(viewModel.stickyDiscussions.indices, viewModel.stickyDiscussions)), id: \.1) { index, viewModel in
+                            let ignored = appGlobalState.ignoredUserIds.contains(viewModel.discussion.starter?.id ?? "") == true
+                            let isHidden = viewModel.discussion.isHidden
                             Button {
                                 let number = viewModel.discussion.attributes?.lastPostNumber ?? 1
                                 uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: number),
@@ -752,7 +802,47 @@ struct HomeView: View {
                                     }
                             }
                             .buttonStyle(.plain)
-                            .opacity(appGlobalState.ignoredUserIds.contains(viewModel.discussion.starter?.id ?? "") == true ? 0.3 : 1.0)
+                            .dimmedOverlay(ignored: .constant(ignored), isHidden: .constant(isHidden))
+                        }
+                    }
+                    .padding(.all, 36)
+                }
+                .padding(.all, -36)
+                .safeAreaInset(edge: .leading) {
+                    Color.clear.frame(width: 8, height: 0)
+                }
+                .safeAreaInset(edge: .trailing) {
+                    Color.clear.frame(width: 8, height: 0)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    func randomRecommendationSection() -> some View {
+        if viewModel.randomDiscussions.count > 0 {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("随机推荐")
+                    .font(.system(size: 34, weight: .bold, design: .rounded))
+                    .foregroundColor(Asset.SpecialColors.sectionColor.swiftUIColor)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.leading)
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 16) {
+                        ForEach(Array(zip(viewModel.randomDiscussions.indices, viewModel.randomDiscussions)), id: \.1) { index, viewModel in
+                            let ignored = appGlobalState.ignoredUserIds.contains(viewModel.discussion.starter?.id ?? "") == true
+                            let isHidden = viewModel.discussion.isHidden
+                            Button {
+                                let number = viewModel.discussion.attributes?.lastPostNumber ?? 1
+                                uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: viewModel.discussion, nearNumber: number),
+                                                               column: .secondary,
+                                                               toRoot: true)
+                            } label: {
+                                HomePostCardView(viewModel: viewModel)
+                            }
+                            .buttonStyle(.plain)
+                            .dimmedOverlay(ignored: .constant(ignored), isHidden: .constant(isHidden))
                         }
                     }
                     .padding(.all, 36)
@@ -831,6 +921,8 @@ private struct HomePostCardView: View {
     @ObservedObject private var viewModel: FlarumDiscussionPreviewViewModel
     @EnvironmentObject var uiKitEnvironment: UIKitEnvironment
 
+    private let maxWidth: CGFloat = 300
+
     fileprivate init(viewModel: FlarumDiscussionPreviewViewModel) {
         self.viewModel = viewModel
     }
@@ -838,7 +930,7 @@ private struct HomePostCardView: View {
     var body: some View {
         Group {
             VStack(spacing: 4) {
-                HStack(alignment: .top) {
+                HStack {
                     PostAuthorAvatarView(name: viewModel.discussion.starterName, url: viewModel.discussion.starterAvatarURL, size: 40)
                         .mask(Circle())
                         .overlay(Circle().stroke(Color.white, lineWidth: 1))
@@ -877,26 +969,36 @@ private struct HomePostCardView: View {
                                 UIApplication.shared.presentOnTop(ProfileCenterViewController(userId: targetId), animated: true)
                             }
                         }
+
+                    let isTagsTooMany = viewModel.discussion.tags.count > 2 || viewModel.discussion.tags.map { $0.attributes.name.count }.reduce(0) { x, y in x + y } > 6
                     VStack(alignment: .leading, spacing: 2) {
                         Text(viewModel.discussion.discussionTitle)
-                            .lineLimit(1)
+                            .lineLimit(2)
                             .font(.system(size: 14, weight: .semibold, design: .rounded))
                             .foregroundColor(Asset.SpecialColors.cardTitleColor.swiftUIColor)
                         HStack(alignment: .top, spacing: 2) {
                             HStack(alignment: .center, spacing: 2) {
                                 Text(viewModel.discussion.lastPostedUserName)
                                     .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                    .layoutPriority(2)
                                 Text(viewModel.discussion.lastPostDateDescription)
                                     .font(.system(size: 10, weight: .regular, design: .rounded))
-                                    .fixedSize()
+                                    .minimumScaleFactor(0.7)
+                                    .layoutPriority(1)
                             }
                             Spacer(minLength: 0)
+                            if !isTagsTooMany {
+                                DiscussionTagsView(tags: .constant(viewModel.discussion.tagViewModels))
+                                    .layoutPriority(2)
+                            }
+                        }
+                        if isTagsTooMany {
                             DiscussionTagsView(tags: .constant(viewModel.discussion.tagViewModels))
-                                .fixedSize()
-//                                .frame(maxWidth: .infinity, alignment: .trailing)
+                                .frame(maxWidth: .infinity, alignment: .trailing)
                         }
                     }
                 }
+
                 Text(viewModel.postExcerpt)
                     .animation(nil)
                     .multilineTextAlignment(.leading)
@@ -933,11 +1035,11 @@ private struct HomePostCardView: View {
                     }
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .topLeading)
             .padding(.horizontal, 12)
             .padding(.top, 12)
             .padding(.bottom, 6)
-            .frame(width: 276, height: 165)
+            .frame(height: 165)
+            .frame(maxWidth: maxWidth)
             .background(.ultraThinMaterial)
             .backgroundStyle(cornerRadius: 30, opacity: 0.3)
         }

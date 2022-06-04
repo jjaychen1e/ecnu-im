@@ -61,6 +61,7 @@ class AppGlobalState: ObservableObject {
     public var showRecentActiveUsers: CurrentValueSubject<Bool, Never>
     public var showRecentOnlineUsers: CurrentValueSubject<Bool, Never>
     public var showRecentRegisteredUsers: CurrentValueSubject<Bool, Never>
+    public var showRandomRecommendationDiscussions: CurrentValueSubject<Bool, Never>
     public var autoClearUnreadNotification: CurrentValueSubject<Bool, Never>
     public var discussionBrowseCategory: CurrentValueSubject<BrowseCategory, Never>
 
@@ -105,6 +106,7 @@ class AppGlobalState: ObservableObject {
             "showRecentActiveUsers": true,
             "showRecentOnlineUsers": false,
             "showRecentRegisteredUsers": false,
+            "showRandomRecommendationDiscussions": true,
             "autoClearUnreadNotification": false,
             "discussionBrowseCategory": BrowseCategory.cards.rawValue,
         ])
@@ -121,6 +123,7 @@ class AppGlobalState: ObservableObject {
         showRecentActiveUsers = CurrentValueSubject<Bool, Never>(UserDefaults.standard.bool(forKey: "showRecentActiveUsers"))
         showRecentOnlineUsers = CurrentValueSubject<Bool, Never>(UserDefaults.standard.bool(forKey: "showRecentOnlineUsers"))
         showRecentRegisteredUsers = CurrentValueSubject<Bool, Never>(UserDefaults.standard.bool(forKey: "showRecentRegisteredUsers"))
+        showRandomRecommendationDiscussions = CurrentValueSubject<Bool, Never>(UserDefaults.standard.bool(forKey: "showRandomRecommendationDiscussions"))
         autoClearUnreadNotification = CurrentValueSubject<Bool, Never>(UserDefaults.standard.bool(forKey: "autoClearUnreadNotification"))
         discussionBrowseCategory = {
             if let rawString = UserDefaults.standard.string(forKey: "discussionBrowseCategory"),
@@ -170,6 +173,12 @@ class AppGlobalState: ObservableObject {
 
         showRecentRegisteredUsers.removeDuplicates().sink { value in
             UserDefaults.standard.set(value, forKey: "showRecentRegisteredUsers")
+            self.objectWillChange.send()
+        }
+        .store(in: &subscriptions)
+        
+        showRandomRecommendationDiscussions.removeDuplicates().sink { value in
+            UserDefaults.standard.set(value, forKey: "showRandomRecommendationDiscussions")
             self.objectWillChange.send()
         }
         .store(in: &subscriptions)

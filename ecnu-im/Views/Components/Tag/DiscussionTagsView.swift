@@ -37,9 +37,11 @@ struct DiscussionTagsView: View {
         HStack(spacing: spacing) {
             if let iconInfo = tag.iconInfo {
                 Text(fa: iconInfo.icon, faStyle: iconInfo.style, size: fontSize)
+                    .lineLimit(1)
             }
             Text(tag.name)
                 .font(.system(size: fontSize))
+                .lineLimit(1)
         }
         .foregroundColor(tag.fontColor ?? .primary)
         .padding(.horizontal, horizontalPadding)

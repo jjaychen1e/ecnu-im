@@ -45,6 +45,12 @@ private class InnerHomeConfigureViewController: SettingViewController, NoOverlay
                                       publisher: AppGlobalState.shared.showRecentRegisteredUsers.eraseToAnyPublisher()),
                         icon: .system(name: "person.crop.circle.badge.plus"),
                         label: "最近注册用户（若有权限）"),
+                RowItem(type: .toggle(action: { value in
+                                          AppGlobalState.shared.showRandomRecommendationDiscussions.send(value)
+                                      },
+                                      publisher: AppGlobalState.shared.showRandomRecommendationDiscussions.eraseToAnyPublisher()),
+                        icon: .system(name: "dice"),
+                        label: "随机推荐帖子"),
             ]),
         ]
         applyInitialSnapshots()

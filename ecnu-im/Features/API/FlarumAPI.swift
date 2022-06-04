@@ -62,6 +62,8 @@ enum Flarum {
                         pageOffset: Int = 0,
                         pageItemLimit: Int = 20,
                         tags: [FlarumTag] = [])
+    case discussionById(includes: Set<DiscussionIncludeOption> = DiscussionIncludeOption.homeDiscussionIncludeOptionSet,
+                        id: Int)
     case discussionByUserAccount(includes: Set<DiscussionIncludeOption> = DiscussionIncludeOption.profileDiscussionIncludeOptionSet,
                                  account: String, offset: Int, limit: Int, sort: DiscussionSortOption = .newest)
     case discussionLastRead(discussionId: Int, postNumber: Int)
@@ -110,6 +112,8 @@ extension Flarum: TargetType {
             return "/api/discussions"
         case .allDiscussions:
             return "/api/discussions"
+        case let .discussionById(_, id):
+            return "/api/discussions/\(id)"
         case .discussionByUserAccount:
             return "/api/discussions"
         case let .discussionLastRead(discussionId, _):
@@ -176,6 +180,8 @@ extension Flarum: TargetType {
         case .discussionSearch:
             return .get
         case .allDiscussions:
+            return .get
+        case .discussionById:
             return .get
         case .discussionByUserAccount:
             return .get
@@ -289,6 +295,10 @@ extension Flarum: TargetType {
                     "page[limit]": pageLimit,
                 ], encoding: URLEncoding.default)
             }
+        case let .discussionById(includes, _):
+            return .requestParameters(parameters: [
+                "include": includes.map { $0.rawValue }.joined(separator: ","),
+            ], encoding: URLEncoding.default)
         case let .discussionByUserAccount(includes, account, offset, limit, sort):
             return .requestParameters(parameters: [
                 "include": includes.map { $0.rawValue }.joined(separator: ","),
