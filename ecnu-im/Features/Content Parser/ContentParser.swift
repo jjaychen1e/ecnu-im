@@ -53,7 +53,13 @@ class ContentParser {
         let styleStack = ContentTextStyleStack()
         let attributedString = NSMutableAttributedString()
 
-        let indentWhitespaces = String(repeating: "\t", count: level + 1)
+        let indentWhitespaces: String = {
+            if level == 0 {
+                return "  "
+            } else {
+                return String(repeating: "    ", count: level + 1)
+            }
+        }()
 
         var orderOffset = 0
         for (index, item) in list.items.enumerated() {
