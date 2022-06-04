@@ -120,9 +120,7 @@ class ContentParser {
                     contentItems.append(ContentItemBlockquoteUIView(contentItems: subContentItems))
                 }
             case let .list(contentBlockList):
-                let attributedString = Self.parseListToAttributedString(list: contentBlockList, level: 0, initStyles: [
-                    .textColor(Asset.DynamicColors.dynamicBlack.color.withAlphaComponent(0.7)),
-                ])
+                let attributedString = Self.parseListToAttributedString(list: contentBlockList, level: 0, initStyles: initStyles)
                 contentItems.append(ContentItemParagraphUIView(attributedText: attributedString))
             case .divider:
                 contentItems.append(ContentItemDividerUIView())
