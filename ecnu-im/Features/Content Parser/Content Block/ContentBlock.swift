@@ -79,13 +79,20 @@ enum ContentBlock {
     private static func excerptText(list: ContentBlockList) -> String {
         var text = ""
 
-        for (index, item) in list.items.enumerated() {
+        var orderOffset = 0
+        for (_, item) in list.items.enumerated() {
             let leadingCharacter: String = {
-                switch list.listType {
-                case .bullet:
-                    return "\u{2022} "
-                case let .ordered(number):
-                    return "\(number + index). "
+                switch item {
+                case .text:
+                    switch list.listType {
+                    case .bullet:
+                        return "\u{2022} "
+                    case let .ordered(number):
+                        orderOffset += 1
+                        return "\(number + orderOffset - 1). "
+                    }
+                case .list:
+                    return ""
                 }
             }()
             switch item {
@@ -232,12 +239,12 @@ extension ContentBlock {
         case .listItem:
             break
         case let .indentedCode(lines):
-            return [.codeBlock(nil, lines.joined(separator: "\n"))]
+            return [.codeBlock(nil, lines.joined(separator: ""))]
         case let .fencedCode(fence, lines):
-            return [.codeBlock(fence, lines.joined(separator: "\n"))]
+            return [.codeBlock(fence, lines.joined(separator: ""))]
         case let .htmlBlock(lines):
             // TODO: HTML is not supported in the web, so we will regard html block as a normal code block.
-            return [.codeBlock(nil, lines.joined(separator: "\n"))]
+            return [.codeBlock(nil, lines.joined(separator: ""))]
         case .thematicBreak:
             return [.divider]
         case let .table(header, alignments, rows):
@@ -303,7 +310,7 @@ extension ContentBlock {
         if case let .list(topListType, _, topBlocks) = block {
             var topListItems: [ContentBlockList.ContentListItem] = []
             for topBlock in topBlocks {
-                if case let .listItem(_, _, subListBlocks) = topBlock {
+                if case let .listItem(type, bool, subListBlocks) = topBlock {
                     for subListBlock in subListBlocks {
                         if case let .paragraph(text) = subListBlock {
                             topListItems.append(.text(RichText.parseFrom(text: text)))

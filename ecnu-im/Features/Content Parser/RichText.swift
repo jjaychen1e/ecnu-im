@@ -277,7 +277,7 @@ extension RichText {
             styleStack.pop()
             return result
         case let .codeInline(codeString):
-            styleStack.push(.markerColor(.systemGray))
+            styleStack.push(.markerColor(.secondarySystemBackground))
             styleStack.push(.mono)
             let result = RichText.plain(codeString).attributedString(styleStack: styleStack)
             styleStack.pop()

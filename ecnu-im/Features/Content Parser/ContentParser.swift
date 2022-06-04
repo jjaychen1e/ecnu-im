@@ -32,7 +32,7 @@ class ContentParser {
             .split(separator: "\n", omittingEmptySubsequences: false)
             .enumerated()
             .forEach { index, element in
-                if index > 0, processedLines[index - 1].starts(with: ">"), !element.starts(with: ">"), element.contains(where: { !$0.isWhitespace }) {
+                if index > 0, processedLines[index - 1].starts(with: ">"), !element.starts(with: ">"), element.contains(where: { !$0.isWhitespace }), !element.starts(with: "```") {
                     processedLines.append(">" + element)
                 } else {
                     processedLines.append(String(element))
@@ -55,13 +55,20 @@ class ContentParser {
 
         let indentWhitespaces = String(repeating: "\t", count: level + 1)
 
+        var orderOffset = 0
         for (index, item) in list.items.enumerated() {
             let leadingCharacter: RichText = {
-                switch list.listType {
-                case .bullet:
-                    return .bold(.plain("\u{2022} "))
-                case let .ordered(number):
-                    return .bold(.plain("\(number + index). "))
+                switch item {
+                case .text:
+                    switch list.listType {
+                    case .bullet:
+                        return .bold(.plain("\u{2022} "))
+                    case let .ordered(number):
+                        orderOffset += 1
+                        return .bold(.plain("\(number + orderOffset - 1). "))
+                    }
+                case .list:
+                    return .empty
                 }
             }()
             switch item {
@@ -75,6 +82,9 @@ class ContentParser {
                 attributedString.append(itemRichText.attributedString(styleStack: styleStack))
             case let .list(contentBlockList):
                 attributedString.append(parseListToAttributedString(list: contentBlockList, level: level + 1))
+                if index != list.items.count - 1 {
+                    attributedString.append(.init(string: "\n"))
+                }
             }
         }
 
@@ -109,11 +119,17 @@ class ContentParser {
             case .divider:
                 contentItems.append(ContentItemDividerUIView())
             case let .codeBlock(optional, string):
+                let paragraphStyle = NSMutableParagraphStyle()
+                paragraphStyle.lineSpacing = 2
+                paragraphStyle.paragraphSpacing = 2
+                paragraphStyle.paragraphSpacingBefore = 2
                 let attributes: [NSAttributedString.Key: Any] = [
                     NSAttributedString.Key.font: Font.monospace(17),
                     NSAttributedString.Key.foregroundColor: Asset.DynamicColors.dynamicBlack.color,
+                    NSAttributedString.Key.paragraphStyle: paragraphStyle,
                 ]
-                let attributedString: NSAttributedString = .init(string: string, attributes: attributes)
+                let trimmedString = string.trimmingCharacters(in: .newlines)
+                let attributedString: NSAttributedString = .init(string: trimmedString, attributes: attributes)
                 contentItems.append(ContentItemCodeBlockUIView(attributedText: attributedString))
             case let .linkPreview(link):
                 if let url = URL(string: link) {

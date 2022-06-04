@@ -24,9 +24,6 @@ class ContentItemCodeBlockUIView: UIView & ContentBlockUIView {
     var attributedText: NSAttributedString
     private lazy var textView: ECNUTextView = {
         let textView = ECNUTextView()
-        textView.textContainerInset = .zero
-        textView.textContainer.lineFragmentPadding = 0
-        textView.contentInset = .zero
         textView.isEditable = false
         textView.isScrollEnabled = false
         return textView
@@ -37,6 +34,11 @@ class ContentItemCodeBlockUIView: UIView & ContentBlockUIView {
         super.init(frame: .zero)
         textView.attributedText = attributedText
         textView.delegate = self
+        layer.borderWidth = 1.0
+        layer.borderColor = Asset.DynamicColors.dynamicBlack.color.withAlphaComponent(0.5).cgColor
+        layer.cornerRadius = 4
+        backgroundColor = .secondarySystemBackground
+        clipsToBounds = true
         addSubview(textView)
     }
 

@@ -18,6 +18,7 @@ struct FlarumNotificationAttributes: Codable {
         case newPost(postNumber: Int)
         case privateDiscussionReplied(postNumber: Int)
         case privateDiscussionCreated
+        case privateDiscussionAdded
     }
 
     enum FlarumNotificationContentType: String, RawRepresentable, Codable {
@@ -29,6 +30,7 @@ struct FlarumNotificationAttributes: Codable {
         case newPost
         case privateDiscussionReplied = "byobuPrivateDiscussionReplied"
         case privateDiscussionCreated = "byobuPrivateDiscussionCreated"
+        case privateDiscussionAdded = "byobuPrivateDiscussionAdded"
 
         var actionDescription: String {
             switch self {
@@ -47,6 +49,8 @@ struct FlarumNotificationAttributes: Codable {
             case .privateDiscussionReplied:
                 return "在私密主题中回复了你"
             case .privateDiscussionCreated:
+                return "在私密主题中邀请了你"
+            case .privateDiscussionAdded:
                 return "在私密主题中邀请了你"
             }
         }
@@ -170,7 +174,7 @@ struct FlarumNotification {
 
     var originalPost: FlarumPost? {
         switch attributes.content {
-        case .badgeReceived, .postLiked, .postMentioned, .postReacted, .privateDiscussionCreated, .privateDiscussionReplied:
+        case .badgeReceived, .postLiked, .postMentioned, .postReacted, .privateDiscussionCreated, .privateDiscussionAdded, .privateDiscussionReplied:
             switch relationships?.subject {
             case let .post(post):
                 return post
@@ -188,7 +192,7 @@ struct FlarumNotification {
         var targetPostNumber: Int?
         var targetPost: FlarumPost?
         switch attributes.content {
-        case .postLiked, .postReacted, .privateDiscussionCreated, .badgeReceived:
+        case .postLiked, .postReacted, .badgeReceived:
             break
         case let .postMentioned(replyNumber):
             targetPostNumber = replyNumber
@@ -202,6 +206,8 @@ struct FlarumNotification {
                     targetPost = post
                 }
             }
+        case .privateDiscussionAdded, .privateDiscussionCreated:
+            targetPostNumber = 1
         }
 
         if let targetPost = targetPost {

@@ -287,7 +287,7 @@ struct HomeView: View {
 
                                 if let latestNotification = notifications.first {
                                     switch latestNotification.attributes.contentType {
-                                    case .postLiked, .postMentioned, .userMentioned, .postReacted, .newPost, .privateDiscussionReplied, .privateDiscussionCreated:
+                                    case .postLiked, .postMentioned, .userMentioned, .postReacted, .newPost, .privateDiscussionReplied, .privateDiscussionCreated, .privateDiscussionAdded:
                                         let latestNotificationUserName: String = notifications.first?.relationships?.fromUser?.attributes.displayName ?? "Unkown"
                                         let latestNotificationDiscussionTitle: String = {
                                             if let subject = notifications.first?.relationships?.subject {
@@ -344,7 +344,7 @@ struct HomeView: View {
                                 }
 
                                 switch notifications[0].attributes.contentType {
-                                case .postLiked, .postReacted, .privateDiscussionCreated:
+                                case .postLiked, .postReacted:
                                     if let excerpt = notifications[0].originalPost?.excerptText(configuration: .init(textLengthMax: 150, textLineMax: 3, imageCountMax: 0)) {
                                         withAnimation {
                                             viewModel.latestNotificationExcerpt = excerpt
@@ -352,7 +352,7 @@ struct HomeView: View {
                                     } else {
                                         fatalErrorDebug()
                                     }
-                                case .postMentioned, .userMentioned, .newPost, .privateDiscussionReplied:
+                                case .postMentioned, .userMentioned, .newPost, .privateDiscussionReplied, .privateDiscussionCreated, .privateDiscussionAdded:
                                     if let repliedPost = await notifications[0].newPost() {
                                         if let excerpt = repliedPost.excerptText(configuration: .init(textLengthMax: 150, textLineMax: 3, imageCountMax: 0)) {
                                             withAnimation {

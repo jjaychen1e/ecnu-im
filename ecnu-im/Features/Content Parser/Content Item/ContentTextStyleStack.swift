@@ -20,6 +20,7 @@ enum ContentTextStyle {
     case superscript
     case markerColor(UIColor)
     case link(String)
+    case lineSpacing(CGFloat)
 }
 
 let ContentMarkerColorAttribute = "MarkerColorAttribute"
@@ -54,6 +55,7 @@ final class ContentTextStyleStack {
         var baselineOffset: CGFloat?
         var markerColor: UIColor?
         var link: String?
+        var lineSpacing: CGFloat?
 
         for item in items.reversed() {
             switch item {
@@ -108,6 +110,10 @@ final class ContentTextStyleStack {
                 if underline == nil {
                     underline = true
                 }
+            case let .lineSpacing(_lineSpacing):
+                if lineSpacing == nil {
+                    lineSpacing = _lineSpacing
+                }
             }
         }
 
@@ -121,7 +127,7 @@ final class ContentTextStyleStack {
         }
 
         let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.lineSpacing = parsedFontSize * 0.4
+        paragraphStyle.lineSpacing = parsedFontSize * (lineSpacing ?? 1.4 - 1)
         attributes[NSAttributedString.Key.paragraphStyle] = paragraphStyle
 
         if let baselineOffset = baselineOffset {
@@ -173,7 +179,8 @@ final class ContentTextStyleStack {
         }
 
         if let markerColor = markerColor {
-            attributes[NSAttributedString.Key(rawValue: ContentMarkerColorAttribute)] = markerColor
+//            attributes[NSAttributedString.Key(rawValue: ContentMarkerColorAttribute)] = markerColor
+            attributes[NSAttributedString.Key.backgroundColor] = markerColor
         }
 
         return attributes

@@ -356,6 +356,10 @@ struct FlarumResponseReference {
                                         attributes["content"] = JSON([
                                             "privateDiscussionCreated": [:],
                                         ])
+                                    case .privateDiscussionAdded:
+                                        attributes["content"] = JSON([
+                                            "privateDiscussionAdded": [:],
+                                        ])
                                     }
                                 } else {
                                     debugExecution {

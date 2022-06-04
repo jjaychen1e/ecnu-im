@@ -33,7 +33,7 @@ struct NotificationView: View {
         VStack(alignment: .leading, spacing: 6) {
             Group {
                 switch type {
-                case .postLiked, .postMentioned, .userMentioned, .postReacted, .newPost, .privateDiscussionReplied, .privateDiscussionCreated:
+                case .postLiked, .postMentioned, .userMentioned, .postReacted, .newPost, .privateDiscussionReplied, .privateDiscussionCreated, .privateDiscussionAdded:
                     Text(relatedDiscussion?.discussionTitle ?? "Unkown")
                 case .badgeReceived:
                     Text(badgeNotificationTitle ?? "Unkown")
@@ -154,6 +154,13 @@ struct NotificationView: View {
                                                    column: .secondary,
                                                    toRoot: true)
                 }
+            case .privateDiscussionAdded:
+                if let post = originalPost,
+                   let discussion = post.relationships?.discussion {
+                    uiKitEnvironment.splitVC?.push(viewController: DiscussionViewController(discussion: discussion, nearNumber: 1),
+                                                   column: .secondary,
+                                                   toRoot: true)
+                }
             case .userMentioned:
                 Task {
                     if let newPost = await notification.newPost() {
@@ -189,10 +196,7 @@ struct NotificationView: View {
                 .foregroundColor(.teal)
         case .badgeReceived:
             EmptyView()
-        case .privateDiscussionReplied:
-            Image(systemName: "lock.fill")
-                .foregroundColor(.orange)
-        case .privateDiscussionCreated:
+        case .privateDiscussionReplied, .privateDiscussionCreated, .privateDiscussionAdded:
             Image(systemName: "lock.fill")
                 .foregroundColor(.orange)
         }
@@ -214,7 +218,7 @@ struct NotificationView: View {
     @ViewBuilder
     func contentExcerptView() -> some View {
         switch notification.attributes.content {
-        case .postLiked, .postReacted, .privateDiscussionCreated, .badgeReceived:
+        case .postLiked, .postReacted, .privateDiscussionCreated, .privateDiscussionAdded, .badgeReceived:
             EmptyView()
         case .postMentioned, .newPost, .userMentioned, .privateDiscussionReplied:
             if let replyExcerptText = replyExcerptText, replyExcerptText != "" {
