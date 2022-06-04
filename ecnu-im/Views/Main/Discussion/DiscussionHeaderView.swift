@@ -34,7 +34,7 @@ struct DiscussionHeaderView: View {
                     .padding(.horizontal, viewModel.discussion.tagViewModels.count == 0 ? 30 : 0)
             }
         }
-        .padding(.horizontal)
+        .padding(.horizontal, 32)
         .padding(.bottom, 4)
         .padding(.top, 8)
         .frame(maxWidth: .infinity, minHeight: 50, alignment: .bottom)

@@ -980,7 +980,7 @@ private struct HomePostCardView: View {
                             HStack(alignment: .center, spacing: 2) {
                                 Text(viewModel.discussion.lastPostedUserName)
                                     .font(.system(size: 12, weight: .semibold, design: .rounded))
-                                    .layoutPriority(2)
+                                    .layoutPriority(1)
                                 Text(viewModel.discussion.lastPostDateDescription)
                                     .font(.system(size: 10, weight: .regular, design: .rounded))
                                     .minimumScaleFactor(0.7)
