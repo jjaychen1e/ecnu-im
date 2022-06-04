@@ -26,9 +26,9 @@ class ContentItemCodeBlockUIView: UIView & ContentBlockUIView {
         let textView = ECNUTextView()
         textView.textContainerInset = .zero
         textView.textContainer.lineFragmentPadding = 0
+        textView.contentInset = .zero
         textView.isEditable = false
         textView.isScrollEnabled = false
-        textView.delegate = self
         return textView
     }()
 
@@ -36,24 +36,19 @@ class ContentItemCodeBlockUIView: UIView & ContentBlockUIView {
         self.attributedText = attributedText
         super.init(frame: .zero)
         textView.attributedText = attributedText
+        textView.delegate = self
         addSubview(textView)
     }
 
     override func sizeThatFits(_ size: CGSize) -> CGSize {
         guard size.width > 0 else { return .zero }
-        return CGSize(width: size.width, height: textView.sizeThatFits(frame.size).height)
+        return CGSize(width: size.width, height: textView.sizeThatFits(size).height)
     }
 
     override func layoutSubviews() {
         super.layoutSubviews()
         let size = textView.sizeThatFits(bounds.size)
-        textView.backgroundColor = .clear
         textView.frame = .init(origin: .zero, size: size)
-        invalidateIntrinsicContentSize()
-    }
-
-    override var intrinsicContentSize: CGSize {
-        return .init(width: bounds.width, height: textView.frame.size.height)
     }
 
     @available(*, unavailable)

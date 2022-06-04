@@ -35,7 +35,6 @@ class ContentItemParagraphUIView: UIView & ContentBlockUIView {
         super.init(frame: .zero)
         textView.backgroundColor = .clear
         textView.attributedText = attributedText
-        textView.textContainerInset = .zero
         textView.delegate = self
         addSubview(textView)
     }
@@ -54,11 +53,6 @@ class ContentItemParagraphUIView: UIView & ContentBlockUIView {
         super.layoutSubviews()
         let size = textView.sizeThatFits(bounds.size)
         textView.frame = .init(origin: .zero, size: size)
-        invalidateIntrinsicContentSize()
-    }
-
-    override var intrinsicContentSize: CGSize {
-        return .init(width: bounds.width, height: textView.frame.size.height)
     }
 }
 

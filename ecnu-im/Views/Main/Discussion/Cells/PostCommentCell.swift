@@ -240,7 +240,7 @@ final class PostCommentCell: UITableViewCell {
             let heightVerticalSpacing = 2 * contentVerticalSpacing
 
             let totalHeight = headerHeight + heightContent + footerHeight + heightVerticalSpacing + margin.top + margin.bottom
-//            print("Cell \(post!.attributes!.number!) \(Unmanaged.passUnretained(self).toOpaque()) - \(CGSize(width: size.width, height: totalHeight))")
+//            printDebug("Cell \(post!.attributes!.number!) \(Unmanaged.passUnretained(self).toOpaque()) - \(CGSize(width: size.width, height: totalHeight))")
             return CGSize(width: size.width, height: totalHeight)
         }
         return .zero

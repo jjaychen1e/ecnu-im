@@ -78,7 +78,7 @@ class PostContentItemsUIView: UIView {
         guard size.width > 0 else { return .zero }
         var totalHeight = 0.0
         for view in views {
-            let size = view.sizeThatFits(.init(width: size.width, height: .infinity))
+            let size = view.sizeThatFits(.init(width: size.width, height: .greatestFiniteMagnitude))
             totalHeight += size.height + margin
         }
         totalHeight -= margin
@@ -93,19 +93,11 @@ class PostContentItemsUIView: UIView {
 
         var totalHeight = 0.0
         for view in views {
-            let size = view.sizeThatFits(.init(width: bounds.width, height: .infinity))
+            let size = view.sizeThatFits(.init(width: bounds.width, height: .greatestFiniteMagnitude))
             let frame = CGRect(origin: .init(x: (bounds.width - size.width) / 2.0, y: totalHeight), size: size)
             view.frame = frame
             totalHeight += size.height + margin
         }
-    }
-
-    override func systemLayoutSizeFitting(_ targetSize: CGSize, withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority, verticalFittingPriority: UILayoutPriority) -> CGSize {
-        return .zero
-    }
-
-    override var intrinsicContentSize: CGSize {
-        return .init(width: bounds.width, height: totalHeight)
     }
 
     @available(*, unavailable)
