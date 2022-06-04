@@ -113,10 +113,18 @@ class DiscussionViewController: UIViewController, NoOverlayViewController, HasNa
             }
         }
     }
-    
+
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         hideReplyView()
+        view.resignFirstResponder()
+        view.endEditing(true)
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        view.resignFirstResponder()
+        view.endEditing(true)
     }
 
     private func setViewHierarchy() {
