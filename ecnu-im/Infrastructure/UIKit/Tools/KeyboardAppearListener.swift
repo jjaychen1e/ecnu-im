@@ -38,7 +38,6 @@ class KeyboardAppearListener {
     }
 
     private func keyboardWillShow(notification: Notification) {
-        printDebug("")
         guard
             let viewController = viewController,
             let userInfo = notification.userInfo,
