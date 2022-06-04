@@ -202,7 +202,8 @@ extension ContentBlock {
                         paragraphContentBlocks.append(.image(url: url))
                     } else if case let .link(text, url, _) = textFragment,
                               let url = url,
-                              case let .text(t) = text[0],
+                              let firstFragment = text.first,
+                              case let .text(t) = firstFragment,
                               t == Self.magicStringLink {
                         processTempText()
                         paragraphContentBlocks.append(.linkPreview(url))
