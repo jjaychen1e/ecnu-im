@@ -13,9 +13,9 @@ class MainSplitViewController: UIViewController {
     @AppStorage("account") var account: String = ""
     @AppStorage("password") var password: String = ""
 
-    static var rootSplitVC: UISplitViewController!
+    static var rootSplitVC: MySplitViewController!
 
-    private var mainSplitViewController: UISplitViewController!
+    private var mainSplitViewController: MySplitViewController!
 
     private lazy var primaryNavigationViewController: NoNavigationBarNavigationController = {
         let nvc = NoNavigationBarNavigationController()
@@ -33,6 +33,7 @@ class MainSplitViewController: UIViewController {
     private func adjustSplitViewHierarchy() {
         if UIApplication.shared.isLandscape {
             setOverrideTraitCollection(traitCollection, forChild: mainSplitViewController)
+            mainSplitViewController.setOverrideTraitCollectionForAllChildViewControllers(traitCollection)
             if traitCollection.horizontalSizeClass == .compact {
                 secondaryNavigationViewController.viewControllers = secondaryNavigationViewController.viewControllers.filter {
                     !($0 is DiscussionEmptyViewController)
@@ -52,6 +53,7 @@ class MainSplitViewController: UIViewController {
         } else if UIApplication.shared.isPortrait {
             let tc = UITraitCollection(horizontalSizeClass: .compact)
             setOverrideTraitCollection(tc, forChild: mainSplitViewController)
+            mainSplitViewController.setOverrideTraitCollectionForAllChildViewControllers(traitCollection)
             secondaryNavigationViewController.viewControllers = secondaryNavigationViewController.viewControllers.filter {
                 !($0 is DiscussionEmptyViewController)
             }
@@ -66,7 +68,7 @@ class MainSplitViewController: UIViewController {
         super.viewDidLoad()
         initializeApp()
 
-        mainSplitViewController = UISplitViewController(style: .doubleColumn)
+        mainSplitViewController = MySplitViewController(style: .doubleColumn)
         addChildViewController(mainSplitViewController, addConstrains: true)
         primaryNavigationViewController.viewControllers = [primaryViewController]
         mainSplitViewController.setViewController(primaryNavigationViewController, for: .primary)

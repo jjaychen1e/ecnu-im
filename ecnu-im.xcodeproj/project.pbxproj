@@ -149,6 +149,7 @@
 		6391FCD52811BB69006E086D /* NoNavigationBarNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6391FCD42811BB69006E086D /* NoNavigationBarNavigationController.swift */; };
 		63A6CCCF28156A51000075F7 /* DiscussionTagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63A6CCCE28156A51000075F7 /* DiscussionTagsView.swift */; };
 		63A6CCD128157FE0000075F7 /* DiscussionHeaderTagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63A6CCD028157FE0000075F7 /* DiscussionHeaderTagsView.swift */; };
+		63A8FF6C284BBE5200176614 /* MySplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63A8FF6B284BBE5200176614 /* MySplitViewController.swift */; };
 		63B3C72F28348F450068701F /* FlarumProfileAnswer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B3C72E28348F450068701F /* FlarumProfileAnswer.swift */; };
 		63B3C73228352CC60068701F /* DiscussionListCardCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B3C73128352CC60068701F /* DiscussionListCardCell.swift */; };
 		63B74092280277A900376B94 /* SignModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B7408F280277A900376B94 /* SignModalView.swift */; };
@@ -363,6 +364,7 @@
 		6391FCD42811BB69006E086D /* NoNavigationBarNavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoNavigationBarNavigationController.swift; sourceTree = "<group>"; };
 		63A6CCCE28156A51000075F7 /* DiscussionTagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscussionTagsView.swift; sourceTree = "<group>"; };
 		63A6CCD028157FE0000075F7 /* DiscussionHeaderTagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscussionHeaderTagsView.swift; sourceTree = "<group>"; };
+		63A8FF6B284BBE5200176614 /* MySplitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MySplitViewController.swift; sourceTree = "<group>"; };
 		63B3C72E28348F450068701F /* FlarumProfileAnswer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlarumProfileAnswer.swift; sourceTree = "<group>"; };
 		63B3C73128352CC60068701F /* DiscussionListCardCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscussionListCardCell.swift; sourceTree = "<group>"; };
 		63B7408F280277A900376B94 /* SignModalView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignModalView.swift; sourceTree = "<group>"; };
@@ -1082,6 +1084,7 @@
 			children = (
 				63E8BF0527F98ADC0021E4C2 /* MainSplitViewController.swift */,
 				637E51652845E0770015C3EE /* SecondaryNavigationController.swift */,
+				63A8FF6B284BBE5200176614 /* MySplitViewController.swift */,
 			);
 			path = "Split View";
 			sourceTree = "<group>";
@@ -1736,6 +1739,7 @@
 				631BB03D2805E4FD007D4138 /* SwiftDown.swift in Sources */,
 				63CBCB20282AB54B0083018D /* PostCommentCellFooterView.swift in Sources */,
 				6380BC07283399B600050AFA /* ContentViewController.swift in Sources */,
+				63A8FF6C284BBE5200176614 /* MySplitViewController.swift in Sources */,
 				6310E181282D5B3600E72F0D /* DiscussionEmptyViewController.swift in Sources */,
 				634C470327F9C18E00FC591D /* AllDiscussionsViewController.swift in Sources */,
 				63B740A52802794800376B94 /* OutlineOverlay.swift in Sources */,
