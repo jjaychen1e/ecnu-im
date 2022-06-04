@@ -66,8 +66,8 @@ class ContentItemSingleImageUIView: UIView & ContentBlockUIView {
                 if self._imageSize == nil {
                     if case let .success(value) = result {
                         ImageSizeStorage.shared.store(size: value.image.size, url: url)
+                        updateLayout?()
                     }
-                    updateLayout?()
                 }
             }
         }
