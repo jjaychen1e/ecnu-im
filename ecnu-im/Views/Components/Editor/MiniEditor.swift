@@ -12,6 +12,7 @@ class EditorContentModel: ObservableObject {
     @Published var text = ""
 }
 
+@MainActor
 class MiniEditorViewModel: ObservableObject {
     @Published var focused: Bool = false
     @Published var discussion: FlarumDiscussion
@@ -33,6 +34,7 @@ class MiniEditorViewModel: ObservableObject {
     var showCallback: () -> Void
     var hideCallback: () -> Void
     var didPostCallback: (FlarumPost) -> Void
+    var didEditPostCallback: (FlarumPost) -> Void
 
     func show(target: ReplyTarget) {
         if let replyTarget = replyTarget {
@@ -50,27 +52,39 @@ class MiniEditorViewModel: ObservableObject {
             switch replyTarget {
             case .discussion, .post:
                 contentModel.text = contentCache[replyTarget] ?? ""
+                focused = true
+                showCallback()
             case let .edit(flarumPost):
                 if let content = flarumPost.attributes?.content, case let .comment(postContent) = content {
-                    contentModel.text = postContent
+                    if let cachedContent = contentCache[replyTarget], cachedContent != postContent {
+                        // Ask user
+                        let alertController = UIAlertController(title: "提醒", message: "检测到上次未保存的编辑内容，是否继续编辑？", preferredStyle: .alert)
+                        alertController.addAction(UIAlertAction(title: "确定", style: .destructive, handler: { action in
+                            contentModel.text = cachedContent
+                            self.focused = true
+                            self.showCallback()
+                        }))
+                        alertController.addAction(UIAlertAction(title: "取消", style: .cancel, handler: { action in
+                            contentModel.text = postContent
+                            self.focused = true
+                            self.showCallback()
+                        }))
+                        UIApplication.shared.presentOnTop(alertController, animated: true)
+                    } else {
+                        contentModel.text = postContent
+                        focused = true
+                        showCallback()
+                    }
                 } else {
                     fatalErrorDebug()
                 }
             }
         }
-
-        focused = true
-        showCallback()
     }
 
     func hide() {
         if let contentModel = contentModel, let replyTarget = replyTarget {
-            switch replyTarget {
-            case .discussion, .post:
-                contentCache[replyTarget] = contentModel.text
-            case .edit:
-                break
-            }
+            contentCache[replyTarget] = contentModel.text != "" ? contentModel.text : nil
             contentModel.text = ""
             self.replyTarget = nil
         }
@@ -78,12 +92,13 @@ class MiniEditorViewModel: ObservableObject {
         hideCallback()
     }
 
-    init(discussion: FlarumDiscussion, contentModel: EditorContentModel? = nil, showCallback: @escaping () -> Void, hideCallback: @escaping () -> Void, didPostCallback: @escaping (FlarumPost) -> Void) {
+    init(discussion: FlarumDiscussion, contentModel: EditorContentModel? = nil, showCallback: @escaping () -> Void, hideCallback: @escaping () -> Void, didPostCallback: @escaping (FlarumPost) -> Void, didEditPostCallback: @escaping (FlarumPost) -> Void) {
         self.discussion = discussion
         self.contentModel = contentModel
         self.showCallback = showCallback
         self.hideCallback = hideCallback
         self.didPostCallback = didPostCallback
+        self.didEditPostCallback = didEditPostCallback
     }
 }
 
@@ -276,7 +291,15 @@ struct MiniEditor: View {
                 viewModel.hide()
             }
 
-            Button("发送") {
+            let confirmButtonTitle: String = {
+                switch viewModel.replyTarget {
+                case .discussion, .post, .none:
+                    return "发送"
+                case .edit:
+                    return "修改"
+                }
+            }()
+            Button(confirmButtonTitle) {
                 Task {
                     var content = contentViewModel.text
                     if case let .post(post) = viewModel.replyTarget {
@@ -284,24 +307,49 @@ struct MiniEditor: View {
                     }
 
                     sending = true
-                    if let response = try? await flarumProvider.request(.newPost(discussionID: discussion.id, content: content)).flarumResponse() {
-                        if let post = response.data.posts.first {
-                            self.viewModel.didPostCallback(post)
-                            let toast = Toast.default(
-                                icon: .emoji("✅"),
-                                title: "发表成功"
-                            )
-                            toast.show()
-                            contentViewModel.text = ""
-                            viewModel.hide()
-                        } else {
-                            let toast = Toast.default(
-                                icon: .emoji("🤨"),
-                                title: "发表失败，请再试一次"
-                            )
-                            toast.show()
+
+                    switch viewModel.replyTarget {
+                    case .discussion, .post, .none:
+                        if let response = try? await flarumProvider.request(.newPost(discussionID: discussion.id, content: content)).flarumResponse() {
+                            if let post = response.data.posts.first {
+                                self.viewModel.didPostCallback(post)
+                                let toast = Toast.default(
+                                    icon: .emoji("✅"),
+                                    title: "发表成功"
+                                )
+                                toast.show()
+                                contentViewModel.text = ""
+                                viewModel.hide()
+                            } else {
+                                let toast = Toast.default(
+                                    icon: .emoji("🤨"),
+                                    title: "发表失败，请再试一次"
+                                )
+                                toast.show()
+                            }
+                            sending = false
                         }
-                        sending = false
+                    case let .edit(post):
+                        if let id = Int(post.id),
+                           let response = try? await flarumProvider.request(.editPost(postID: id, content: content)).flarumResponse() {
+                            if let post = response.data.posts.first {
+                                self.viewModel.didEditPostCallback(post)
+                                let toast = Toast.default(
+                                    icon: .emoji("✅"),
+                                    title: "修改成功"
+                                )
+                                toast.show()
+                                contentViewModel.text = ""
+                                viewModel.hide()
+                            } else {
+                                let toast = Toast.default(
+                                    icon: .emoji("🤨"),
+                                    title: "修改失败，请再试一次"
+                                )
+                                toast.show()
+                            }
+                            sending = false
+                        }
                     }
                 }
             }

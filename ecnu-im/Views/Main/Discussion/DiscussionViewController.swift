@@ -166,6 +166,29 @@ class DiscussionViewController: UIViewController, NoOverlayViewController, HasNa
         process(loadedData: [post], completionHandler: {})
     }
 
+    private func didEditPostCallback(post: FlarumPost) {
+        UIView.performWithoutAnimation {
+            tableView.performBatchUpdates {
+                if let index = self.posts.firstIndex(where: {
+                    if case let .comment(p) = $0,
+                       p.id == post.id {
+                        return true
+                    }
+                    return false
+                }) {
+                    let originalPost = self.posts[index]
+                    if case let .comment(p) = originalPost {
+                        var editedPost = p
+                        editedPost.attributes?.content = post.attributes?.content
+                        editedPost.attributes?.editedAt = post.attributes?.editedAt
+                        tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .none)
+                        self.posts[index] = convertFlarumPostToPost(flarumPost: editedPost, index: index)
+                    }
+                }
+            }
+        }
+    }
+
     private func showReplyView(target: MiniEditorViewModel.ReplyTarget) {
         miniEditorViewModel.show(target: target)
     }
@@ -186,6 +209,8 @@ class DiscussionViewController: UIViewController, NoOverlayViewController, HasNa
                                         self?.hideReplyViewCallback()
                                     }, didPostCallback: { [weak self] post in
                                         self?.didPostCallback(post: post)
+                                    }, didEditPostCallback: { [weak self] post in
+                                        self?.didEditPostCallback(post: post)
                                     })
         replyVC = UIHostingController(rootView: EnvironmentWrapperView(MiniEditor(discussion: discussion, textFieldVM: miniEditorViewModel),
                                                                        splitVC: splitViewController,
