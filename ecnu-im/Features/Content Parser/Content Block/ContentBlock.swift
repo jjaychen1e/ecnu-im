@@ -302,7 +302,13 @@ extension ContentBlock {
                 content.replaceSubrange(linkMatch.range, with: "\(isImage ? "!" : "")[\(isImage ? Self.magicStringImage : Self.magicStringLink)](\(linkMatch.matchedString))")
             }
         }
-
+        
+        // Maybe links inside inline code are processed, too. We need to extracted them out.
+        let _rCodeInlineMagicStringLink = try! Regex(string: "\\`(.*?)\\[\(magicStringLink)\\]\\((.*?)\\)(.*?)\\`", options: .ignoreCase)
+        content = content.replacingAll(matching: _rCodeInlineMagicStringLink, with: "`$1$2$3`")
+        let _rCodeInlineMagicStringImage = try! Regex(string: "\\`(.*?)\\[\(magicStringImage)\\]\\((.*?)\\)(.*?)\\`", options: .ignoreCase)
+        content = content.replacingAll(matching: _rCodeInlineMagicStringImage, with: "`$1$2$3`")
+        
         return content
     }
 
@@ -310,7 +316,7 @@ extension ContentBlock {
         if case let .list(topListType, _, topBlocks) = block {
             var topListItems: [ContentBlockList.ContentListItem] = []
             for topBlock in topBlocks {
-                if case let .listItem(type, bool, subListBlocks) = topBlock {
+                if case let .listItem(_, _, subListBlocks) = topBlock {
                     for subListBlock in subListBlocks {
                         if case let .paragraph(text) = subListBlock {
                             topListItems.append(.text(RichText.parseFrom(text: text)))
