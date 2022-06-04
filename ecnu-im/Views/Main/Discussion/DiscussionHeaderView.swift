@@ -32,6 +32,7 @@ struct DiscussionHeaderView: View {
                 Text(viewModel.discussion.discussionTitle)
                     .font(.system(size: 20, weight: .medium, design: .default))
                     .padding(.horizontal, viewModel.discussion.tagViewModels.count == 0 ? 30 : 0)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(.horizontal, 32)

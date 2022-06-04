@@ -17,8 +17,7 @@ class KeyboardAppearListener {
     private weak var viewController: UIViewController?
     private var callback: (_ fromOffsetHeight: CGFloat, _ toOffsetHeight: CGFloat, _ duration: CGFloat, _ curve: UIView.AnimationCurve) -> Void
 
-    private var isKeyboardShowing = false
-    private var accumulatedHeightOffset: CGFloat = 0.0
+    private var previousHeightOffset: CGFloat = 0.0
 
     let defaultAdditionalSafeAreaInsetCallback: (_ fromOffsetHeight: CGFloat, _ toOffsetHeight: CGFloat, _ duration: CGFloat, _ curve: UIView.AnimationCurve) -> Void = { fromOffsetHeight, toOffsetHeight, duration, curve in
     }
@@ -39,42 +38,34 @@ class KeyboardAppearListener {
     }
 
     private func keyboardWillShow(notification: Notification) {
+        printDebug("")
         guard
             let viewController = viewController,
             let userInfo = notification.userInfo,
             let beginKeyboardFrame = userInfo[UIResponder.keyboardFrameBeginUserInfoKey] as? CGRect,
             let endKeyboardFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
-            // The notificationCenter posts the notification each time user has taped on the input. Ignore when end and begin frame are the same
-            endKeyboardFrame != beginKeyboardFrame,
             beginKeyboardFrame != .zero
         else {
             return
         }
+        let fromOffsetHeight = previousHeightOffset
+        previousHeightOffset = 0
 
-        let fromOffsetHeight = accumulatedHeightOffset
-
-        if isKeyboardShowing == false {
-            if let superview = viewController.view.superview,
-               let window = viewController.view.window {
-                let rect = superview.convert(viewController.view.frame, to: window.screen.coordinateSpace)
-                accumulatedHeightOffset -= (window.screen.bounds.height - rect.maxY)
-                accumulatedHeightOffset += window.screen.bounds.height - endKeyboardFrame.origin.y
-            }
-        } else {
-            accumulatedHeightOffset += beginKeyboardFrame.origin.y - endKeyboardFrame.origin.y
+        if let superview = viewController.view.superview,
+           let window = viewController.view.window {
+            let rect = superview.convert(viewController.view.frame, to: window.screen.coordinateSpace)
+            previousHeightOffset -= (window.screen.bounds.height - rect.maxY)
+            previousHeightOffset += window.screen.bounds.height - endKeyboardFrame.origin.y
         }
 
-        isKeyboardShowing = true
-
-        notifyChange(fromOffsetHeight: fromOffsetHeight, toOffsetHeight: accumulatedHeightOffset, userInfo)
+        notifyChange(fromOffsetHeight: fromOffsetHeight, toOffsetHeight: previousHeightOffset, userInfo)
     }
 
     private func keyboardWillHide(notification: Notification) {
-        isKeyboardShowing = false
         guard let userInfo = notification.userInfo else { return }
 
-        let fromOffsetHeight = accumulatedHeightOffset
-        accumulatedHeightOffset = 0
+        let fromOffsetHeight = previousHeightOffset
+        previousHeightOffset = 0
 
         notifyChange(fromOffsetHeight: fromOffsetHeight, toOffsetHeight: 0, userInfo)
     }

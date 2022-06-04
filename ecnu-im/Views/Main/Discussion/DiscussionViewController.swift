@@ -114,35 +114,25 @@ class DiscussionViewController: UIViewController, NoOverlayViewController, HasNa
         }
     }
 
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        hideReplyView()
-        view.resignFirstResponder()
-        view.endEditing(true)
-    }
-
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        view.resignFirstResponder()
-        view.endEditing(true)
-    }
-
     private func setViewHierarchy() {
         setHeaderView()
         setTableView()
         setToolView()
         setReplyView()
         keyboardListener = KeyboardAppearListener(viewController: self, callback: { [weak self] fromOffsetHeight, toOffsetHeight, duration, curve in
-//            printDebug("Animation - Keyboard changed")
+//            printDebug("Animation - Keyboard changed. fromOffsetHeight: \(fromOffsetHeight), toOffsetHeight: \(toOffsetHeight)")
             if let self = self {
+                let originalSafeAreaBottom = self.view.window?.safeAreaInsets.bottom ?? 0
+                let newAdditionalSafeAreaBottom = max(0, toOffsetHeight - originalSafeAreaBottom)
+//                printDebug("originalSafeAreaBottom: \(originalSafeAreaBottom), newAdditionalSafeAreaBottom: \(newAdditionalSafeAreaBottom)")
                 if duration > 0 {
                     UIViewPropertyAnimator(duration: duration, curve: curve) {
-                        self.additionalSafeAreaInsets.bottom = max(0, toOffsetHeight - self.view.safeAreaInsets.bottom)
+                        self.additionalSafeAreaInsets.bottom = newAdditionalSafeAreaBottom
                         self.view.layoutIfNeeded()
                     }
                     .startAnimation()
                 } else {
-                    self.additionalSafeAreaInsets.bottom = max(0, toOffsetHeight - self.view.safeAreaInsets.bottom)
+                    self.additionalSafeAreaInsets.bottom = newAdditionalSafeAreaBottom
                     self.view.layoutIfNeeded()
                 }
             }
