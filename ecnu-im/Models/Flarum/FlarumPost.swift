@@ -127,8 +127,10 @@ struct FlarumPostRelationships {
 
     init(_ i: FlarumPostRelationshipsReference) {
         user = i.user != nil ? .init(i.user!) : nil
-        boxedDiscussion = i.discussion != nil ? .init(value: .init(i.discussion!)) : nil
         likes = i.likes.map { .init($0) }
+        reactions = i.reactions.map { .init($0) }
+        mentionedBy = i.mentionedBy.map { .init($0) }
+        boxedDiscussion = i.discussion != nil ? .init(value: .init(i.discussion!)) : nil
     }
 }
 
