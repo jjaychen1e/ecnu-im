@@ -19,6 +19,7 @@ enum BrowseCategory: String, CaseIterable, Identifiable, Hashable {
 struct AllDiscussionsViewNavigationHeader: View {
     @EnvironmentObject var uiKitEnvironment: UIKitEnvironment
     @ObservedObject var appGlobalState = AppGlobalState.shared
+    @ObservedObject var tagFilterViewModel: AllDiscussionTagFilterViewModel
 
     var body: some View {
         VStack(spacing: 0) {
@@ -57,9 +58,13 @@ struct AllDiscussionsViewNavigationHeader: View {
                                 .frame(alignment: .trailing)
                             }
                         }
+                        PopoverMenuLabelItem(title: "按标签过滤", systemImage: "line.3.horizontal.decrease.circle", action: {
+                            UIApplication.shared.topController()?.present(AllDiscussionTagFilterViewController(viewModel: tagFilterViewModel), animated: true)
+                        })
                     } label: {
                         Image(systemName: "gearshape")
                             .foregroundColor(.primary)
+                            .contentShape(Rectangle())
                     }
                 }
                 .padding(.trailing, 8),
@@ -81,7 +86,7 @@ private class AllDiscussionsViewModel: ObservableObject {
     var loadInfo = AllDiscussionLoadInfo()
     var pageOffset = 0
     let pageItemLimit = 20
-
+    @Published var filteredTags: [FlarumTag] = []
     @Published var discussionList: [DiscussionListCellViewModel] = []
 
     init() {
@@ -110,7 +115,7 @@ private class AllDiscussionsViewModel: ObservableObject {
             discussionList.removeAll()
         }
 
-        if let response = try? await flarumProvider.request(.allDiscussions(pageOffset: pageOffset, pageItemLimit: pageItemLimit)).flarumResponse() {
+        if let response = try? await flarumProvider.request(.allDiscussions(pageOffset: pageOffset, pageItemLimit: pageItemLimit, tags: filteredTags)).flarumResponse() {
             let newDiscussions = response.data.discussions.sorted { d1, d2 in
                 if let id1 = d1.lastPost?.id, let id2 = d2.lastPost?.id {
                     return id1 > id2
@@ -183,6 +188,7 @@ struct AllDiscussionsView: View {
 
     @ObservedObject private var viewModel = AllDiscussionsViewModel()
     @ObservedObject var appGlobalState = AppGlobalState.shared
+    @ObservedObject var tagFilterViewModel: AllDiscussionTagFilterViewModel = .init()
 
     private var bottomSeparator: some View {
         Rectangle()
@@ -240,13 +246,49 @@ struct AllDiscussionsView: View {
             .listStyle(.plain)
             .background(ThemeManager.shared.theme.backgroundColor1)
             .safeAreaInset(edge: .top, content: {
-                AllDiscussionsViewNavigationHeader()
+                AllDiscussionsViewNavigationHeader(tagFilterViewModel: tagFilterViewModel)
             })
             .refreshable {
                 await viewModel.loadMore(isRefresh: true)
             }
             .onChange(of: appGlobalState.discussionBrowseCategory.value) { newValue in
                 proxy.scrollTo(ModeWithID(mode: newValue, id: 0), anchor: .top)
+            }
+            .onReceive(tagFilterViewModel.confirmPublisher.removeDuplicates()) { newValue in
+                printDebug(newValue)
+                proxy.scrollTo(ModeWithID(mode: appGlobalState.discussionBrowseCategory.value, id: 0), anchor: .top)
+                Task {
+                    viewModel.filteredTags = newValue
+                    await viewModel.loadMore(isRefresh: true)
+                }
+            }
+            .onLoad {
+                Task {
+                    if let response = try? await flarumProvider.request(.allTags).flarumResponse() {
+                        let tags = response.data.tags
+                        var tagPairs: [TagPair] = []
+                        let parents = tags.filter { $0.attributes.isChild == false }
+                        tagPairs.append(contentsOf: parents.map { TagPair(parent: $0, children: []) })
+                        for tag in tags where tag.attributes.isChild == true {
+                            if let tagPair = tagPairs.first(where: { $0.parent.id == tag.relationships?.parent?.id }) {
+                                tagPair.children.append(tag)
+                            }
+                        }
+
+                        tagPairs.sort { tagPair1, tagPair2 in
+                            if let position1 = tagPair1.parent.attributes.position, let position2 = tagPair2.parent.attributes.position {
+                                return position1 < position2
+                            } else if let _ = tagPair1.parent.attributes.position {
+                                return true
+                            } else if let _ = tagPair2.parent.attributes.position {
+                                return false
+                            } else {
+                                return false
+                            }
+                        }
+                        tagFilterViewModel.tagPairs = tagPairs
+                    }
+                }
             }
         }
     }

@@ -11,7 +11,7 @@ import UIKit
 class HomeConfigureViewController: UIViewController, NoOverlayViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
-        let vc = NavigationWrappedViewController(viewController: InnerHomeConfigureViewController(), isPresented: isBeingPresented)
+        let vc = NavigationWrapperViewController(viewController: InnerHomeConfigureViewController(), isPresented: isBeingPresented)
         addChildViewController(vc, addConstrains: true)
     }
 }

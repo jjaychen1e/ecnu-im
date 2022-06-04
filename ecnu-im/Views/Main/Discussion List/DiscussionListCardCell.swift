@@ -134,6 +134,7 @@ struct DiscussionListCardCell: View {
             .padding(.vertical, 4)
         }
         .buttonStyle(.plain)
+        .contentShape(Rectangle())
     }
 
     var likeHint: some View {

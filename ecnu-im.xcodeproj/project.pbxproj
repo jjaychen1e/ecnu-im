@@ -29,7 +29,7 @@
 		631B9FB5284746F8004EE70A /* HomeConfigureViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631B9FB4284746F8004EE70A /* HomeConfigureViewController.swift */; };
 		631B9FB728474A9E004EE70A /* View+Snapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631B9FB628474A9E004EE70A /* View+Snapshot.swift */; };
 		631B9FB928475942004EE70A /* UserDefaults+DefaultValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631B9FB828475942004EE70A /* UserDefaults+DefaultValue.swift */; };
-		631B9FBC28476272004EE70A /* NavigationWrappedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631B9FBB28476272004EE70A /* NavigationWrappedViewController.swift */; };
+		631B9FBC28476272004EE70A /* NavigationWrapperViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631B9FBB28476272004EE70A /* NavigationWrapperViewController.swift */; };
 		631BB0342805E4FD007D4138 /* Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631BB0262805E4FD007D4138 /* Storage.swift */; };
 		631BB0352805E4FD007D4138 /* UniversalTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631BB0272805E4FD007D4138 /* UniversalTypes.swift */; };
 		631BB0382805E4FD007D4138 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631BB02C2805E4FD007D4138 /* Extensions.swift */; };
@@ -205,6 +205,8 @@
 		63EB854B27F2E8A00064F5A8 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 63EB854A27F2E8A00064F5A8 /* Kingfisher */; };
 		63EB854E27F2EC1D0064F5A8 /* AvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63EB854D27F2EC1D0064F5A8 /* AvatarView.swift */; };
 		63EB855727F300080064F5A8 /* SwiftUIPullToRefresh in Frameworks */ = {isa = PBXBuildFile; productRef = 63EB855627F300080064F5A8 /* SwiftUIPullToRefresh */; };
+		63F17955284A65050039C14A /* AllDiscussionTagFilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63F17954284A65050039C14A /* AllDiscussionTagFilterView.swift */; };
+		63F17958284A6B840039C14A /* AllDiscussionTagFilterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63F17957284A6B840039C14A /* AllDiscussionTagFilterViewController.swift */; };
 		63F1AF3B281BDB9400EF5CAF /* ContentItemLinkPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63F1AF3A281BDB9400EF5CAF /* ContentItemLinkPreview.swift */; };
 		63F584512806C4620053DB3A /* MarkdownKit in Frameworks */ = {isa = PBXBuildFile; productRef = 63F584502806C4620053DB3A /* MarkdownKit */; };
 		63F584542806C5E90053DB3A /* Down in Frameworks */ = {isa = PBXBuildFile; productRef = 63F584532806C5E90053DB3A /* Down */; };
@@ -249,7 +251,7 @@
 		631B9FB4284746F8004EE70A /* HomeConfigureViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeConfigureViewController.swift; sourceTree = "<group>"; };
 		631B9FB628474A9E004EE70A /* View+Snapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Snapshot.swift"; sourceTree = "<group>"; };
 		631B9FB828475942004EE70A /* UserDefaults+DefaultValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaults+DefaultValue.swift"; sourceTree = "<group>"; };
-		631B9FBB28476272004EE70A /* NavigationWrappedViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationWrappedViewController.swift; sourceTree = "<group>"; };
+		631B9FBB28476272004EE70A /* NavigationWrapperViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationWrapperViewController.swift; sourceTree = "<group>"; };
 		631BB0262805E4FD007D4138 /* Storage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Storage.swift; sourceTree = "<group>"; };
 		631BB0272805E4FD007D4138 /* UniversalTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UniversalTypes.swift; sourceTree = "<group>"; };
 		631BB02C2805E4FD007D4138 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
@@ -410,6 +412,8 @@
 		63EABDBA283C8CA800A21BE4 /* LikeListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LikeListViewController.swift; sourceTree = "<group>"; };
 		63EABDBC283C8D2C00A21BE4 /* ReplyListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplyListViewController.swift; sourceTree = "<group>"; };
 		63EB854D27F2EC1D0064F5A8 /* AvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarView.swift; sourceTree = "<group>"; };
+		63F17954284A65050039C14A /* AllDiscussionTagFilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllDiscussionTagFilterView.swift; sourceTree = "<group>"; };
+		63F17957284A6B840039C14A /* AllDiscussionTagFilterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllDiscussionTagFilterViewController.swift; sourceTree = "<group>"; };
 		63F1AF3A281BDB9400EF5CAF /* ContentItemLinkPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentItemLinkPreview.swift; sourceTree = "<group>"; };
 		63F6321A2830F76B002623F8 /* KeyboardAppearListener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardAppearListener.swift; sourceTree = "<group>"; };
 		8B7643C14C1ECACCA7A6233B /* Pods-ecnu-im.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ecnu-im.debug.xcconfig"; path = "Target Support Files/Pods-ecnu-im/Pods-ecnu-im.debug.xcconfig"; sourceTree = "<group>"; };
@@ -543,7 +547,7 @@
 		631B9FBA28476261004EE70A /* Navigation */ = {
 			isa = PBXGroup;
 			children = (
-				631B9FBB28476272004EE70A /* NavigationWrappedViewController.swift */,
+				631B9FBB28476272004EE70A /* NavigationWrapperViewController.swift */,
 			);
 			path = Navigation;
 			sourceTree = "<group>";
@@ -1130,6 +1134,7 @@
 		63B3C73028352C9D0068701F /* Discussion List */ = {
 			isa = PBXGroup;
 			children = (
+				63F17956284A6B6D0039C14A /* Tag Filter */,
 				6318B66927EF755A00108D49 /* DiscussionListCell.swift */,
 				638F90902802B4BB002308E0 /* AllDiscussionsView.swift */,
 				634C470227F9C18E00FC591D /* AllDiscussionsViewController.swift */,
@@ -1339,6 +1344,15 @@
 				63EB854D27F2EC1D0064F5A8 /* AvatarView.swift */,
 			);
 			path = DefaultAvatar;
+			sourceTree = "<group>";
+		};
+		63F17956284A6B6D0039C14A /* Tag Filter */ = {
+			isa = PBXGroup;
+			children = (
+				63F17954284A65050039C14A /* AllDiscussionTagFilterView.swift */,
+				63F17957284A6B840039C14A /* AllDiscussionTagFilterViewController.swift */,
+			);
+			path = "Tag Filter";
 			sourceTree = "<group>";
 		};
 		63F632122830DC4D002623F8 /* Packages */ = {
@@ -1625,8 +1639,9 @@
 				6377517B2822863500BE52D5 /* SortedSet.swift in Sources */,
 				637751C2281D1B3C00A13241 /* PostPlaceholderCell.swift in Sources */,
 				63EABDBD283C8D2C00A21BE4 /* ReplyListViewController.swift in Sources */,
+				63F17955284A65050039C14A /* AllDiscussionTagFilterView.swift in Sources */,
 				635B2A5127EEB08400FF6109 /* Response.swift in Sources */,
-				631B9FBC28476272004EE70A /* NavigationWrappedViewController.swift in Sources */,
+				631B9FBC28476272004EE70A /* NavigationWrapperViewController.swift in Sources */,
 				63DD1F8C2832845A00193CFC /* FlarumUserBadge.swift in Sources */,
 				636BE17327F7FDB800283943 /* DefaultTheme.swift in Sources */,
 				6349B18D27EEAB250002E89A /* RequestTask.swift in Sources */,
@@ -1674,6 +1689,7 @@
 				631BB03A2805E4FD007D4138 /* MarkdownEngine.swift in Sources */,
 				634A57592816EBC20022B27E /* Font.swift in Sources */,
 				635B2A5927EEB74000FF6109 /* URL+Network+Extension.swift in Sources */,
+				63F17958284A6B840039C14A /* AllDiscussionTagFilterViewController.swift in Sources */,
 				6312782A281A4E5B0090BAE3 /* ContentItemsView.swift in Sources */,
 				6379A2A928201E2200B31330 /* ContentItemSingleImageNode.swift in Sources */,
 				633BC2EA2813DA4400BC0930 /* FlarumReaction.swift in Sources */,

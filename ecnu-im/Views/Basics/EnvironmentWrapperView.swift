@@ -22,6 +22,7 @@ class UIKitEnvironment: ObservableObject {
     weak var splitVC: UISplitViewController?
     weak var nvc: UINavigationController?
     weak var vc: UIViewController?
+    weak var navWrapperVC: NavigationWrapperViewController?
 
     init(splitVC: UISplitViewController?, nvc: UINavigationController?, vc: UIViewController?) {
         self.splitVC = splitVC
@@ -33,6 +34,10 @@ class UIKitEnvironment: ObservableObject {
         self.splitVC = splitVC
         self.nvc = nvc
         self.vc = vc
+    }
+
+    func update(navWrapperVC: NavigationWrapperViewController?) {
+        self.navWrapperVC = navWrapperVC
     }
 }
 
@@ -65,5 +70,9 @@ struct EnvironmentWrapperView<Content: View>: View {
 
     func update(splitVC: UISplitViewController?, nvc: UINavigationController?, vc: UIViewController?) {
         uiKitEnvironment.update(splitVC: splitVC, nvc: nvc, vc: vc)
+    }
+
+    func update(navWrapperVC: NavigationWrapperViewController?) {
+        uiKitEnvironment.navWrapperVC = navWrapperVC
     }
 }
