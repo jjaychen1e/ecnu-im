@@ -8,7 +8,7 @@
 import UIKit
 
 class NoNavigationBarNavigationController: UINavigationController {
-    private var _isNavigationBarHidden = false
+    private var _isNavigationBarHidden = true
 
     override var isNavigationBarHidden: Bool {
         get {
@@ -19,9 +19,17 @@ class NoNavigationBarNavigationController: UINavigationController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithTransparentBackground()
+        self.navigationBar.standardAppearance = appearance
+        self.navigationBar.scrollEdgeAppearance = appearance
+        self.navigationBar.compactAppearance = appearance
+        self.navigationBar.compactScrollEdgeAppearance = appearance
+        setNavigationBarHidden(true, animated: false)
     }
 
     override func setNavigationBarHidden(_ hidden: Bool, animated: Bool) {
+        _isNavigationBarHidden = true
         super.setNavigationBarHidden(true, animated: animated)
     }
 
