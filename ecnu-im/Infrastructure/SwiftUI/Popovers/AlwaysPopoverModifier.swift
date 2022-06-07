@@ -50,7 +50,10 @@ private struct AlwaysPopoverModifier<PopoverContent>: ViewModifier where Popover
                 popoverOperatorViewModel.popoverMenuPresentEnvironmentOperator.present = { [weak viewModel, weak anchorViewModel] in
                     if let viewModel = viewModel, let anchorViewModel = anchorViewModel {
                         if viewModel.contentViewController == nil {
-                            let contentController = ContentViewController(rootView: content)
+                            let contentController = ContentViewController(rootView: content
+                                .transaction { transaction in
+                                    transaction.animation = nil
+                                })
                             contentController.modalPresentationStyle = .popover
 
                             let view = anchorViewModel.anchorView
