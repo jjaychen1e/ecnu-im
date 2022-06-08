@@ -325,8 +325,14 @@ class DiscussionViewController: UIViewController, NoOverlayViewController, HasNa
             let cell = tableView.dequeueReusableCell(withIdentifier: PostCommentCell.identifier, for: indexPath) as! PostCommentCell
             cell.configure(discussion: discussion, post: post, viewController: self) {
                 DispatchQueue.main.async {
-                    UIView.performWithoutAnimation {
-                        tableView.reconfigureRows(at: [indexPath])
+                    if #available(iOS 16, *) {
+                        // From iOS 16, UIKit will auto resize cell after call cell or contentView's `invalidateIntrinsicContentSize`.
+                        // Using AutoLayout, it will update automatically.
+                        cell.invalidateIntrinsicContentSize()
+                    } else {
+                        UIView.performWithoutAnimation {
+                            tableView.reconfigureRows(at: [indexPath])
+                        }
                     }
                 }
             } replyPostAction: { [weak self] in
