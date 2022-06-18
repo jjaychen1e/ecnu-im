@@ -40,6 +40,22 @@ class ContentParser {
             }
         content = processedLines.joined(separator: "\n")
 
+        // " - " to "  - "
+        let _r2 = Regex("\n (\\-|\\*) ")
+        content = content.replacingAll(matching: _r2, with: "\n  $1 ")
+
+        let _r3 = Regex("^ (\\-|\\*) ")
+        content = content.replacingAll(matching: _r3, with: "  $1 ")
+
+        // "   - " to "    - "
+        let _r4 = Regex("\n   (\\-|\\*) ")
+        content = content.replacingAll(matching: _r4, with: "\n    $1 ")
+
+        let _r5 = Regex("^   (\\-|\\*) ")
+        content = content.replacingAll(matching: _r5, with: "    $1 ")
+
+        printDebug(content)
+
         return content
     }
 
@@ -68,7 +84,13 @@ class ContentParser {
                 case .text:
                     switch list.listType {
                     case .bullet:
-                        return .bold(.plain("\u{2022} "))
+                        if level == 0 {
+                            return .fontSize(.bold(.plain("○  ")), 10)
+                        } else if level == 1 {
+                            return .fontSize(.bold(.plain("▹  ")), 12)
+                        } else {
+                            return .fontSize(.bold(.plain("◇  ")), 12)
+                        }
                     case let .ordered(number):
                         orderOffset += 1
                         return .bold(.plain("\(number + orderOffset - 1). "))

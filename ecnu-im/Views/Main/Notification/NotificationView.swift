@@ -211,6 +211,7 @@ struct NotificationView: View {
             Text(postExcerptText)
                 .font(.system(size: 15, weight: .regular, design: .rounded))
                 .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
                 .foregroundColor(.primary.opacity(0.6))
         }
     }

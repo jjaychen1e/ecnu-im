@@ -86,7 +86,7 @@ enum ContentBlock {
                 case .text:
                     switch list.listType {
                     case .bullet:
-                        return "\u{2022} "
+                        return " ⃘ "
                     case let .ordered(number):
                         orderOffset += 1
                         return "\(number + orderOffset - 1). "

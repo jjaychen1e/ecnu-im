@@ -71,7 +71,7 @@ class PostContentItemsUIView: UIView {
         }
     }
 
-    private let margin: CGFloat = 10.0
+    private let margin: CGFloat = 20
     private var totalHeight: CGFloat = 0.0
 
     override func sizeThatFits(_ size: CGSize) -> CGSize {
