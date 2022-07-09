@@ -24,18 +24,38 @@ struct DiscussionHeaderView: View {
     }
 
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             Group {
-                if viewModel.discussion.tagViewModels.count > 0 {
-                    DiscussionHeaderTagsView(tags: viewModel.discussion.tagViewModels)
+                VStack {
+                    if viewModel.discussion.tagViewModels.count > 0 {
+                        DiscussionHeaderTagsView(tags: viewModel.discussion.tagViewModels)
+                    }
+                    Text(viewModel.discussion.discussionTitle)
+                        .font(.system(size: 20, weight: .medium, design: .default))
+                        .padding(.horizontal, viewModel.discussion.tagViewModels.count == 0 ? 30 : 0)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
-                Text(viewModel.discussion.discussionTitle)
-                    .font(.system(size: 20, weight: .medium, design: .default))
-                    .padding(.horizontal, viewModel.discussion.tagViewModels.count == 0 ? 30 : 0)
-                    .fixedSize(horizontal: false, vertical: true)
             }
+            .padding(.horizontal, 16)
+            PopoverMenu {
+                PopoverMenuLabelItem(title: "App 问题反馈", systemImage: "exclamationmark.bubble", action: {})
+                    .disabled(true)
+                PopoverMenuLabelItem(title: "分享", systemImage: "square.and.arrow.up", action: {})
+                    .disabled(true)
+
+                if let url = URL(string: URLService.link(href: "https://ecnu.im/d/\(viewModel.discussion.id)").url) {
+                    PopoverMenuLabelItem(title: "打开网页版", systemImage: "safari", action: {
+                        UIApplication.shared.open(url)
+                    })
+                }
+            } label: {
+                Image(systemName: "ellipsis")
+                    .font(.system(size: 20, weight: .regular, design: .rounded))
+                    .foregroundColor(Asset.DynamicColors.dynamicWhite.swiftUIColor)
+            }
+            .frame(maxWidth: .infinity, alignment: .trailing)
         }
-        .padding(.horizontal, 32)
+        .padding(.horizontal, 4)
         .padding(.bottom, 4)
         .padding(.top, 8)
         .frame(maxWidth: .infinity, minHeight: 50, alignment: .bottom)
@@ -56,26 +76,6 @@ struct DiscussionHeaderView: View {
                 }
             },
             alignment: .topLeading
-        )
-        .overlay(
-            PopoverMenu {
-                PopoverMenuLabelItem(title: "App 问题反馈", systemImage: "exclamationmark.bubble", action: {})
-                    .disabled(true)
-                PopoverMenuLabelItem(title: "分享", systemImage: "square.and.arrow.up", action: {})
-                    .disabled(true)
-
-                if let url = URL(string: URLService.link(href: "https://ecnu.im/d/\(viewModel.discussion.id)").url) {
-                    PopoverMenuLabelItem(title: "打开网页版", systemImage: "safari", action: {
-                        UIApplication.shared.open(url)
-                    })
-                }
-            } label: {
-                Image(systemName: "ellipsis")
-                    .font(.system(size: 20, weight: .regular, design: .rounded))
-                    .foregroundColor(Asset.DynamicColors.dynamicWhite.swiftUIColor)
-            }
-            .offset(x: -8, y: 0),
-            alignment: .bottomTrailing
         )
     }
 }
