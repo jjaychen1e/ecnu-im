@@ -288,8 +288,14 @@ extension ContentBlock {
         let markdownLinkCaptureRanges = markdownLinkMatches.compactMap { $0.captureRanges.first }.compactMap { $0 }
         let markdownLinkCaptureRangeLowerBounds = markdownLinkCaptureRanges.map { $0.lowerBound }
 
+        let _rURLInSquareBrackets = try! Regex(string: "\\[(\(_us))\\]", options: .ignoreCase)
+        let urlInSquareBrackets = _rURLInSquareBrackets.allMatches(in: content).sorted(by: { $0.range.lowerBound > $1.range.lowerBound })
+        let urlInSquareBracketsRanges = urlInSquareBrackets.compactMap { $0.captureRanges.first }.compactMap { $0 }
+        let urlInSquareBracketsRangeLowerBounds = urlInSquareBracketsRanges.map { $0.lowerBound }
+
         for linkMatch in linkMatches {
-            if !markdownLinkCaptureRangeLowerBounds.contains(linkMatch.range.lowerBound) {
+            if !markdownLinkCaptureRangeLowerBounds.contains(linkMatch.range.lowerBound),
+               !urlInSquareBracketsRangeLowerBounds.contains(linkMatch.range.lowerBound) {
                 var isImage = false
                 if let url = URL(string: linkMatch.matchedString),
                    let components = URLComponents(url: url, resolvingAgainstBaseURL: true) {
@@ -302,13 +308,13 @@ extension ContentBlock {
                 content.replaceSubrange(linkMatch.range, with: "\(isImage ? "!" : "")[\(isImage ? Self.magicStringImage : Self.magicStringLink)](\(linkMatch.matchedString))")
             }
         }
-        
+
         // Maybe links inside inline code are processed, too. We need to extracted them out.
         let _rCodeInlineMagicStringLink = try! Regex(string: "\\`(.*?)\\[\(magicStringLink)\\]\\((.*?)\\)(.*?)\\`", options: .ignoreCase)
         content = content.replacingAll(matching: _rCodeInlineMagicStringLink, with: "`$1$2$3`")
         let _rCodeInlineMagicStringImage = try! Regex(string: "\\`(.*?)\\[\(magicStringImage)\\]\\((.*?)\\)(.*?)\\`", options: .ignoreCase)
         content = content.replacingAll(matching: _rCodeInlineMagicStringImage, with: "`$1$2$3`")
-        
+
         return content
     }
 
