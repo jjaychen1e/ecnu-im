@@ -54,8 +54,6 @@ class ContentParser {
         let _r5 = Regex("^   (\\-|\\*) ")
         content = content.replacingAll(matching: _r5, with: "    $1 ")
 
-        printDebug(content)
-
         return content
     }
 
