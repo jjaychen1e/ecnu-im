@@ -1996,6 +1996,8 @@
 				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "ecnu-im/Info.plist";
+				INFOPLIST_KEY_NSCameraUsageDescription = "ecnu.im 想要使用您的相机";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "ecnu.im 想要访问您的相册";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -2035,6 +2037,8 @@
 				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "ecnu-im/Info.plist";
+				INFOPLIST_KEY_NSCameraUsageDescription = "ecnu.im 想要使用您的相机";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "ecnu.im 想要访问您的相册";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";

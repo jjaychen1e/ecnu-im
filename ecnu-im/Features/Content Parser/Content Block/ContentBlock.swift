@@ -271,14 +271,14 @@ extension ContentBlock {
         var content = content
 
         // A strong regex to match urls(and possible alt text)
-        let _us = "(https?:\\/\\/)(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9]{1,6}\\b([-a-zA-Z0-9@:%_\\+.~#?&,\\/\\/=]*)"
+        let _us = "(https?:\\/\\/)(www\\.)?[-a-zA-Z0-9\\u4e00-\\u9fa5@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9]{1,6}\\b([-a-zA-Z0-9\\u4e00-\\u9fa5@:%_\\+.~#?&,\\/\\/=]*)"
 
         // Remove possible alt text
         let markdownURLWithAltText = "\\[(.*?)\\]\\((\(_us))(\\s+.*?)?\\)"
         let _rMarkdownURL = try! Regex(string: "\(markdownURLWithAltText)", options: .ignoreCase)
         content = content.replacingAll(matching: _rMarkdownURL, with: "[$1]($2)")
 
-        // All link ranges, in a reversed order
+        // All link ranges, in a reversed order(!!)
         let _rURL = try! Regex(string: "(\(_us))", options: .ignoreCase)
         let linkMatches = _rURL.allMatches(in: content).sorted(by: { $0.range.lowerBound > $1.range.lowerBound })
 
@@ -314,6 +314,19 @@ extension ContentBlock {
         content = content.replacingAll(matching: _rCodeInlineMagicStringLink, with: "`$1$2$3`")
         let _rCodeInlineMagicStringImage = try! Regex(string: "\\`(.*?)\\[\(magicStringImage)\\]\\((.*?)\\)(.*?)\\`", options: .ignoreCase)
         content = content.replacingAll(matching: _rCodeInlineMagicStringImage, with: "`$1$2$3`")
+
+        let processedLinkMatches = _rURL.allMatches(in: content).sorted(by: { $0.range.lowerBound > $1.range.lowerBound })
+        for processedLinkMatch in processedLinkMatches {
+            var urlContent = processedLinkMatch.matchedString
+            let _rChineseCharacters = Regex("[\\u4e00-\\u9fa5]+")
+            let chineseCharactersMatches = _rChineseCharacters.allMatches(in: urlContent).sorted(by: { $0.range.lowerBound > $1.range.lowerBound })
+            for chineseCharactersMatch in chineseCharactersMatches {
+                if let encodedChineseCharacters = chineseCharactersMatch.matchedString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
+                    urlContent.replaceSubrange(chineseCharactersMatch.range, with: encodedChineseCharacters)
+                }
+            }
+            content.replaceSubrange(processedLinkMatch.range, with: urlContent)
+        }
 
         return content
     }
