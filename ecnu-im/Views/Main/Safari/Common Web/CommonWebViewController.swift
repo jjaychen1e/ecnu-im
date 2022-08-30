@@ -7,6 +7,7 @@
 
 import UIKit
 import WebController
+import WebKit
 
 class CommonWebViewController: UIViewController, WebControllerDelegate {
     private var startURL: URL
@@ -23,7 +24,7 @@ class CommonWebViewController: UIViewController, WebControllerDelegate {
         fatalError("init(coder:) has not been implemented")
     }
 
-    private var webController: WebController!
+    private(set) var webController: WebController!
 
     override var preferredStatusBarStyle: UIStatusBarStyle {
         .lightContent
@@ -93,5 +94,13 @@ class CommonWebViewController: UIViewController, WebControllerDelegate {
         if url.absoluteURL == startURL.absoluteURL, let jsAction = jsAction {
             webController.evaluateJavaScript(jsAction, completionHandler: { _, _ in })
         }
+    }
+}
+
+extension WKWebView {
+    private var httpCookieStore: WKHTTPCookieStore { return WKWebsiteDataStore.default().httpCookieStore }
+
+    func getCookies() async -> [HTTPCookie] {
+        await httpCookieStore.allCookies()
     }
 }

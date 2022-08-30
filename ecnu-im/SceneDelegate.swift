@@ -104,10 +104,10 @@ enum URLService {
     var url: String {
         switch self {
         case let .link(href, jsAction):
-            return schemePrefix + "link?" + "href=\(href.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")" +
-                "&jsAction=\(jsAction?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
+            return schemePrefix + "link?" + "href=\(href.addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? "")" +
+                "&jsAction=\(jsAction?.addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? "")"
         case let .safari(href):
-            return schemePrefix + "safari?" + "href=\(href.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
+            return schemePrefix + "safari?" + "href=\(href.addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? "")"
         }
     }
 }

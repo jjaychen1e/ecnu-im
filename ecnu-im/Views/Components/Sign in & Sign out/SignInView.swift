@@ -64,7 +64,6 @@ struct SignInView: View {
                     case let .success(result):
                         if !result {
                             // Maybe password has been modified
-                            UIApplication.shared.topController()?.presentSignView()
                             AppGlobalState.shared.logout()
                             AppGlobalState.shared.loginState = .loginFailed
                             let toast = Toast.default(

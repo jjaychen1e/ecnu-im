@@ -7,6 +7,7 @@ target 'ecnu-im' do
 
   # Pods for ecnu-im
   pod "ReCaptcha/RxSwift"
+  pod 'DatePickerDialog', :git => 'https://github.com/JJAYCHEN1e/DatePickerDialog-iOS-Swift'
   pod 'WebController', :git => 'https://github.com/JJAYCHEN1e/WebController.git'
   
 end

@@ -75,8 +75,29 @@ class RootSettingViewController: SettingViewController {
                         UIApplication.shared.open(url)
                     }
                 }), icon: .system(name: "creditcard"), label: "校园卡中心"),
-                RowItem(type: .navigation(action: {
-                    Toast.default(icon: .emoji("👀"), title: "尚未支持").show()
+                RowItem(type: .action(action: { sender in
+                    DatePickerToastViewController.show() { date in
+                        if let date = date {
+                            let alertController = UIAlertController(title: "确认", message: "请问你想导入本科生课程表还是研究生课程表？", preferredStyle: .actionSheet)
+                            alertController.addAction(.init(title: "本科生课程表", style: .default, handler: { _ in
+                                let undergraduateCourseTableViewController = UndergraduateCourseTableViewController(semesterDate: date)
+                                undergraduateCourseTableViewController.modalPresentationStyle = .fullScreen
+                                UIApplication.shared.presentOnTop(undergraduateCourseTableViewController, animated: true)
+                            }))
+                            alertController.addAction(.init(title: "研究生课程表", style: .default, handler: { _ in
+                                let masterDegreeCourseTableViewController = MasterDegreeCourseTableViewController(semesterDate: date)
+                                masterDegreeCourseTableViewController.modalPresentationStyle = .fullScreen
+                                UIApplication.shared.presentOnTop(masterDegreeCourseTableViewController, animated: true)
+                            }))
+                            alertController.addAction(.init(title: "取消", style: .cancel, handler: { _ in
+                                alertController.dismiss(animated: true)
+                            }))
+                            if let popoverController = alertController.popoverPresentationController {
+                                popoverController.sourceView = sender // to set the source of your alert
+                            }
+                            UIApplication.shared.presentOnTop(alertController)
+                        }
+                    }
                 }), icon: .system(name: "calendar.badge.plus"), label: "导入课表至日历"),
             ]),
             HeaderItem(title: "App", rowItems: [

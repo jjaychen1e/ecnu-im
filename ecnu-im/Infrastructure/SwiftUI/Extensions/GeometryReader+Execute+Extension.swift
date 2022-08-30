@@ -11,13 +11,13 @@ import SwiftUI
 extension View {
     func execute(closure: () -> Void) -> some View {
         closure()
-        return Circle().fill().opacity(0)
+        return self.background(Color.clear.opacity(0))
     }
 
     func executeAsync(closure: @escaping () -> Void) -> some View {
         DispatchQueue.main.async {
             closure()
         }
-        return Circle().fill().opacity(0)
+        return self.background(Color.clear.opacity(0))
     }
 }

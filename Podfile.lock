@@ -1,4 +1,5 @@
 PODS:
+  - DatePickerDialog (4.0)
   - ReCaptcha/Core (1.6.0)
   - ReCaptcha/RxSwift (1.6.0):
     - ReCaptcha/Core
@@ -7,6 +8,7 @@ PODS:
   - WebController (0.3.3)
 
 DEPENDENCIES:
+  - DatePickerDialog (from `https://github.com/JJAYCHEN1e/DatePickerDialog-iOS-Swift`)
   - ReCaptcha/RxSwift
   - WebController (from `https://github.com/JJAYCHEN1e/WebController.git`)
 
@@ -16,19 +18,25 @@ SPEC REPOS:
     - RxSwift
 
 EXTERNAL SOURCES:
+  DatePickerDialog:
+    :git: https://github.com/JJAYCHEN1e/DatePickerDialog-iOS-Swift
   WebController:
     :git: https://github.com/JJAYCHEN1e/WebController.git
 
 CHECKOUT OPTIONS:
+  DatePickerDialog:
+    :commit: cdf69b30a4395dd341ef54a9fe6359a2d44b57f2
+    :git: https://github.com/JJAYCHEN1e/DatePickerDialog-iOS-Swift
   WebController:
     :commit: 4f8359213e1bbf322fd34c537cc689825f3fb54e
     :git: https://github.com/JJAYCHEN1e/WebController.git
 
 SPEC CHECKSUMS:
+  DatePickerDialog: ccff2f91ff7a018057a4d72fa5ad6de49c8cb0cd
   ReCaptcha: d493ed256054a7b6a7eabcaf0b47ec9a8f42a16e
   RxSwift: 5710a9e6b17f3c3d6e40d6e559b9fa1e813b2ef8
   WebController: 1935cb1b1be52c2b31db707ef129230a8014e61a
 
-PODFILE CHECKSUM: ea65e55536c9ed68381c339f53cde3533c2b2944
+PODFILE CHECKSUM: 522ebcd158e74c6965e030b49da49b58a3d1c6a2
 
-COCOAPODS: 1.11.2
+COCOAPODS: 1.11.3
