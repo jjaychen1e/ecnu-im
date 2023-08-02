@@ -160,7 +160,9 @@ class DiscussionViewController: UIViewController, NoOverlayViewController, HasNa
                     make.top.equalTo(self.view.snp.bottom)
                 }
                 self.toolVC.view.isHidden = false
-                self.view.layoutIfNeeded()
+                DispatchQueue.main.async {
+                    self.view.layoutIfNeeded()
+                }
             }
         }
     }

@@ -58,6 +58,7 @@ struct FlarumPostAttributes: Decodable {
     var createdDate: Date? {
         // date format, example: 2022-03-23T13:37:49+00:00
         let dateFormatter = DateFormatter()
+        dateFormatter.locale = .init(identifier: "en_US_POSIX")
         dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
         let dateString = createdAt.prefix(25)
         return dateFormatter.date(from: String(dateString))
@@ -66,6 +67,7 @@ struct FlarumPostAttributes: Decodable {
     var editedDate: Date? {
         // date format, example: 2022-03-23T13:37:49+00:00
         let dateFormatter = DateFormatter()
+        dateFormatter.locale = .init(identifier: "en_US_POSIX")
         dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
         if let dateString = editedAt?.prefix(25) {
             return dateFormatter.date(from: String(dateString))

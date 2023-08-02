@@ -147,6 +147,11 @@ class RootSettingViewController: SettingViewController {
                         UIApplication.shared.open(url)
                     }
                 }), icon: .system(name: "person.crop.circle"), label: "修改资料"),
+                RowItem(type: .navigation(action: {
+                    if let url = URL(string: URLService.link(href: "https://ecnu.im/d/1161").url) {
+                        UIApplication.shared.open(url)
+                    }
+                }), icon: .system(name: "trash"), label: "账户删除指南"),
                 RowItem(type: .action(action: { sender in
                     let alertController = UIAlertController(title: "你确定要退出登录吗", message: nil, preferredStyle: .actionSheet)
                     alertController.addAction(.init(title: "退出登录", style: .destructive, handler: { _ in

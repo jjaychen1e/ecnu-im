@@ -566,9 +566,11 @@ struct HomeView: View {
                                 HStack {
                                     Text(viewModel.latestNotificationTitle ?? "暂无通知标题")
                                         .lineLimit(2)
+                                        .multilineTextAlignment(.leading)
                                         .font(.system(size: 12, weight: .semibold, design: .rounded))
                                     Text(latestNotificationCreatedDateDescription)
                                         .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                        .multilineTextAlignment(.leading)
                                         .fixedSize(horizontal: true, vertical: true)
                                 }
                             }

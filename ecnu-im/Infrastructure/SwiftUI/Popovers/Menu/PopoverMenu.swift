@@ -26,10 +26,10 @@ struct PopoverMenuLabelItem: View {
             HStack {
                 Image(systemName: systemImage)
                     .frame(width: 25, height: 25)
-                    .foregroundColor(isEnabled ? iconColor : nil)
+                    .foregroundColor(isEnabled ? iconColor : .primary.opacity(0.15))
                 Text(title)
                     .font(.system(size: 15, weight: .regular, design: .rounded))
-                    .foregroundColor(isEnabled ? titleColor : nil)
+                    .foregroundColor(isEnabled ? titleColor : .primary.opacity(0.15))
             }
             .frame(minWidth: popoverMenuMinWidth, alignment: .leading)
         }
