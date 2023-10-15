@@ -40,8 +40,8 @@ private struct NotificationUserBadgeView: View {
         if let badge = userBadge.relationships?.badge {
             HStack {
                 HStack {
-                    if let (fa, faStyle) = FontAwesome.parseFromFlarum(str: badge.attributes.icon),
-                       let color = Color(rgba: badge.attributes.iconColor) {
+                    if let (fa, faStyle) = FontAwesome.parseFromFlarum(str: badge.attributes.icon) {
+                        let color = Color(rgba: badge.attributes.iconColor)
                         Image(fa: fa, faStyle: faStyle, color: color)
                             .resizable()
                             .aspectRatio(contentMode: .fit)

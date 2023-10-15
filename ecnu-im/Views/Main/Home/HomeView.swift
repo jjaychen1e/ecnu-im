@@ -1170,8 +1170,8 @@ struct HomePostCardViewLarge: View {
 
     var likeHint: some View {
         Group {
-            if let likesUsers = viewModel.likesUsers,
-               likesUsers.count > 0 {
+            let likesUsers = viewModel.likesUsers
+            if likesUsers.count > 0 {
                 let threshold = 3
                 let likesUserName = likesUsers.prefix(threshold).map { $0.attributes.displayName }.joined(separator: ", ")
                     + "\(likesUsers.count > 3 ? "等\(likesUsers.count)人" : "")"
