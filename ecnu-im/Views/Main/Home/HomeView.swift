@@ -193,6 +193,8 @@ struct HomeView: View {
                         partialResult + tag.attributes.discussionCount
                     }
 
+                    guard totalDiscussionCount > 100 else { return }
+
                     (0 ..< 20).map { _ in
                         Int.random(in: 0 ..< totalDiscussionCount)
                     }
