@@ -74,9 +74,7 @@ class CourseTableCrawlerUndergraduates {
         defer {
             if lessons.count == 0 {
                 printDebug(course.courseName)
-                DispatchQueue.main.async {
-                    Toast.default(icon: .emoji("🤔"), title: course.courseName, subtitle: "未获取到开课信息，请手动检查").show()
-                }
+                Toast.default(icon: .emoji("🤔"), title: course.courseName, subtitle: "未获取到开课信息，请手动检查").show()
             }
         }
 

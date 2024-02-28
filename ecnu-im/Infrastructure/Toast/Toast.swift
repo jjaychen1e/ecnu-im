@@ -72,14 +72,15 @@ class Toast: Hashable {
     private static var toasts: Set<Toast> = []
 
     private let config: ToastConfiguration
-    private var view: UIView
+    private var _view: UIView?
+    private var view: () -> UIView
 
     enum Icon {
         case image(UIImage, UIColor = defaultImageTint)
         case emoji(String)
     }
 
-    required init(view: UIView, config: ToastConfiguration) {
+    required init(view: @escaping () -> UIView, config: ToastConfiguration) {
         self.view = view
         self.config = config
     }
@@ -116,7 +117,9 @@ class Toast: Hashable {
         subtitle: String? = nil,
         config: ToastConfiguration = ToastConfiguration()
     ) -> Toast {
-        let view = UIHostingController(rootView: ToastPopover(icon: icon, title: title, subtitle: subtitle)).view!
+        let view: () -> UIView = {
+            UIHostingController(rootView: ToastPopover(icon: icon, title: title, subtitle: subtitle)).view!
+        }
 
         return self.init(view: view, config: config)
     }
@@ -133,31 +136,35 @@ class Toast: Hashable {
     /// Show the toast
     /// - Parameter delay: Time after which the toast is shown
     func show(after delay: TimeInterval = 0) {
-        if let view = config.view {
-            config.view?.addSubview(view)
-        } else if let window = UIApplication.shared.topController()?.view.window {
-            window.addSubview(view)
-        } else {
-            return
-        }
-        view.backgroundColor = .clear
-        view.transform = initialTransform
-        view.snp.makeConstraints { make in
-            make.centerX.equalToSuperview()
-        }
+        DispatchQueue.main.async { [self] in
+            self._view = view()
+            guard let _view = _view else { return }
+            if let view = config.view {
+                config.view?.addSubview(view)
+            } else if let window = UIApplication.shared.topController()?.view.window {
+                window.addSubview(_view)
+            } else {
+                return
+            }
+            _view.backgroundColor = .clear
+            _view.transform = initialTransform
+            _view.snp.makeConstraints { make in
+                make.centerX.equalToSuperview()
+            }
 
-        Self.toasts.forEach { toast in
-            toast.close(after: 0, mode: .opacity)
-        }
+            Self.toasts.forEach { toast in
+                toast.close(after: 0, mode: .opacity)
+            }
 
-        Self.toasts.insert(self)
+            Self.toasts.insert(self)
 
-        UIView.animate(withDuration: config.animationTime, delay: delay, options: [.curveEaseOut, .allowUserInteraction]) {
-            self.view.transform = .identity
-        } completion: { [weak self] _ in
-            if let self = self {
-                if self.config.autoHide {
-                    self.close(after: self.config.displayTime)
+            UIView.animate(withDuration: config.animationTime, delay: delay, options: [.curveEaseOut, .allowUserInteraction]) {
+                _view.transform = .identity
+            } completion: { [weak self] _ in
+                if let self = self {
+                    if self.config.autoHide {
+                        self.close(after: self.config.displayTime)
+                    }
                 }
             }
         }
@@ -173,20 +180,21 @@ class Toast: Hashable {
     ///   - time: Time after which the toast will be closed
     ///   - completion: A completion handler which is invoked after the toast is hidden
     func close(after time: TimeInterval = 0, animated: Bool = true, mode: ToastCloseAnimationType = .transform, completion: (() -> Void)? = nil) {
+        guard let _view = _view else { return }
         if animated {
             UIView.animate(withDuration: config.animationTime, delay: time, options: [.curveEaseIn, .allowUserInteraction], animations: {
                 switch mode {
                 case .transform:
-                    self.view.transform = self.initialTransform
+                    _view.transform = self.initialTransform
                 case .opacity:
-                    self.view.alpha = 0
+                    _view.alpha = 0
                 }
             }, completion: { _ in
-                self.view.removeFromSuperview()
+                _view.removeFromSuperview()
                 completion?()
             })
         } else {
-            view.removeFromSuperview()
+            _view.removeFromSuperview()
         }
     }
 
