@@ -20,6 +20,8 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>ecnu.im 想要在您的日历中创建新的日历或日程。</string>
 	<key>ReCaptchaDomain</key>
 	<string>https://ecnu.im</string>
 	<key>ReCaptchaKey</key>

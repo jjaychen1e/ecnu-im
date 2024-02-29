@@ -41,12 +41,30 @@ class CalendarCenter {
         return calendar
     }
 
-    func saveEvent(for lessons: [Lesson], in calendarTitle: String) {
-        eventStore.requestAccess(to: .event) { success, error in
-            guard success else {
-                Toast.default(icon: .emoji("🙀"), title: "获得日历访问权限失败").show()
-                return
+    func getCalendarAccessPermission(action: @escaping () -> Void) {
+        if #available(iOS 17.0, *) {
+            eventStore.requestFullAccessToEvents { success, error in
+                guard success else {
+                    Toast.default(icon: .emoji("🙀"), title: "获得日历访问权限失败").show()
+                    return
+                }
+
+                action()
             }
+        } else {
+            eventStore.requestAccess(to: .event) { success, error in
+                guard success else {
+                    Toast.default(icon: .emoji("🙀"), title: "获得日历访问权限失败").show()
+                    return
+                }
+
+                action()
+            }
+        }
+    }
+
+    func saveEvent(for lessons: [Lesson], in calendarTitle: String) {
+        getCalendarAccessPermission {
             if let courseCalendar = self.courseCalendar(title: calendarTitle) {
                 for lesson in lessons {
                     let event: EKEvent = .init(eventStore: self.eventStore)
